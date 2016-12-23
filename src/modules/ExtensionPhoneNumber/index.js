@@ -50,7 +50,7 @@ export default class ExtensionPhoneNumber extends DataFetcher {
 
     this.addSelector(
       'smsSenderNumbers',
-      () => this.data.extensionPhoneNumbers,
+      () => this.numbers,
       phoneNumbers =>
         phoneNumbers.filter(
           p => (p.features && p.features.indexOf('SmsSender') !== -1)
