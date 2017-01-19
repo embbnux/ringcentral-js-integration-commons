@@ -17,8 +17,10 @@ const connectionStatus = new Enum([
 const actionTypes = new Enum([
   'initSuccess',
   'connect',
-  'connectSuccess',
-  'connectError',
+  'registered',
+  'registrationFailed',
+  'disconnect',
+  'unregistered',
 ], 'webphone');
 
 function getVideoElementPreparedReducer(types) {
@@ -33,10 +35,13 @@ function getConnectionStatusReducer(types) {
     switch (type) {
       case types.connect:
         return connectionStatus.connecting;
-      case types.connectSuccess:
+      case types.registered:
         return connectionStatus.connected;
-      case types.connectError:
+      case types.registrationFailed:
+      case types.unregistered:
         return connectionStatus.disconnected;
+      case types.disconnect:
+        return connectionStatus.disconnecting;
       default:
         return state;
     }
@@ -60,7 +65,7 @@ export default class Webphone extends RcModule {
     auth,
     client,
     rolesAndPermissions,
-    webphoneLogLevel = 3,
+    webphoneLogLevel = 0,
     ...options,
   }) {
     super({
@@ -148,22 +153,28 @@ export default class Webphone extends RcModule {
         outgoing: outgoingAudio, // path to aduotfile for outgoing call
       }
     });
-    // this._webphone.userAgent.on('connecting', function () { console.log('@@@ UA connecting'); });
-    // this._webphone.userAgent.on('connected', function () { console.log('@@@ UA Connected'); });
-    // this._webphone.userAgent.on('disconnected', function () { console.log('@@@ UA Disconnected'); });
-    this._webphone.userAgent.on('registered', () => {
+
+    const onRegistered = () => {
       this.store.dispatch({
-        type: this.actionTypes.connectSuccess,
+        type: this.actionTypes.registered,
       });
-    });
-    // this._webphone.userAgent.on('unregistered', function () { console.log('@@@ UA Unregistered'); });
-    this._webphone.userAgent.once('registrationFailed', (error) => {
+    };
+    const onUnregistered = () => {
       this.store.dispatch({
-        type: this.actionTypes.connectError,
+        type: this.actionTypes.unregistered,
+      });
+      this._webphone.userAgent.removeAllListeners();
+      this._webphone = null;
+    };
+    const onRegistrationFailed = (error) => {
+      this.store.dispatch({
+        type: this.actionTypes.registrationFailed,
         error,
       });
-    });
-    // this._webphone.userAgent.on('message', function () { console.log('@@@ UA Message', arguments); });
+    };
+    this._webphone.userAgent.on('registered', onRegistered);
+    this._webphone.userAgent.on('unregistered', onUnregistered);
+    this._webphone.userAgent.once('registrationFailed', onRegistrationFailed);
   }
 
   async connect() {
@@ -183,6 +194,18 @@ export default class Webphone extends RcModule {
           error,
         });
       }
+    }
+  }
+
+  async disconnect() {
+    if (
+      this._webphone &&
+      this.connectionStatus === connectionStatus.connected
+    ) {
+      this.store.dispatch({
+        type: this.actionTypes.disconnect,
+      });
+      this._webphone.userAgent.stop();
     }
   }
 }
