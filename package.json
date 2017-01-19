@@ -57,9 +57,11 @@
     "react-redux": "^5.0.1",
     "ringcentral": "^3.0.0",
     "ringcentral-client": "^1.0.0-rc1",
+    "ringcentral-web-phone": "^0.4.0",
     "source-map-loader": "^0.1.5",
     "source-map-support": "^0.4.0",
     "through2": "^2.0.1",
+    "url-loader": "^0.5.7",
     "webpack": "^1.12.14",
     "webpack-dev-server": "^1.14.1",
     "whatwg-fetch": "^2.0.1",
@@ -72,6 +74,7 @@
     "intl": "^1.2.5",
     "ringcentral": "^3.0.0",
     "ringcentral-client": "^1.0.0-rc1",
+    "ringcentral-web-phone": "^0.4.0",
     "whatwg-fetch": "^2.0.1"
   },
   "dependencies": {

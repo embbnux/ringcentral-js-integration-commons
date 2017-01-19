@@ -22,6 +22,7 @@ export default class CallingSettings extends RcModule {
     rolesAndPermissions,
     tabManager,
     onFirstLogin,
+    enableWebphone = false,
     ...options
   }) {
     super({
@@ -36,6 +37,7 @@ export default class CallingSettings extends RcModule {
     this._storage = storage;
     this._rolesAndPermissions = rolesAndPermissions;
     this._tabManager = tabManager;
+    this._enabledWebphone = false;
 
     this._callWithStorageKey = 'callingSettingsCallWith';
     this._ringoutPromptStorageKey = 'callingSettingsRingoutPrompt';

@@ -33,6 +33,7 @@ import Softphone from '../src/modules/Softphone';
 import Storage from '../src/modules/Storage';
 import Subscription from '../src/modules/Subscription';
 import TabManager from '../src/modules/TabManager';
+import Webphone from '../src/modules/Webphone';
 
 import config from './config';
 
@@ -100,6 +101,7 @@ class DemoPhone extends RcModule {
       globalStorage: this.globalStorage,
       getState: () => this.state.rateLimiter,
     }));
+
     this.addModule('softphone', new Softphone({
       brand: this.brand,
     }));
@@ -178,6 +180,15 @@ class DemoPhone extends RcModule {
       tabManager: this._tabManager,
       getState: () => this.state.callingSettings,
     }));
+    this.addModule('webphone', new Webphone({
+      appKey: config.api.appKey,
+      appName: 'RingCentral Integration',
+      appVersion: '0.1.0',
+      auth: this.auth,
+      client: this.client,
+      rolesAndPermissions: this.rolesAndPermissions,
+      getState: () => this.state.webphone,
+    }));
     this.addModule('subscription', new Subscription({
       auth: this.auth,
       client: this.client,
@@ -234,6 +245,7 @@ class DemoPhone extends RcModule {
       regionSettings: this.regionSettings.reducer,
       subscription: this.subscription.reducer,
       tabManager: this.tabManager.reducer,
+      webphone: this.webphone.reducer,
       lastAction: (state = null, action) => {
         console.log(action);
         return action;
