@@ -178,6 +178,7 @@ class DemoPhone extends RcModule {
       storage: this.storage,
       rolesAndPermissions: this.rolesAndPermissions,
       tabManager: this._tabManager,
+      enableWebphone: true,
       getState: () => this.state.callingSettings,
     }));
     this.addModule('webphone', new Webphone({

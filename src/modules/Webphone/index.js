@@ -65,7 +65,7 @@ export default class Webphone extends RcModule {
     auth,
     client,
     rolesAndPermissions,
-    webphoneLogLevel = 0,
+    webphoneLogLevel = 3,
     ...options,
   }) {
     super({
@@ -83,6 +83,8 @@ export default class Webphone extends RcModule {
     this._session = null;
     this._remoteVideo = null;
     this._localVideo = null;
+
+    this._sessions = new Set();
 
     this._reducer = getWebphoneReducer(this.actionTypes);
   }
@@ -207,5 +209,19 @@ export default class Webphone extends RcModule {
       });
       this._webphone.userAgent.stop();
     }
+  }
+
+  testCall() {
+    const session = this._webphone.userAgent.invite('+18122879796', {
+      media: {
+        render: {
+          remote: this._remoteVideo,
+          local: this._localVideo,
+        }
+      },
+      fromNumber: '+16506950198',
+      homeCountryId: '1',
+    });
+    window.callSession = session;
   }
 }
