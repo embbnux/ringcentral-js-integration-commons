@@ -34,6 +34,7 @@ import Storage from '../src/modules/Storage';
 import Subscription from '../src/modules/Subscription';
 import TabManager from '../src/modules/TabManager';
 import NumberValidate from '../src/modules/NumberValidate';
+
 import config from './config';
 
 const DemoView = connect(state => ({

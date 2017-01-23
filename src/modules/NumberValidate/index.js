@@ -28,6 +28,7 @@ export default class NumberValidate extends RcModule {
     this.store.subscribe(() => {
       if (
         this._regionSettings.ready &&
+        this._accountExtension.ready &&
         this.status === moduleStatus.pending
       ) {
         this.store.dispatch({
@@ -35,7 +36,8 @@ export default class NumberValidate extends RcModule {
         });
       } else if (
         (
-          !this._regionSettings.ready
+          !this._regionSettings.ready ||
+          !this._accountExtension.ready
         ) &&
         this.status === moduleStatus.ready
       ) {
