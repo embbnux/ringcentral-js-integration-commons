@@ -9,5 +9,6 @@ export default new Enum([
   'resetSuccess',
   'delete',
   'add',
+  'update',
 ], 'accountExtension');
 
