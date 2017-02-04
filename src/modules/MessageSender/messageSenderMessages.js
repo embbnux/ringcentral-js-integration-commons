@@ -17,5 +17,5 @@ export default new Enum([
   'internalError',
   'notAnExtension',
   'networkError',
-  'NotSmsToExtension',
+  'notSmsToExtension',
 ], 'message-sender-msg');

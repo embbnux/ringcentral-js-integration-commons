@@ -236,7 +236,7 @@ export default class MessageSender extends RcModule {
         if (err.errorCode === 'MSG-246') {
           // MSG-246 : "Sending SMS from/to extension numbers is not available"
           this._alert.warning({
-            message: messageSenderMessages.NotSmsToExtension,
+            message: messageSenderMessages.notSmsToExtension,
           });
         }
         return null;
