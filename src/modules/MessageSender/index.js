@@ -1,4 +1,5 @@
 import RcModule from '../../lib/RcModule';
+import isBlank from '../../lib/isBlank';
 import moduleStatus from '../../enums/moduleStatus';
 
 import messageSenderActionTypes from './messageSenderActionTypes';
@@ -31,45 +32,65 @@ export default class MessageSender extends RcModule {
   }
 
   initialize() {
-    this.store.subscribe(() => {
-      if (
-        this._extensionPhoneNumber.ready &&
-        this._extensionInfo.ready &&
-        this.status === moduleStatus.pending
-      ) {
-        this.store.dispatch({
-          type: this.actionTypes.initSuccess,
-        });
-      } else if (
-        (
-          !this._extensionPhoneNumber.ready ||
-          !this._extensionInfo.ready
-        ) &&
-        this.status === moduleStatus.ready
-      ) {
-        this.store.dispatch({
-          type: this.actionTypes.resetSuccess,
-        });
-      }
+    this.store.subscribe(() => this._onStateChange());
+  }
+
+  _onStateChange() {
+    if (this._shouldInit()) {
+      this._initModuleStatus();
+    } else if (this._shouldReset()) {
+      this._resetModuleStatus();
+    }
+  }
+
+  _shouldInit() {
+    return (
+      this._extensionPhoneNumber.ready &&
+      this._extensionInfo.ready &&
+      !this.ready
+    );
+  }
+
+  _initModuleStatus() {
+    this.store.dispatch({
+      type: this.actionTypes.initSuccess,
     });
   }
 
-  _isBlank(str) {
-    return !/\S/.test(str);
+  _shouldReset() {
+    return (
+      (
+        !this._extensionPhoneNumber.ready ||
+        !this._extensionInfo.ready
+      ) &&
+      this.ready
+    );
+  }
+
+  _resetModuleStatus() {
+    this.store.dispatch({
+      type: this.actionTypes.resetSuccess,
+    });
+  }
+
+  _alertWarning(message) {
+    if (message) {
+      this._alert.warning({
+        message,
+      });
+      return true;
+    }
+    return false;
   }
 
   _validateText(text) {
-    if (!text || this._isBlank(text)) {
-      this._alert.warning({
-        message: messageSenderMessages.textEmpty,
-      });
+    if (isBlank(text)) {
+      this._alertWarning(messageSenderMessages.textEmpty);
       return false;
     }
 
     if (text.length > 1000) {
-      this._alert.warning({
-        message: messageSenderMessages.textTooLong,
-      });
+      this._alertWarning(messageSenderMessages.textTooLong);
       return false;
     }
 
@@ -78,9 +99,7 @@ export default class MessageSender extends RcModule {
 
   _validateToNumbersIsEmpty(toNumbers) {
     if (toNumbers.length === 0) {
-      this._alert.warning({
-        message: messageSenderMessages.receiversEmpty,
-      });
+      this._alertWarning(messageSenderMessages.recipientsEmpty);
       return true;
     }
     return false;
@@ -88,7 +107,7 @@ export default class MessageSender extends RcModule {
 
   _validateSenderNumber(senderNumber) {
     let validateResult = true;
-    if (!senderNumber || this._isBlank(senderNumber)) {
+    if (isBlank(senderNumber)) {
       validateResult = false;
     }
     if (validateResult) {
@@ -100,43 +119,34 @@ export default class MessageSender extends RcModule {
       }
     }
     if (!validateResult) {
-      this._alert.warning({
-        message: messageSenderMessages.senderNumberInvalids,
-      });
+      this._alertWarning(messageSenderMessages.senderNumberInvalids);
     }
     return validateResult;
   }
 
-  _alertInvalidRecipientNumber(errors) {
+  _alertInvalidRecipientErrors(errors) {
     errors.forEach((error) => {
       const message = messageSenderMessages[error.type];
-      if (message) {
-        this._alert.warning({ message });
-        return;
+      if (!this._alertWarning(message)) {
+        this._alertWarning(messageSenderMessages.recipientNumberInvalids);
       }
-      this._alert.warning({
-        message: messageSenderMessages.recipientNumberInvalids,
-      });
     });
   }
 
-  async send({ fromNumber, toNumbers, text, replyOnMessageId }) {
-    if (!this._validateText(text)) {
-      return null;
-    }
-
+  async _validateToNumbers(toNumbers) {
+    const result = {
+      result: false,
+    };
     if (this._validateToNumbersIsEmpty(toNumbers)) {
-      return null;
+      return result;
     }
-
     let recipientNumbers = toNumbers.filter((item, index, arr) => arr.indexOf(item) === index);
-
     this.store.dispatch({ type: this.actionTypes.validate });
     const numberValidateResult = await this._numberValidate.validateNumbers(recipientNumbers);
     if (!numberValidateResult.result) {
-      this._alertInvalidRecipientNumber(numberValidateResult.errors);
+      this._alertInvalidRecipientErrors(numberValidateResult.errors);
       this.store.dispatch({ type: this.actionTypes.validateError });
-      return null;
+      return result;
     }
 
     recipientNumbers = numberValidateResult.numbers.map((number) => {
@@ -145,6 +155,21 @@ export default class MessageSender extends RcModule {
       }
       return `${number.e164}*${number.subAddress}`;
     });
+    result.result = true;
+    result.numbers = recipientNumbers;
+    return result;
+  }
+
+  async send({ fromNumber, toNumbers, text, replyOnMessageId }) {
+    if (!this._validateText(text)) {
+      return null;
+    }
+
+    const validateToNumberResult = await this._validateToNumbers(toNumbers);
+    if (!validateToNumberResult.result) {
+      return null;
+    }
+    const recipientNumbers = validateToNumberResult.numbers;
 
     const extensionNumbers = recipientNumbers.filter(number => (number.length <= 5));
     const phoneNumbers = recipientNumbers.filter(number => (number.length > 5));
@@ -168,14 +193,12 @@ export default class MessageSender extends RcModule {
           text,
           replyOnMessageId,
         });
-        console.debug('sendPagerText response: ', pagerResponse);
       }
 
       if (phoneNumbers.length > 0) {
         for (const phoneNumber of phoneNumbers) {
           smsResponse = await this._sendSms({ fromNumber, toNumber: phoneNumber, text });
         }
-        console.debug('sendSmsText response: ', smsResponse);
       }
       this.store.dispatch({
         type: this.actionTypes.sendOver,
@@ -228,24 +251,18 @@ export default class MessageSender extends RcModule {
           // 101 : "Parameter [to.extensionNumber] value is invalid"
           // 101 : "Parameter [to.phoneNumber] value is invalid"
           // 102 : "Resource for parameter [to] is not found"
-          this._alert.warning({
-            message: messageSenderMessages.recipientNumberInvalids,
-          });
+          this._alertWarning(messageSenderMessages.recipientNumberInvalids);
           return null;
         }
         if (err.errorCode === 'MSG-246') {
           // MSG-246 : "Sending SMS from/to extension numbers is not available"
-          this._alert.warning({
-            message: messageSenderMessages.notSmsToExtension,
-          });
+          this._alertWarning(messageSenderMessages.notSmsToExtension);
         }
         return null;
       });
       return;
     }
-    this._alert.warning({
-      message: messageSenderMessages.sendError,
-    });
+    this._alertWarning(messageSenderMessages.sendError);
   }
 
   get status() {
@@ -266,7 +283,7 @@ export default class MessageSender extends RcModule {
 
   get senderNumbersList() {
     return this._extensionPhoneNumber.smsSenderNumbers.map(
-      (number) => number.phoneNumber
+      number => number.phoneNumber
     );
   }
 }

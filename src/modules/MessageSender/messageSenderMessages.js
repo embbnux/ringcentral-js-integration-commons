@@ -9,7 +9,7 @@ export default new Enum([
   'noPermission',
   'senderEmpty',
   'noToNumber',
-  'receiversEmpty',
+  'recipientsEmpty',
   'recipientNumberInvalids',
   'senderNumberInvalids',
   'noAreaCode',
