@@ -1,4 +1,5 @@
 import RcModule from '../../lib/RcModule';
+import isBlank from '../../lib/isBlank';
 import moduleStatus from '../../enums/moduleStatus';
 
 import composeTextActionTypes from './composeTextActionTypes';
@@ -72,13 +73,6 @@ export default class ComposeText extends RcModule {
     this.updateSenderNumber(defaultPhoneNumber);
   }
 
-  _isBlank(str) {
-    if (!str) {
-      return true;
-    }
-    return !/\S/.test(str);
-  }
-
   _validatePhoneNumber(phoneNumber) {
     const validateResult = this._numberValidate.validateFormat([phoneNumber]);
     if (!validateResult.result) {
@@ -102,7 +96,7 @@ export default class ComposeText extends RcModule {
     const fromNumber = this.senderNumber;
     const toNumbers = this.toNumbers.map(number => number.phoneNumber);
     const typingToNumber = this.typingToNumber;
-    if (!this._isBlank(typingToNumber)) {
+    if (!isBlank(typingToNumber)) {
       if (this._validatePhoneNumber(typingToNumber)) {
         toNumbers.push(typingToNumber);
       } else {
@@ -139,7 +133,7 @@ export default class ComposeText extends RcModule {
   }
 
   addToNumber(number) {
-    if (this._isBlank(number.phoneNumber)) {
+    if (isBlank(number.phoneNumber)) {
       return;
     }
     if (!this._validatePhoneNumber(number.phoneNumber)) {
