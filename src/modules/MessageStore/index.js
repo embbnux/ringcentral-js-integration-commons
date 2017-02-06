@@ -4,6 +4,7 @@ import moduleStatus from '../../enums/moduleStatus';
 import { batchPutApi } from '../../lib/batchApiHelper';
 import * as messageHelper from '../../lib/messageHelper';
 
+import * as messageStoreHelper from './messageStoreHelper';
 import messageStoreActionTypes from './messageStoreActionTypes';
 import getMessageStoreReducer from './getMessageStoreReducer';
 import getCacheReducer from './getCacheReducer';
@@ -37,50 +38,65 @@ export default class MessageStore extends RcModule {
   }
 
   initialize() {
-    this.store.subscribe(() => {
-      if (
-        this._storage.ready &&
-        this._subscription.ready &&
-        this.status === moduleStatus.pending
-      ) {
+    this.store.subscribe(() => this._onStateChange());
+  }
+
+  _onStateChange() {
+    if (this._shouldInit()) {
+      this.store.dispatch({
+        type: this.actionTypes.init,
+      });
+      if (this._shouleCleanCache()) {
         this.store.dispatch({
-          type: this.actionTypes.init,
+          type: this.actionTypes.cleanUp,
         });
-        if (
-          this._auth.isFreshLogin ||
-          !this.cache ||
-          (Date.now() - this.conversationsTimestamp) > this._ttl ||
-          (Date.now() - this.messagesTimestamp) > this._ttl
-        ) {
-          this.store.dispatch({
-            type: this.actionTypes.cleanUp,
-          });
-        }
-        this._syncMessages().then(() => {
-          this.store.dispatch({
-            type: this.actionTypes.initSuccess,
-          });
-          this._subscription.subscribe('/account/~/extension/~/message-store');
-        });
-      } else if (
+      }
+      this._initMessageStore();
+    } else if (this._shouldReset()) {
+      this.store.dispatch({
+        type: this.actionTypes.resetSuccess,
+      });
+    } else if (this.ready) {
+      this._subscriptionHandler();
+    }
+  }
+
+  _shouldInit() {
+    return (
+      this._storage.ready &&
+      this._subscription.ready &&
+      this.status === moduleStatus.pending
+    );
+  }
+
+  _shouldReset() {
+    return (
+      (
         (this._storage.pending ||
          !this._subscription.ready) &&
         this.status === moduleStatus.ready
-      ) {
-        this.store.dispatch({
-          type: this.actionTypes.resetSuccess,
-        });
-      } else if (
+      ) ||
+      (
         this._storage.resetting &&
-        this.status !== moduleStatus.pending) {
-        this.store.dispatch({
-          type: this.actionTypes.resetSuccess,
-        });
-      } else if (
-        this.status === moduleStatus.ready
-      ) {
-        this._subscriptionHandler();
-      }
+        this.status !== moduleStatus.pending
+      )
+    );
+  }
+
+  _shouleCleanCache() {
+    return (
+      this._auth.isFreshLogin ||
+      !this.cache ||
+      (Date.now() - this.conversationsTimestamp) > this._ttl ||
+      (Date.now() - this.messagesTimestamp) > this._ttl
+    );
+  }
+
+  async _initMessageStore() {
+    await this._syncMessages();
+    this._subscription.subscribe('/account/~/extension/~/message-store');
+    this.store.dispatch({
+      type: this.actionTypes.initSuccess,
     });
   }
 
@@ -162,126 +178,12 @@ export default class MessageStore extends RcModule {
   _getConversationsAndMessagesFromSyncResponse(conversationResponse) {
     const records = conversationResponse.records.reverse();
     const syncToken = conversationResponse.syncInfo.syncToken;
-    return this._getNewConversationsAndMessagesFromRecords(records, syncToken);
-  }
-
-  _getNewConversationsAndMessagesFromRecords(records, syncToken) {
-    const conversations = this.conversations;
-    let messages = this.messages;
-    records.forEach((record) => {
-      if (!messageHelper.messaageIsTextMessage(record)) {
-        return;
-      }
-      const conversationId = record.conversation.id;
-      let conversation = conversations[conversationId];
-      if (!conversation) {
-        conversation = { messages: [] };
-      }
-      const oldMessages = conversation.messages;
-      conversation.messages = this._pushMessageToConversationMessages({
-        messages: oldMessages,
-        message: record,
-      });
-      if (syncToken) {
-        conversation.syncToken = syncToken;
-      }
-      conversation.id = conversationId;
-      conversations[conversationId] = conversation;
-      messages = this._pushMessageToMesages({
-        messages,
-        message: record
-      });
+    return messageStoreHelper.getNewConversationsAndMessagesFromRecords({
+      records,
+      syncToken,
+      conversations: this.conversations,
+      messages: this.messages,
     });
-    return { conversations, messages };
-  }
-
-  _pushOrReplaceOrDeleteMessage({
-    messages,
-    message,
-    isFind,
-    replaceMessage,
-    pushMessage,
-    deleteMessage
-  }) {
-    const messageLength = messages.length;
-    let messageExistIndex = null;
-    if (messageLength > 0) {
-      for (let index = (messageLength - 1); index >= 0; index -= 1) {
-        if (isFind({
-          oldMessage: messages[index],
-          newMessage: message,
-        })) {
-          messageExistIndex = index;
-          break;
-        }
-      }
-    }
-    if (messageExistIndex === null) {
-      if (messageHelper.messageIsAcceptable(message)) {
-        pushMessage(message);
-        return;
-      }
-    }
-    if (messageHelper.messageIsDeleted(message)) {
-      deleteMessage(messageExistIndex);
-      return;
-    }
-    replaceMessage({ index: messageExistIndex, newMessage: message });
-  }
-
-  _pushMessageToConversationMessages({ messages, message }) {
-    const isFind = ({ oldMessage, newMessage }) => (
-      oldMessage.id === newMessage.id
-    );
-    const replaceMessage = ({ index, newMessage }) => {
-      messages[index] = newMessage;
-    };
-    const pushMessage = (newMessage) => {
-      messages.push(newMessage);
-    };
-    const deleteMessage = (index) => {
-      messages.splice(index, 1);
-    };
-    this._pushOrReplaceOrDeleteMessage({
-      messages,
-      message,
-      isFind,
-      replaceMessage,
-      pushMessage,
-      deleteMessage
-    });
-    return messages;
-  }
-
-  _pushMessageToMesages({ messages, message }) {
-    const isFind = ({ oldMessage, newMessage }) => (
-      oldMessage.id === newMessage.id ||
-        oldMessage.conversation.id === newMessage.conversation.id
-    );
-    const replaceMessage = ({ index, newMessage }) => {
-      const oldCreated = new Date(messages[index].creationTime);
-      const newCreated = new Date(message.creationTime);
-      if (newCreated >= oldCreated) {
-        messages.splice(index, 1);
-        messages.push(newMessage);
-      }
-    };
-    const pushMessage = (newMessage) => {
-      messages.push(newMessage);
-    };
-    const deleteMessage = (index) => {
-      messages.splice(index, 1);
-    };
-
-    this._pushOrReplaceOrDeleteMessage({
-      messages,
-      message,
-      isFind,
-      replaceMessage,
-      pushMessage,
-      deleteMessage
-    });
-    return messages;
   }
 
   async _sync(syncFunction) {
@@ -327,11 +229,11 @@ export default class MessageStore extends RcModule {
       newConversation = oldConversation;
     }
     newConversation.id = conversationId;
-    newConversation.messages = this._pushMessageToConversationMessages({
+    newConversation.messages = messageStoreHelper.pushMessageToConversationMessages({
       messages: newConversation.messages,
       message,
     });
-    const messages = this._pushMessageToMesages({
+    const messages = messageStoreHelper.pushMessageToMesages({
       messages: this.messages,
       message
     });
@@ -340,7 +242,11 @@ export default class MessageStore extends RcModule {
 
   _updateConversationsMessagesFromRecords(records) {
     const { conversations, messages } =
-      this._getNewConversationsAndMessagesFromRecords(records, null);
+      messageStoreHelper.getNewConversationsAndMessagesFromRecords({
+        records,
+        conversations: this.conversations,
+        messages: this.messages,
+      });
     this._saveConversationsAndMessages(conversations, messages, null);
   }
 
