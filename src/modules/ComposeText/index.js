@@ -40,31 +40,49 @@ export default class ComposeText extends RcModule {
   }
 
   initialize() {
-    this.store.subscribe(() => {
-      if (
-        this._messageSender.ready &&
-        this.status === moduleStatus.pending
-      ) {
-        this.store.dispatch({
-          type: this.actionTypes.initSuccess,
-        });
-        this.initSenderNumber();
-      } else if (
-        (
-          !this._messageSender.ready
-        ) &&
-        this.status === moduleStatus.ready
-      ) {
-        this.store.dispatch({
-          type: this.actionTypes.resetSuccess,
-        });
-      }
+    this.store.subscribe(() => this._onStateChange());
+  }
+
+  _onStateChange() {
+    if (
+      this._shouldInit()
+    ) {
+      this.store.dispatch({
+        type: this.actionTypes.initSuccess,
+      });
+      this._initSenderNumber();
+    } else if (
+      this._shouldReset()
+    ) {
+      this._resetModuleStatus();
+    }
+  }
+
+  _shouldInit() {
+    return (
+      this._messageSender.ready &&
+      !this.ready
+    );
+  }
+
+  _shouldReset() {
+    return (
+      (
+        !this._messageSender.ready
+      ) &&
+      this.ready
+    );
+  }
+
+  _resetModuleStatus() {
+    this.store.dispatch({
+      type: this.actionTypes.resetSuccess,
     });
   }
 
-  initSenderNumber() {
+  _initSenderNumber() {
     let defaultPhoneNumber = null;
-    const cachedPhoneNumber = this.cache.senderNumber;
+    const cachedPhoneNumber = this.cache && this.cache.senderNumber;
     if (cachedPhoneNumber) {
       defaultPhoneNumber = cachedPhoneNumber;
     } else {
@@ -73,19 +91,24 @@ export default class ComposeText extends RcModule {
     this.updateSenderNumber(defaultPhoneNumber);
   }
 
+  _alertWarning(message) {
+    if (message) {
+      this._alert.warning({
+        message,
+      });
+      return true;
+    }
+    return false;
+  }
+
   _validatePhoneNumber(phoneNumber) {
     const validateResult = this._numberValidate.validateFormat([phoneNumber]);
     if (!validateResult.result) {
       const error = validateResult.errors[0];
-      if (error && messageSenderMessages[error.type]) {
-        this._alert.warning({
-          message: messageSenderMessages[error.type],
-        });
+      if (error && this._alertWarning(messageSenderMessages[error.type])) {
         return false;
       }
-      this._alert.warning({
-        message: messageSenderMessages.recipientNumberInvalids,
-      });
+      this._alertWarning(messageSenderMessages.recipientNumberInvalids);
       return false;
     }
     return true;
@@ -115,9 +138,7 @@ export default class ComposeText extends RcModule {
 
   updateTypingToNumber(number) {
     if (number.length > 30) {
-      this._alert.warning({
-        message: messageSenderMessages.recipientNumberInvalids,
-      });
+      this._alertWarning(messageSenderMessages.recipientNumberInvalids);
       return;
     }
     this.store.dispatch({
@@ -154,9 +175,7 @@ export default class ComposeText extends RcModule {
 
   updateMessageText(text) {
     if (text.length > 1000) {
-      this._alert.warning({
-        message: messageSenderMessages.textTooLong,
-      });
+      this._alertWarning(messageSenderMessages.textTooLong);
       return;
     }
     this.store.dispatch({
