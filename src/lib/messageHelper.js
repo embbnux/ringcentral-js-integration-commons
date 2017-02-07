@@ -1,4 +1,4 @@
-function filterNumbers(numbers, filterNumber) {
+export function filterNumbers(numbers, filterNumber) {
   return numbers.filter((number) => {
     if (filterNumber.phoneNumber) {
       return filterNumber.phoneNumber !== number.phoneNumber;
