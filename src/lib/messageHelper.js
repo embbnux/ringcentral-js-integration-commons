@@ -66,12 +66,3 @@ export function getRecipients({ message, myExtensionNumber }) {
     myNumber,
   });
 }
-
-export function filterConversationUnreadMessages(conversation) {
-  const unReadMessages = conversation.messages.filter(record => (
-    record.direction === 'Inbound' &&
-    !(messageIsDeleted(record)) &&
-    record.readStatus !== 'Read'
-  ));
-  return unReadMessages;
-}

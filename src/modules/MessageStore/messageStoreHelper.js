@@ -121,3 +121,28 @@ export function getNewConversationsAndMessagesFromRecords({
   });
   return { conversations, messages };
 }
+
+export function filterConversationUnreadMessages(conversation) {
+  const unReadMessages = conversation.messages.filter(record => (
+    record.direction === 'Inbound' &&
+    !(messageHelper.messageIsDeleted(record)) &&
+    record.readStatus !== 'Read'
+  ));
+  return unReadMessages;
+}
+
+export function updateMessagesUnreadCounts(messages, conversations) {
+  let totalUnreadCounts = 0;
+  for (let index = 0; index < messages.length; index += 1) {
+    const message = messages[index];
+    const conversation = conversations[message.conversation.id];
+    const unReadMessages = filterConversationUnreadMessages(conversation);
+    totalUnreadCounts += unReadMessages.length;
+    message.isRead = (unReadMessages.length === 0);
+  }
+  return {
+    messages,
+    unreadCounts: totalUnreadCounts
+  };
+}
+

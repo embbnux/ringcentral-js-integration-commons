@@ -2,7 +2,6 @@ import RcModule from '../../lib/RcModule';
 import moduleStatus from '../../enums/moduleStatus';
 
 import { batchPutApi } from '../../lib/batchApiHelper';
-import * as messageHelper from '../../lib/messageHelper';
 
 import * as messageStoreHelper from './messageStoreHelper';
 import messageStoreActionTypes from './messageStoreActionTypes';
@@ -222,103 +221,6 @@ export default class MessageStore extends RcModule {
     });
   }
 
-  pushMessage(conversationId, message) {
-    const oldConversation = this.findConversationById(conversationId);
-    let newConversation = { messages: [] };
-    if (oldConversation) {
-      newConversation = oldConversation;
-    }
-    newConversation.id = conversationId;
-    newConversation.messages = messageStoreHelper.pushMessageToConversationMessages({
-      messages: newConversation.messages,
-      message,
-    });
-    const messages = messageStoreHelper.pushMessageToMesages({
-      messages: this.messages,
-      message
-    });
-    this._saveConversationAndMessages(newConversation, messages);
-  }
-
-  _updateConversationsMessagesFromRecords(records) {
-    const { conversations, messages } =
-      messageStoreHelper.getNewConversationsAndMessagesFromRecords({
-        records,
-        conversations: this.conversations,
-        messages: this.messages,
-      });
-    this._saveConversationsAndMessages(conversations, messages, null);
-  }
-
-  _saveConversationAndMessages(conversation, messages) {
-    this._saveConversation(conversation);
-
-    const unReadMessagesRusult = this._updateMessagesUnreadCounts(messages);
-    this._saveUnreadCounts(unReadMessagesRusult.unreadCounts);
-    this._saveMessages(unReadMessagesRusult.messages);
-  }
-
-  _saveConversationsAndMessages(conversations, messages, syncToken) {
-    this._saveConversations(conversations);
-    const unReadMessagesRusult = this._updateMessagesUnreadCounts(messages);
-    this._saveMessages(unReadMessagesRusult.messages);
-    this._saveUnreadCounts(unReadMessagesRusult.unreadCounts);
-    if (syncToken) {
-      this._saveSyncToken(syncToken);
-    }
-  }
-
-  _saveConversation(conversation) {
-    const conversations = this.conversations;
-    const id = conversation.id;
-    conversations[id] = conversation;
-    this._saveConversations(conversations);
-  }
-
-  _saveConversations(conversations) {
-    this.store.dispatch({
-      type: this.actionTypes.saveConversations,
-      data: conversations,
-    });
-  }
-
-  _saveMessages(messages) {
-    this.store.dispatch({
-      type: this.actionTypes.saveMessages,
-      data: messages,
-    });
-  }
-
-  _saveSyncToken(syncToken) {
-    this.store.dispatch({
-      type: this.actionTypes.saveSyncToken,
-      syncToken,
-    });
-  }
-
-  _saveUnreadCounts(unreadCounts) {
-    this.store.dispatch({
-      type: this.actionTypes.updateUnreadCounts,
-      unreadCounts,
-    });
-  }
-
-  _updateMessagesUnreadCounts(messages) {
-    let totalUnreadCounts = 0;
-    const conversations = this.conversations;
-    for (let index = 0; index < messages.length; index += 1) {
-      const message = messages[index];
-      const conversation = conversations[message.conversation.id];
-      const unReadMessages = messageHelper.filterConversationUnreadMessages(conversation);
-      totalUnreadCounts += unReadMessages.length;
-      message.isRead = (unReadMessages.length === 0);
-    }
-    return {
-      messages,
-      unreadCounts: totalUnreadCounts
-    };
-  }
-
   async _updateMessageApi(messageId, status) {
     const body = {
       readStatus: status,
@@ -365,7 +267,7 @@ export default class MessageStore extends RcModule {
 
   async readMessages(conversation) {
     console.debug(`read messages from conversation ${conversation.id}`);
-    const unReadMessages = messageHelper.filterConversationUnreadMessages(conversation);
+    const unReadMessages = messageStoreHelper.filterConversationUnreadMessages(conversation);
     if (unReadMessages.length === 0) {
       return null;
     }
@@ -412,6 +314,89 @@ export default class MessageStore extends RcModule {
       messages[messageIndex] = message;
       this._saveMessages(messages);
     }
+  }
+
+  pushMessage(conversationId, message) {
+    const oldConversation = this.findConversationById(conversationId);
+    let newConversation = { messages: [] };
+    if (oldConversation) {
+      newConversation = oldConversation;
+    }
+    newConversation.id = conversationId;
+    newConversation.messages = messageStoreHelper.pushMessageToConversationMessages({
+      messages: newConversation.messages,
+      message,
+    });
+    const messages = messageStoreHelper.pushMessageToMesages({
+      messages: this.messages,
+      message
+    });
+    this._saveConversationAndMessages(newConversation, messages);
+  }
+
+  _updateConversationsMessagesFromRecords(records) {
+    const { conversations, messages } =
+      messageStoreHelper.getNewConversationsAndMessagesFromRecords({
+        records,
+        conversations: this.conversations,
+        messages: this.messages,
+      });
+    this._saveConversationsAndMessages(conversations, messages, null);
+  }
+
+  _saveConversationAndMessages(conversation, messages) {
+    this._saveConversation(conversation);
+
+    const unReadMessagesRusult =
+      messageStoreHelper.updateMessagesUnreadCounts(messages, this.conversations);
+    this._saveUnreadCounts(unReadMessagesRusult.unreadCounts);
+    this._saveMessages(unReadMessagesRusult.messages);
+  }
+
+  _saveConversationsAndMessages(conversations, messages, syncToken) {
+    this._saveConversations(conversations);
+    const unReadMessagesRusult =
+      messageStoreHelper.updateMessagesUnreadCounts(messages, this.conversations);
+    this._saveMessages(unReadMessagesRusult.messages);
+    this._saveUnreadCounts(unReadMessagesRusult.unreadCounts);
+    if (syncToken) {
+      this._saveSyncToken(syncToken);
+    }
+  }
+
+  _saveConversation(conversation) {
+    const conversations = this.conversations;
+    const id = conversation.id;
+    conversations[id] = conversation;
+    this._saveConversations(conversations);
+  }
+
+  _saveConversations(conversations) {
+    this.store.dispatch({
+      type: this.actionTypes.saveConversations,
+      data: conversations,
+    });
+  }
+
+  _saveMessages(messages) {
+    this.store.dispatch({
+      type: this.actionTypes.saveMessages,
+      data: messages,
+    });
+  }
+
+  _saveSyncToken(syncToken) {
+    this.store.dispatch({
+      type: this.actionTypes.saveSyncToken,
+      syncToken,
+    });
+  }
+
+  _saveUnreadCounts(unreadCounts) {
+    this.store.dispatch({
+      type: this.actionTypes.updateUnreadCounts,
+      unreadCounts,
+    });
   }
 
   get cache() {
