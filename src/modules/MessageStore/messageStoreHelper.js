@@ -24,11 +24,13 @@ function pushOrReplaceOrDeleteMessage({
   if (messageExistIndex === null) {
     if (messageHelper.messageIsAcceptable(message)) {
       pushMessage(message);
-      return;
     }
+    return;
   }
   if (messageHelper.messageIsDeleted(message)) {
-    deleteMessage(messageExistIndex);
+    if (messages[messageExistIndex].id === message.id) {
+      deleteMessage(messageExistIndex);
+    }
     return;
   }
   replaceMessage({ index: messageExistIndex, newMessage: message });
