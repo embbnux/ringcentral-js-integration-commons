@@ -233,7 +233,7 @@ async function exec(command) {
 async function getVersionFromTag() {
   let tag = await exec('git describe --abbrev=0 --tags');
   tag = tag.replace(/\r?\n|\r/g, '');
-  if (/^\d+.\d+.\d+$/.test(tag)) {
+  if (/^\d+.\d+.\d+/.test(tag)) {
     return tag;
   }
   return null;

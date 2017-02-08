@@ -23,4 +23,5 @@ deploy:
     on:
       node: '6'
       tags: true
+      condition: "$TRAVIS_TAG =~ ^[0-9]+.[0-9]+.[0-9]+"
       repo: ringcentral/ringcentral-js-integration-commons
