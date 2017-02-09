@@ -148,3 +148,21 @@ export function updateMessagesUnreadCounts(messages, conversations) {
   };
 }
 
+export function getMessageSyncParams({ syncToken, conversationId }) {
+  if (syncToken) {
+    return {
+      syncToken,
+      syncType: 'ISync',
+    };
+  }
+  const lastSevenDate = new Date();
+  lastSevenDate.setDate(lastSevenDate.getDate() - 7);
+  const params = {
+    syncType: 'FSync',
+    dateFrom: lastSevenDate.toISOString(),
+  };
+  if (conversationId) {
+    params.conversationId = conversationId;
+  }
+  return params;
+}

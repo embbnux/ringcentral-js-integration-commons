@@ -864,3 +864,29 @@ describe('updateMessagesUnreadCounts', () => {
     expect(result).to.deep.equal({ messages: expectMessages, unreadCounts: 2 });
   });
 });
+
+describe('getMessageSyncParams', () => {
+  it('should return syncToken and syncType is ISync when syncToken exist', () => {
+    const syncToken = 'aabbccdd';
+    const conversationId = null;
+    const result = messageStoreHelper.getMessageSyncParams({
+      syncToken,
+      conversationId,
+    });
+    expect(result).to.deep.equal({ syncToken, syncType: 'ISync' });
+  });
+
+  it('should return syncToken and syncType is ISync when syncToken exist', () => {
+    const result = messageStoreHelper.getMessageSyncParams({});
+    expect(result.syncType).to.equal('FSync');
+    expect(Object.keys(result)).to.deep.equal(['syncType', 'dateFrom']);
+  });
+
+  it('should return params with conversationId when conversationId exist', () => {
+    const conversationId = '12345678';
+    const result = messageStoreHelper.getMessageSyncParams({ conversationId });
+    expect(result.syncType).to.equal('FSync');
+    expect(result.conversationId).to.equal('12345678');
+    expect(Object.keys(result)).to.deep.equal(['syncType', 'dateFrom', 'conversationId']);
+  });
+});

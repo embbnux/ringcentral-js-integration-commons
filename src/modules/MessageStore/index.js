@@ -46,15 +46,11 @@ export default class MessageStore extends RcModule {
         type: this.actionTypes.init,
       });
       if (this._shouleCleanCache()) {
-        this.store.dispatch({
-          type: this.actionTypes.cleanUp,
-        });
+        this._cleanUpCache();
       }
       this._initMessageStore();
     } else if (this._shouldReset()) {
-      this.store.dispatch({
-        type: this.actionTypes.resetSuccess,
-      });
+      this._resetModuleStatus();
     } else if (this.ready) {
       this._subscriptionHandler();
     }
@@ -64,31 +60,38 @@ export default class MessageStore extends RcModule {
     return (
       this._storage.ready &&
       this._subscription.ready &&
-      this.status === moduleStatus.pending
+      this.pending
     );
   }
 
   _shouldReset() {
     return (
       (
-        (this._storage.pending ||
-         !this._subscription.ready) &&
-        this.status === moduleStatus.ready
-      ) ||
-      (
-        this._storage.resetting &&
-        this.status !== moduleStatus.pending
-      )
+        !this._storage.ready ||
+        !this._subscription.ready
+      ) &&
+      this.ready
     );
   }
 
   _shouleCleanCache() {
     return (
       this._auth.isFreshLogin ||
-      !this.cache ||
       (Date.now() - this.conversationsTimestamp) > this._ttl ||
       (Date.now() - this.messagesTimestamp) > this._ttl
     );
+  }
+
+  _resetModuleStatus() {
+    this.store.dispatch({
+      type: this.actionTypes.resetSuccess,
+    });
+  }
+
+  _cleanUpCache() {
+    this.store.dispatch({
+      type: this.actionTypes.cleanUp,
+    });
   }
 
   async _initMessageStore() {
@@ -108,8 +111,6 @@ export default class MessageStore extends RcModule {
       message.body &&
       message.body.changes
     ) {
-      console.debug('receive a message notification:');
-      console.debug(message);
       this._syncMessages();
     }
   }
@@ -118,28 +119,22 @@ export default class MessageStore extends RcModule {
     return this.conversations[id.toString()];
   }
 
+  async _messageSyncApi(params) {
+    const response = await this._client.account()
+                             .extension()
+                             .messageSync()
+                             .list(params);
+    return response;
+  }
+
   async _updateConversationFromSync(id) {
     const oldConversation = this.findConversationById(id);
     const syncToken = oldConversation && oldConversation.syncToken;
-    let params = null;
-    if (syncToken) {
-      params = {
-        syncToken,
-        syncType: 'ISync',
-      };
-    } else {
-      const lastSevenDate = new Date();
-      lastSevenDate.setDate(lastSevenDate.getDate() - 7);
-      params = {
-        conversationId: id,
-        syncType: 'FSync',
-        dateFrom: lastSevenDate.toISOString(),
-      };
-    }
-    const newConversationRequest = await this._client.account()
-                                             .extension()
-                                             .messageSync()
-                                             .list(params);
+    const params = messageStoreHelper.getMessageSyncParams({
+      syncToken,
+      conversationId: id,
+    });
+    const newConversationRequest = await this._messageSyncApi(params);
     const { conversations, messages }
       = this._getConversationsAndMessagesFromSyncResponse(newConversationRequest);
     this._saveConversationsAndMessages(conversations, messages, null);
@@ -147,24 +142,8 @@ export default class MessageStore extends RcModule {
 
   async _updateMessagesFromSync() {
     const syncToken = this.syncToken;
-    let params = null;
-    if (syncToken) {
-      params = {
-        syncToken,
-        syncType: 'ISync',
-      };
-    } else {
-      const lastSevenDate = new Date();
-      lastSevenDate.setDate(lastSevenDate.getDate() - 7);
-      params = {
-        syncType: 'FSync',
-        dateFrom: lastSevenDate.toISOString(),
-      };
-    }
-    const newConversationRequest = await this._client.account()
-                                             .extension()
-                                             .messageSync()
-                                             .list(params);
+    const params = messageStoreHelper.getMessageSyncParams({ syncToken });
+    const newConversationRequest = await this._messageSyncApi(params);
     const { conversations, messages } =
       this._getConversationsAndMessagesFromSyncResponse(newConversationRequest);
     this._saveConversationsAndMessages(
@@ -445,5 +424,9 @@ export default class MessageStore extends RcModule {
 
   get ready() {
     return this.status === moduleStatus.ready;
+  }
+
+  get pending() {
+    return this.status === moduleStatus.pending;
   }
 }
