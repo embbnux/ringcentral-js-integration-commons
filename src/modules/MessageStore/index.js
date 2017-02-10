@@ -233,7 +233,7 @@ export default class MessageStore extends RcModule {
     const body = leftIds.map(() => (
       { body: { readStatus: status } }
     ));
-    const responses = this._batchUpdateMessagesApi(leftIds, body);
+    const responses = await this._batchUpdateMessagesApi(leftIds, body);
     const results = [];
     responses.forEach((res) => {
       if (res.response().status === 200) {
