@@ -33,6 +33,8 @@ describe('MessageStore Unit Test', () => {
       '_syncMessages',
       'syncConversation',
       '_updateMessageApi',
+      '_batchUpdateMessagesApi',
+      '_updateMessagesApi',
       'readMessages',
       'matchMessageText',
       'updateConversationRecipientList',
@@ -499,6 +501,495 @@ describe('MessageStore Unit Test', () => {
         conversations: expectConversations,
         messages: expectMessages,
       });
+    });
+  });
+
+  describe('_sync', () => {
+    it('should call syncFunction once when _promise is null', async () => {
+      messageStore._promise = null;
+      sinon.stub(messageStore, '_updateMessagesFromSync');
+      await messageStore._sync(async () => {
+        await messageStore._updateMessagesFromSync();
+      });
+      sinon.assert.calledOnce(messageStore._updateMessagesFromSync);
+      expect(messageStore._promise).to.equal(null);
+    });
+
+    it('should not call syncFunction when _promise exist', async () => {
+      messageStore._promise = () => null;
+      sinon.stub(messageStore, '_updateMessagesFromSync');
+      await messageStore._sync(async () => {
+        await messageStore._updateMessagesFromSync();
+      });
+      sinon.assert.notCalled(messageStore._updateMessagesFromSync);
+    });
+
+    it('_promise should be null when throw error', async () => {
+      messageStore._promise = null;
+      sinon.stub(messageStore, '_updateMessagesFromSync').throws(new Error('error'));
+      try {
+        await messageStore._sync(async () => {
+          await messageStore._updateMessagesFromSync();
+        });
+      } catch (e) {}
+      expect(messageStore._promise).to.equal(null);
+    });
+  });
+
+  describe('_syncMessages', () => {
+    it('should call _updateMessagesFromSync once', async () => {
+      messageStore._promise = null;
+      sinon.stub(messageStore, '_updateMessagesFromSync');
+      await messageStore._syncMessages();
+      sinon.assert.calledOnce(messageStore._updateMessagesFromSync);
+      expect(messageStore._promise).to.equal(null);
+    });
+  });
+
+  describe('syncConversation', () => {
+    it('should call _updateConversationFromSync with id', async () => {
+      messageStore._promise = null;
+      sinon.stub(messageStore, '_updateConversationFromSync');
+      await messageStore.syncConversation(123);
+      sinon.assert.calledWith(messageStore._updateConversationFromSync, 123);
+      expect(messageStore._promise).to.equal(null);
+    });
+  });
+
+  describe('_updateMessagesApi', () => {
+    it('should call _updateMessageApi and not call _batchUpdateMessagesApi when ids length is one', async () => {
+      sinon.stub(messageStore, '_updateMessageApi');
+      sinon.stub(messageStore, '_batchUpdateMessagesApi');
+      await messageStore._updateMessagesApi(['11111'], 'Read');
+      sinon.assert.calledOnce(messageStore._updateMessageApi);
+      sinon.assert.notCalled(messageStore._batchUpdateMessagesApi);
+    });
+
+    it('should not call _updateMessageApi and call _batchUpdateMessagesApi when ids length is more one', async () => {
+      sinon.stub(messageStore, '_updateMessageApi');
+      sinon.stub(messageStore, '_batchUpdateMessagesApi').callsFake(
+        () => [
+          {
+            response: () => ({ status: 200 }),
+            json: () => ({ data: 'test1' }),
+          }, {
+            response: () => ({ status: 200 }),
+            json: () => ({ data: 'test2' }),
+          }
+        ]
+      );
+      const result = await messageStore._updateMessagesApi(['11111', '222222'], 'Read');
+      sinon.assert.calledOnce(messageStore._batchUpdateMessagesApi);
+      sinon.assert.notCalled(messageStore._updateMessageApi);
+      expect(result).to.deep.equal([{ data: 'test1' }, { data: 'test2' }]);
+    });
+
+    it('should not call _updateMessageApi and call _batchUpdateMessagesApi twice when length is more 20', async () => {
+      const ids = Array(22);
+      ids.fill('121212121')
+      sinon.stub(messageStore, '_updateMessageApi');
+      sinon.stub(messageStore, '_batchUpdateMessagesApi').callsFake(
+        () => [
+          {
+            response: () => ({ status: 200 }),
+            json: () => ({ data: 'test1' }),
+          }, {
+            response: () => ({ status: 200 }),
+            json: () => ({ data: 'test2' }),
+          }
+        ]
+      );
+      const result = await messageStore._updateMessagesApi(ids, 'Read');
+      sinon.assert.callCount(messageStore._batchUpdateMessagesApi, 2);
+      sinon.assert.notCalled(messageStore._updateMessageApi);
+    });
+  });
+
+  describe('readMessages', () => {
+    it('should call _updateMessagesApi and _updateConversationsMessagesFromRecords', async () => {
+      const conversation = {
+        id: '1234567890',
+        messages: [
+          {
+            id: '1234567',
+            conversation: {
+              id: '1234567890'
+            },
+            type: 'SMS',
+            subject: 'test',
+            direction: 'Inbound',
+            availability: 'Alive',
+            readStatus: 'Unread',
+            creationTime: '2017-02-03T09:53:49.000Z',
+            to: [{
+              phoneNumber: '+1234567890',
+            }],
+            from: { phoneNumber: '+1234567891' },
+          },
+        ]
+      };
+      sinon.stub(messageStore, '_updateMessagesApi');
+      sinon.stub(messageStore, '_updateConversationsMessagesFromRecords');
+      await messageStore.readMessages(conversation);
+      sinon.assert.calledWith(messageStore._updateMessagesApi, ['1234567'], 'Read');
+      sinon.assert.calledOnce(messageStore._updateConversationsMessagesFromRecords);
+    });
+  });
+
+  describe('matchMessageText', () => {
+    const message = {
+      id: '1234567',
+      conversation: {
+        id: '1234567890'
+      },
+      type: 'SMS',
+      subject: 'test',
+      direction: 'Inbound',
+      availability: 'Alive',
+      readStatus: 'Unread',
+      creationTime: '2017-02-03T09:53:49.000Z',
+      to: [{
+        phoneNumber: '+1234567890',
+      }],
+      from: { phoneNumber: '+1234567891' },
+    };
+    it('should return message when match suject', () => {
+      const result = messageStore.matchMessageText(message, 'est');
+      expect(result).to.deep.equal(message);
+    });
+
+    it('should return message when match suject on conversation messages', async () => {
+      const conversation = {
+        id: '1234567890',
+        messages: [
+          message,
+          {
+            id: '1234567',
+            conversation: {
+              id: '1234567890'
+            },
+            type: 'SMS',
+            subject: 'aaaa',
+            direction: 'Inbound',
+            availability: 'Alive',
+            readStatus: 'Unread',
+            creationTime: '2017-02-03T09:53:49.000Z',
+            to: [{
+              phoneNumber: '+1234567890',
+            }],
+            from: { phoneNumber: '+1234567891' },
+          }
+        ]
+      };
+      sinon.stub(messageStore, 'conversations', {
+        get: () => ({
+          '1234567890': conversation,
+        }),
+      });
+      const result = messageStore.matchMessageText(message, 'aaa');
+      expect(result).to.deep.equal(message);
+    });
+
+    it('should return null when not match suject', async () => {
+      const conversation = {
+        id: '1234567890',
+        messages: [
+          message,
+        ]
+      };
+      sinon.stub(messageStore, 'conversations', {
+        get: () => ({
+          '1234567890': conversation,
+        }),
+      });
+      const result = messageStore.matchMessageText(message, 'aaa');
+      expect(result).to.equal(null);
+    });
+  });
+
+  describe('updateConversationRecipientList', () => {
+    it('should return call _saveConversation and _saveMessages', async () => {
+      const message = {
+        id: '1234567',
+        conversation: {
+          id: '1234567890'
+        },
+        type: 'SMS',
+        subject: 'test',
+        direction: 'Inbound',
+        availability: 'Alive',
+        readStatus: 'Unread',
+        creationTime: '2017-02-03T09:53:49.000Z',
+        to: [{
+          phoneNumber: '+1234567890',
+        }],
+        from: { phoneNumber: '+1234567891' },
+      };
+      const conversation = {
+        id: '1234567890',
+        messages: [
+          message,
+        ]
+      };
+      sinon.stub(messageStore, 'conversations', {
+        get: () => ({
+          '1234567890': conversation,
+        }),
+      });
+      sinon.stub(messageStore, 'messages', {
+        get: () => [message],
+      });
+      sinon.stub(messageStore, 'findConversationById').callsFake(() => conversation);
+      sinon.stub(messageStore, '_saveConversation');
+      sinon.stub(messageStore, '_saveMessages');
+      messageStore.updateConversationRecipientList(conversation.id, [1]);
+      sinon.assert.calledOnce(messageStore._saveConversation);
+      sinon.assert.calledOnce(messageStore._saveMessages);
+      expect(conversation.recipients).to.deep.equal([1]);
+    });
+  });
+
+  describe('pushMessage', () => {
+    it('should call _saveConversationAndMessages successfully when conversation is new', () => {
+      const message = {
+        id: '1234567',
+        conversation: {
+          id: '1234567890'
+        },
+        type: 'SMS',
+        subject: 'test',
+        direction: 'Inbound',
+        availability: 'Alive',
+        readStatus: 'Unread',
+        creationTime: '2017-02-03T09:53:49.000Z',
+        to: [{
+          phoneNumber: '+1234567890',
+        }],
+        from: { phoneNumber: '+1234567891' },
+      };
+      sinon.stub(messageStore, 'conversations', {
+        get: () => ({}),
+      });
+      sinon.stub(messageStore, 'messages', {
+        get: () => [],
+      });
+      const expectConversation = {
+        id: '1234567890',
+        messages: [
+          message,
+        ]
+      };
+      sinon.stub(messageStore, 'findConversationById').callsFake(() => undefined);
+      sinon.stub(messageStore, '_saveConversationAndMessages');
+      messageStore.pushMessage(message.conversation.id, message);
+      sinon.assert.calledWith(messageStore._saveConversationAndMessages, expectConversation, [message]);
+    });
+
+    it('should call _saveConversationAndMessages successfully when conversation exist', () => {
+      const message = {
+        id: '1234567',
+        conversation: {
+          id: '1234567890'
+        },
+        type: 'SMS',
+        subject: 'test',
+        direction: 'Inbound',
+        availability: 'Alive',
+        readStatus: 'Unread',
+        creationTime: '2017-02-03T09:53:49.000Z',
+        to: [{
+          phoneNumber: '+1234567890',
+        }],
+        from: { phoneNumber: '+1234567891' },
+      };
+      const conversation = {
+        id: '1234567890',
+        messages: [
+          { ...message, id: '1234568' },
+        ]
+      };
+      sinon.stub(messageStore, 'conversations', {
+        get: () => ({
+          '1234567890': conversation,
+        }),
+      });
+      sinon.stub(messageStore, 'messages', {
+        get: () => [],
+      });
+      sinon.stub(messageStore, 'findConversationById').callsFake(() => conversation);
+      sinon.stub(messageStore, '_saveConversationAndMessages');
+      messageStore.pushMessage(message.conversation.id, message);
+      sinon.assert.calledOnce(messageStore._saveConversationAndMessages);
+    });
+  });
+
+  describe('_updateConversationsMessagesFromRecords', () => {
+    it('should call _saveConversationsAndMessages successfully', () => {
+      const message = {
+        id: '1234567',
+        conversation: {
+          id: '1234567890'
+        },
+        type: 'SMS',
+        subject: 'test',
+        direction: 'Inbound',
+        availability: 'Alive',
+        readStatus: 'Unread',
+        creationTime: '2017-02-03T09:53:49.000Z',
+        to: [{
+          phoneNumber: '+1234567890',
+        }],
+        from: { phoneNumber: '+1234567891' },
+      };
+      sinon.stub(messageStore, 'conversations', {
+        get: () => ({}),
+      });
+      sinon.stub(messageStore, 'messages', {
+        get: () => [],
+      });
+      sinon.stub(messageStore, '_saveConversationsAndMessages');
+      messageStore._updateConversationsMessagesFromRecords([message]);
+      sinon.assert.calledOnce(messageStore._saveConversationsAndMessages);
+    });
+  });
+
+  describe('_saveConversationAndMessages', () => {
+    it('should call _saveConversation, _saveMessages and _saveUnreadCounts successfully', () => {
+      const message = {
+        id: '1234567',
+        conversation: {
+          id: '1234567890'
+        },
+        type: 'SMS',
+        subject: 'test',
+        direction: 'Inbound',
+        availability: 'Alive',
+        readStatus: 'Unread',
+        creationTime: '2017-02-03T09:53:49.000Z',
+        to: [{
+          phoneNumber: '+1234567890',
+        }],
+        from: { phoneNumber: '+1234567891' },
+      };
+      const conversation = {
+        id: '1234567890',
+        messages: [
+          message,
+        ]
+      };
+      sinon.stub(messageStore, 'conversations', {
+        get: () => ({
+          '1234567890': conversation,
+        }),
+      });
+      sinon.stub(messageStore, 'messages', {
+        get: () => [message],
+      });
+      sinon.stub(messageStore, '_saveConversation');
+      sinon.stub(messageStore, '_saveUnreadCounts');
+      sinon.stub(messageStore, '_saveMessages');
+      messageStore._saveConversationAndMessages(conversation, [message]);
+      sinon.assert.calledOnce(messageStore._saveConversation);
+      sinon.assert.calledOnce(messageStore._saveUnreadCounts);
+      sinon.assert.calledOnce(messageStore._saveMessages);
+    });
+  });
+
+  describe('_saveConversationsAndMessages', () => {
+    const message = {
+      id: '1234567',
+      conversation: {
+        id: '1234567890'
+      },
+      type: 'SMS',
+      subject: 'test',
+      direction: 'Inbound',
+      availability: 'Alive',
+      readStatus: 'Unread',
+      creationTime: '2017-02-03T09:53:49.000Z',
+      to: [{
+        phoneNumber: '+1234567890',
+      }],
+      from: { phoneNumber: '+1234567891' },
+    };
+    const conversation = {
+      id: '1234567890',
+      messages: [
+        message,
+      ]
+    };
+    const conversations = {
+      '1234567890': conversation,
+    };
+
+    it('should call _saveConversations, _saveMessages and _saveUnreadCounts successfully without syncToken', () => {
+      sinon.stub(messageStore, 'conversations', {
+        get: () => conversations,
+      });
+      sinon.stub(messageStore, 'messages', {
+        get: () => [message],
+      });
+      sinon.stub(messageStore, '_saveConversations');
+      sinon.stub(messageStore, '_saveUnreadCounts');
+      sinon.stub(messageStore, '_saveMessages');
+      messageStore._saveConversationsAndMessages(conversations, [message]);
+      sinon.assert.calledOnce(messageStore._saveConversations);
+      sinon.assert.calledOnce(messageStore._saveUnreadCounts);
+      sinon.assert.calledOnce(messageStore._saveMessages);
+    });
+
+    it('should call _saveConversations, _saveMessages, _saveSyncToken and _saveUnreadCounts successfully with syncToken', () => {
+      sinon.stub(messageStore, 'conversations', {
+        get: () => conversations,
+      });
+      sinon.stub(messageStore, 'messages', {
+        get: () => [message],
+      });
+      sinon.stub(messageStore, '_saveConversations');
+      sinon.stub(messageStore, '_saveUnreadCounts');
+      sinon.stub(messageStore, '_saveMessages');
+      sinon.stub(messageStore, '_saveSyncToken');
+      messageStore._saveConversationsAndMessages(conversations, [message], '121212');
+      sinon.assert.calledOnce(messageStore._saveConversations);
+      sinon.assert.calledOnce(messageStore._saveUnreadCounts);
+      sinon.assert.calledOnce(messageStore._saveMessages);
+      sinon.assert.calledOnce(messageStore._saveSyncToken);
+    });
+  });
+
+  describe('_saveConversation', () => {
+    it('should call _saveConversations', () => {
+      const message = {
+        id: '1234567',
+        conversation: {
+          id: '1234567890'
+        },
+        type: 'SMS',
+        subject: 'test',
+        direction: 'Inbound',
+        availability: 'Alive',
+        readStatus: 'Unread',
+        creationTime: '2017-02-03T09:53:49.000Z',
+        to: [{
+          phoneNumber: '+1234567890',
+        }],
+        from: { phoneNumber: '+1234567891' },
+      };
+      const conversation = {
+        id: '1234567890',
+        messages: [
+          message,
+        ]
+      };
+      const conversations = {
+        '1234567890': conversation,
+      };
+      sinon.stub(messageStore, 'conversations', {
+        get: () => ({}),
+      });
+      sinon.stub(messageStore, '_saveConversations');
+      messageStore._saveConversation(conversation);
+      sinon.assert.calledWith(messageStore._saveConversations, conversations);
     });
   });
 });

@@ -211,6 +211,17 @@ export default class MessageStore extends RcModule {
     return updateRequest;
   }
 
+  async _batchUpdateMessagesApi(messageIds, body) {
+    const ids = decodeURIComponent(messageIds.join(','));
+    const platform = this._client.service.platform();
+    const responses = await batchPutApi({
+      platform,
+      url: `/account/~/extension/~/message-store/${ids}`,
+      body,
+    });
+    return responses;
+  }
+
   async _updateMessagesApi(messageIds, status) {
     if (messageIds.length === 1) {
       const result = await this._updateMessageApi(messageIds[0], status);
@@ -222,13 +233,7 @@ export default class MessageStore extends RcModule {
     const body = leftIds.map(() => (
       { body: { readStatus: status } }
     ));
-    const ids = decodeURIComponent(leftIds.join(','));
-    const platform = this._client.service.platform();
-    const responses = await batchPutApi({
-      platform,
-      url: `/account/~/extension/~/message-store/${ids}`,
-      body,
-    });
+    const responses = this._batchUpdateMessagesApi(leftIds, body);
     const results = [];
     responses.forEach((res) => {
       if (res.response().status === 200) {
@@ -245,7 +250,6 @@ export default class MessageStore extends RcModule {
   }
 
   async readMessages(conversation) {
-    console.debug(`read messages from conversation ${conversation.id}`);
     const unReadMessages = messageStoreHelper.filterConversationUnreadMessages(conversation);
     if (unReadMessages.length === 0) {
       return null;
@@ -287,10 +291,9 @@ export default class MessageStore extends RcModule {
     const messageIndex = messages.findIndex(message =>
       message.conversation && message.conversation.id === conversationId
     );
-    if (messageIndex) {
+    if (messageIndex > -1) {
       const message = messages[messageIndex];
       message.recipients = recipients;
-      messages[messageIndex] = message;
       this._saveMessages(messages);
     }
   }
