@@ -6,7 +6,6 @@ import getMessagesReducer from './getMessagesReducer';
 
 export default class Messages extends RcModule {
   constructor({
-    alert,
     messageStore,
     perPage = 10,
     ...options
@@ -37,14 +36,8 @@ export default class Messages extends RcModule {
         type: this.actionTypes.initSuccess,
       });
     } else if (this._shouldReset()) {
-      this.store.dispatch({
-        type: this.actionTypes.resetSuccess,
-      });
+      this._resetModuleStatus();
     } else if (this._shouldReload()) {
-      this.store.dispatch({
-        type: this.actionTypes.updateMessageStoreUpdateAt,
-        updatedAt: this._messageStore.messagesTimestamp,
-      });
       this._reloadMessages();
     }
   }
@@ -82,7 +75,17 @@ export default class Messages extends RcModule {
     this._updateMessages(messages);
   }
 
+  _resetModuleStatus() {
+    this.store.dispatch({
+      type: this.actionTypes.resetSuccess,
+    });
+  }
+
   _reloadMessages() {
+    this.store.dispatch({
+      type: this.actionTypes.updateMessageStoreUpdateAt,
+      updatedAt: this._messageStore.messagesTimestamp,
+    });
     const page = this.currentPage;
     const allMessages = this._messageStore.messages;
     let bottomIndex = allMessages.length - (this._perPage * page);
