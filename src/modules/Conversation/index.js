@@ -180,24 +180,28 @@ export default class Conversation extends RcModule {
     return lastMessage && lastMessage.id;
   }
 
+  _getFromNumber() {
+    if (!this.senderNumber) {
+      return null;
+    }
+    return (this.senderNumber.extensionNumber || this.senderNumber.phoneNumber);
+  }
+
+  _getToNumbers() {
+    return this.recipients.map(
+      recipient => (recipient.extensionNumber || recipient.phoneNumber)
+    );
+  }
+
   async replyToReceivers(text) {
     this.store.dispatch({
       type: this.actionTypes.reply,
     });
     try {
-      const recipients = this.recipients;
-      const currentNumber = this.senderNumber;
-      let phoneOrExtension = null;
-      if (currentNumber.extensionNumber) {
-        phoneOrExtension = 'extensionNumber';
-      } else {
-        phoneOrExtension = 'phoneNumber';
-      }
-      const recipientNumbers = recipients.map(recipient => recipient[phoneOrExtension]);
       const response = await this._messageSender
                                  .send({
-                                   fromNumber: currentNumber[phoneOrExtension],
-                                   toNumbers: recipientNumbers,
+                                   fromNumber: this._getFromNumber(),
+                                   toNumbers: this._getToNumbers(),
                                    text,
                                    replyOnMessageId: this._getReplyOnMessageId(),
                                  });
