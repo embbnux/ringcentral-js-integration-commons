@@ -37,13 +37,9 @@ export default class Conversation extends RcModule {
 
   _onStateChange() {
     if (this._shouldInit()) {
-      this.store.dispatch({
-        type: this.actionTypes.initSuccess,
-      });
+      this._initModuleStatus();
     } else if (this._shouldReset()) {
-      this.store.dispatch({
-        type: this.actionTypes.resetSuccess,
-      });
+      this._resetModuleStatus();
     } else if (this._shouldReloadConversation()) {
       const newConversation = this._messageStore
                                   .findConversationById(this.conversation.id);
@@ -77,9 +73,21 @@ export default class Conversation extends RcModule {
   _shouldReloadConversation() {
     return (
       this.ready &&
-      this.conversation &&
+      (!!this.conversation) &&
       this.messageStoreUpdatedAt !== this._messageStore.conversationsTimestamp
     );
+  }
+
+  _initModuleStatus() {
+    this.store.dispatch({
+      type: this.actionTypes.initSuccess,
+    });
+  }
+
+  _resetModuleStatus() {
+    this.store.dispatch({
+      type: this.actionTypes.resetSuccess,
+    });
   }
 
   loadConversationById(id) {
