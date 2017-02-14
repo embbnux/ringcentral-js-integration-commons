@@ -24,13 +24,17 @@ describe('Conversation Unit Test', () => {
       'loadConversationById',
       'unloadConversation',
       'changeDefaultRecipient',
+      '_updateConversationRecipients',
       '_loadConversation',
+      '_updateRecipients',
+      '_updateSenderNumber',
       '_getCurrentSenderNumber',
       '_getRecipients',
       '_getReplyOnMessageId',
       '_getFromNumber',
       '_getToNumbers',
       'replyToReceivers',
+      '_onReplyError',
     ].forEach((key) => {
       conversation[key].restore();
     });
@@ -90,7 +94,7 @@ describe('Conversation Unit Test', () => {
       sinon.stub(conversation, '_loadConversation');
       sinon.stub(conversation, 'conversation', { get: () => ({ id: '123' }) });
       conversation._messageStore = {
-        findConversationById: id => null,
+        findConversationById: () => null,
         readMessages: () => null,
       };
       conversation._onStateChange();
@@ -647,12 +651,368 @@ describe('Conversation Unit Test', () => {
 
     it('should not call _loadConversation when cannot find conversation from _messageStore', () => {
       conversation._messageStore = {
-        findConversationById: id => null,
+        findConversationById: () => null,
         readMessages: () => null,
       };
       sinon.stub(conversation, '_loadConversation');
       conversation.loadConversationById(1);
       sinon.assert.notCalled(conversation._loadConversation);
+    });
+  });
+
+  describe('changeDefaultRecipient', () => {
+    it('should not call _updateConversationRecipients if conversation recipients length is one', () => {
+      sinon.stub(conversation, 'recipients', { get: () => ['123'] });
+      sinon.stub(conversation, '_updateConversationRecipients');
+      conversation.changeDefaultRecipient('123');
+      sinon.assert.notCalled(conversation._updateConversationRecipients);
+    });
+
+    it('should not call _updateConversationRecipients if phoneNumber is not included in recipients', () => {
+      sinon.stub(conversation, 'recipients', {
+        get: () => [{ extensionNumber: '123' }, { extensionNumber: '321' }]
+      });
+      sinon.stub(conversation, '_updateConversationRecipients');
+      conversation.changeDefaultRecipient('111');
+      sinon.assert.notCalled(conversation._updateConversationRecipients);
+    });
+
+    it('should not call _updateConversationRecipients if conversation is null', () => {
+      sinon.stub(conversation, 'recipients', {
+        get: () => [{ extensionNumber: '123' }, { extensionNumber: '321' }]
+      });
+      sinon.stub(conversation, 'conversation', { get: () => null });
+      sinon.stub(conversation, '_updateConversationRecipients');
+      conversation.changeDefaultRecipient('321');
+      sinon.assert.notCalled(conversation._updateConversationRecipients);
+    });
+
+    it('should call _updateConversationRecipients', () => {
+      sinon.stub(conversation, 'recipients', {
+        get: () => [{ extensionNumber: '123' }, { extensionNumber: '321' }]
+      });
+      sinon.stub(conversation, 'conversation', { get: () => ({ id: '123' }) });
+      sinon.stub(conversation, '_updateConversationRecipients');
+      conversation.changeDefaultRecipient('321');
+      sinon.assert.calledWith(
+        conversation._updateConversationRecipients,
+        [{ extensionNumber: '321' }, { extensionNumber: '123' }]
+      );
+    });
+  });
+
+  describe('_updateConversationRecipients', () => {
+    it('should not call _updateRecipients if conversation is null', () => {
+      sinon.stub(conversation, 'conversation', { get: () => null });
+      sinon.stub(conversation, '_updateRecipients');
+      conversation._updateConversationRecipients(['321']);
+      sinon.assert.notCalled(conversation._updateRecipients);
+    });
+
+    it('should not call _updateRecipients if conversation id is undefined', () => {
+      sinon.stub(conversation, 'conversation', { get: () => ({}) });
+      sinon.stub(conversation, '_updateRecipients');
+      conversation._updateConversationRecipients(['321']);
+      sinon.assert.notCalled(conversation._updateRecipients);
+    });
+
+    it('should call _updateRecipients', () => {
+      conversation._messageStore = {
+        updateConversationRecipientList: () => null,
+      };
+      sinon.stub(conversation, 'conversation', { get: () => ({ id: '123' }) });
+      sinon.stub(conversation, '_updateRecipients');
+      conversation._updateConversationRecipients(['321']);
+      sinon.assert.calledOnce(conversation._updateRecipients);
+    });
+  });
+
+  describe('_loadConversation', () => {
+    it('should call _updateRecipients, _updateSenderNumber and _getRecipients', () => {
+      conversation._messageStore = {
+        conversationsTimestamp: 12345678
+      };
+      sinon.stub(conversation, '_updateRecipients');
+      sinon.stub(conversation, '_getCurrentSenderNumber');
+      sinon.stub(conversation, '_updateSenderNumber');
+      sinon.stub(conversation, '_getRecipients').callsFake(() => ['123']);
+      const conversationData = {
+        id: '123456',
+      };
+      conversation._loadConversation(conversationData);
+      sinon.assert.calledOnce(conversation._updateRecipients);
+      sinon.assert.calledOnce(conversation._updateSenderNumber);
+      sinon.assert.calledOnce(conversation._getRecipients);
+    });
+
+    it('should call _updateRecipients, _updateSenderNumber and not call _getRecipients if conversation recipients exist', () => {
+      conversation._messageStore = {
+        conversationsTimestamp: 12345678
+      };
+      sinon.stub(conversation, '_updateRecipients');
+      sinon.stub(conversation, '_getCurrentSenderNumber');
+      sinon.stub(conversation, '_updateSenderNumber');
+      sinon.stub(conversation, '_getRecipients').callsFake(() => ['123']);
+      const conversationData = {
+        id: '123456',
+        recipients: ['123'],
+      };
+      conversation._loadConversation(conversationData);
+      sinon.assert.calledOnce(conversation._updateRecipients);
+      sinon.assert.calledOnce(conversation._updateSenderNumber);
+      sinon.assert.notCalled(conversation._getRecipients);
+    });
+  });
+
+  describe('_getCurrentSenderNumber', () => {
+    it('should return null if conversation is null', () => {
+      const conversationData = null;
+      const result = conversation._getCurrentSenderNumber(conversationData);
+      expect(result).to.equal(null);
+    });
+
+    it('should return null if conversation messages is undefined', () => {
+      const conversationData = {};
+      const result = conversation._getCurrentSenderNumber(conversationData);
+      expect(result).to.equal(null);
+    });
+
+    it('should return null if conversation messages length is zero', () => {
+      const conversationData = { messages: [] };
+      const result = conversation._getCurrentSenderNumber(conversationData);
+      expect(result).to.equal(null);
+    });
+
+    it('should return senderNumber successfully', () => {
+      const conversationData = {
+        messages: [{
+          type: 'SMS',
+          direction: 'Inbound',
+          to: [{
+            phoneNumber: '+1234567890',
+          }],
+          from: { phoneNumber: '+1234567891' },
+        }],
+      };
+      conversation._extensionInfo = {
+        extensionNumber: '1234',
+      };
+      const result = conversation._getCurrentSenderNumber(conversationData);
+      expect(result).to.deep.equal({ phoneNumber: '+1234567890' });
+    });
+  });
+
+  describe('_getRecipients', () => {
+    it('should return empty array if conversation is null', () => {
+      const conversationData = null;
+      const senderNumber = { phoneNumber: '+1234567890' };
+      const result = conversation._getRecipients(conversationData, senderNumber);
+      expect(result).to.deep.equal([]);
+    });
+
+    it('should return empty array if conversation is null', () => {
+      const conversationData = null;
+      const senderNumber = { phoneNumber: '+1234567890' };
+      const result = conversation._getRecipients(conversationData, senderNumber);
+      expect(result).to.deep.equal([]);
+    });
+
+    it('should return empty array if senderNumber is null', () => {
+      const conversationData = {
+        messages: [{
+          type: 'SMS',
+          direction: 'Inbound',
+          to: [{
+            phoneNumber: '+1234567890',
+          }],
+          from: { phoneNumber: '+1234567891' },
+        }],
+      };
+      const senderNumber = null;
+      const result = conversation._getRecipients(conversationData, senderNumber);
+      expect(result).to.deep.equal([]);
+    });
+
+    it('should return empty array if conversation messages length is zero', () => {
+      const conversationData = { messages: [] };
+      const senderNumber = { phoneNumber: '+1234567890' };
+      const result = conversation._getRecipients(conversationData, senderNumber);
+      expect(result).to.deep.equal([]);
+    });
+
+    it('should return senderNumber successfully', () => {
+      const conversationData = {
+        messages: [{
+          type: 'SMS',
+          direction: 'Inbound',
+          to: [{
+            phoneNumber: '+1234567890',
+          }],
+          from: { phoneNumber: '+1234567891' },
+        }],
+      };
+      const senderNumber = { phoneNumber: '+1234567890' };
+      const result = conversation._getRecipients(conversationData, senderNumber);
+      expect(result).to.deep.equal([{ phoneNumber: '+1234567891' }]);
+    });
+  });
+
+  describe('_getReplyOnMessageId', () => {
+    it('should get last message id successfully', () => {
+      sinon.stub(conversation, 'conversation', {
+        get: () => ({
+          messages: [{
+            id: 12345678,
+            type: 'SMS',
+            direction: 'Inbound',
+            to: [{
+              phoneNumber: '+1234567890',
+            }],
+            from: { phoneNumber: '+1234567891' },
+          }],
+        })
+      });
+      const result = conversation._getReplyOnMessageId();
+      expect(result).to.equal(12345678);
+    });
+
+    it('should return null if last message length is 0', () => {
+      sinon.stub(conversation, 'conversation', {
+        get: () => ({
+          messages: [],
+        })
+      });
+      const result = conversation._getReplyOnMessageId();
+      expect(result).to.equal(null);
+    });
+
+    it('should return null if conversation messages is undefined', () => {
+      sinon.stub(conversation, 'conversation', {
+        get: () => ({})
+      });
+      const result = conversation._getReplyOnMessageId();
+      expect(result).to.equal(null);
+    });
+
+    it('should return null if conversation is null', () => {
+      sinon.stub(conversation, 'conversation', {
+        get: () => null
+      });
+      const result = conversation._getReplyOnMessageId();
+      expect(result).to.equal(null);
+    });
+
+    it('should return null if message id is undefined', () => {
+      sinon.stub(conversation, 'conversation', {
+        get: () => ({
+          messages: [{}],
+        })
+      });
+      const result = conversation._getReplyOnMessageId();
+      expect(result).to.equal(null);
+    });
+  });
+
+  describe('_getFromNumber', () => {
+    it('should return null if senderNumber is null', () => {
+      sinon.stub(conversation, 'senderNumber', {
+        get: () => null
+      });
+      const result = conversation._getFromNumber();
+      expect(result).to.equal(null);
+    });
+
+    it('should return fromNumber if senderNumber extensionNumber exist', () => {
+      sinon.stub(conversation, 'senderNumber', {
+        get: () => ({ extensionNumber: '1234' })
+      });
+      const result = conversation._getFromNumber();
+      expect(result).to.equal('1234');
+    });
+
+    it('should return fromNumber if senderNumber phoneNumber exist', () => {
+      sinon.stub(conversation, 'senderNumber', {
+        get: () => ({ phoneNumber: '+1234567890' })
+      });
+      const result = conversation._getFromNumber();
+      expect(result).to.equal('+1234567890');
+    });
+  });
+
+  describe('_getToNumbers', () => {
+    it('should return empty array if recipients is empty', () => {
+      sinon.stub(conversation, 'recipients', {
+        get: () => []
+      });
+      const result = conversation._getToNumbers();
+      expect(result).to.deep.equal([]);
+    });
+
+    it('should return toNumbers if recipient extensionNumber exist', () => {
+      sinon.stub(conversation, 'recipients', {
+        get: () => [{ extensionNumber: '1234' }]
+      });
+      const result = conversation._getToNumbers();
+      expect(result).to.deep.equal(['1234']);
+    });
+
+    it('should return toNumbers if recipient phoneNumber exist', () => {
+      sinon.stub(conversation, 'recipients', {
+        get: () => [{ phoneNumber: '+1234567890' }]
+      });
+      const result = conversation._getToNumbers();
+      expect(result).to.deep.equal(['+1234567890']);
+    });
+  });
+
+  describe('replyToReceivers', () => {
+    it('should return response successfully and not call _onReplyError', async () => {
+      conversation._messageSender = {
+        send: () => ({ id: '1234567890', conversation: { id: '1234' } }),
+      };
+      conversation._messageStore = {
+        pushMessage: () => null,
+      };
+      sinon.stub(conversation, '_getFromNumber');
+      sinon.stub(conversation, '_getToNumbers');
+      sinon.stub(conversation, '_getReplyOnMessageId');
+      sinon.stub(conversation, '_onReplyError');
+      const result = await conversation.replyToReceivers('text');
+      expect(result).to.deep.equal({ id: '1234567890', conversation: { id: '1234' } });
+      sinon.assert.notCalled(conversation._onReplyError);
+    });
+
+    it('should return null when response is null and call _onReplyError', async () => {
+      conversation._messageSender = {
+        send: () => null,
+      };
+      conversation._messageStore = {
+        pushMessage: () => null,
+      };
+      sinon.stub(conversation, '_getFromNumber');
+      sinon.stub(conversation, '_getToNumbers');
+      sinon.stub(conversation, '_getReplyOnMessageId');
+      sinon.stub(conversation, '_onReplyError');
+      const result = await conversation.replyToReceivers('text');
+      expect(result).to.equal(null);
+      sinon.assert.calledOnce(conversation._onReplyError);
+    });
+
+    it('should call _onReplyError when response is error', async () => {
+      conversation._messageSender = {
+        send: () => { throw new Error('error')},
+      };
+      conversation._messageStore = {
+        pushMessage: () => null,
+      };
+      sinon.stub(conversation, '_getFromNumber');
+      sinon.stub(conversation, '_getToNumbers');
+      sinon.stub(conversation, '_getReplyOnMessageId');
+      sinon.stub(conversation, '_onReplyError');
+      try {
+        await conversation.replyToReceivers('text');
+      } catch (error) {}
+      sinon.assert.calledOnce(conversation._onReplyError);
     });
   });
 });

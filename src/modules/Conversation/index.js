@@ -100,7 +100,6 @@ export default class Conversation extends RcModule {
   }
 
   unloadConversation() {
-    console.debug('unloading conversation:');
     this.store.dispatch({
       type: this.actionTypes.cleanUp,
     });
@@ -114,21 +113,38 @@ export default class Conversation extends RcModule {
     const defaultNumberIndex = recipients.findIndex(number =>
       (number.extensionNumber === phoneNumber || number.phoneNumber === phoneNumber)
     );
-    if (!defaultNumberIndex) {
+    if (defaultNumberIndex < 0) {
       return;
     }
-    let defaultNumber = null;
-    defaultNumber = recipients[defaultNumberIndex];
-    const currentConversationId = this.conversation && this.conversation.id;
-    if (defaultNumber && currentConversationId) {
+    if (this.conversation) {
+      const defaultNumber = recipients[defaultNumberIndex];
       recipients.splice(defaultNumberIndex, 1);
       const newRecipients = [defaultNumber].concat(recipients);
-      this._messageStore.updateConversationRecipientList(currentConversationId, newRecipients);
-      this.store.dispatch({
-        type: this.actionTypes.updateRecipients,
-        recipients: newRecipients,
-      });
+      this._updateConversationRecipients(newRecipients);
     }
+  }
+
+  _updateConversationRecipients(newRecipients) {
+    const currentConversationId = this.conversation && this.conversation.id;
+    if (!currentConversationId) {
+      return;
+    }
+    this._messageStore.updateConversationRecipientList(currentConversationId, newRecipients);
+    this._updateRecipients(newRecipients);
+  }
+
+  _updateRecipients(recipients) {
+    this.store.dispatch({
+      type: this.actionTypes.updateRecipients,
+      recipients,
+    });
+  }
+
+  _updateSenderNumber(senderNumber) {
+    this.store.dispatch({
+      type: this.actionTypes.updateSenderNumber,
+      senderNumber,
+    });
   }
 
   _loadConversation(conversation) {
@@ -141,28 +157,23 @@ export default class Conversation extends RcModule {
       conversation: { ...conversation },
     });
     const senderNumber = this._getCurrentSenderNumber(conversation);
-    this.store.dispatch({
-      type: this.actionTypes.updateSenderNumber,
-      senderNumber,
-    });
+    this._updateSenderNumber(senderNumber);
     let recipients = conversation.recipients;
     if (!recipients || recipients.length === 0) {
       recipients = this._getRecipients(conversation, senderNumber);
     }
-    this.store.dispatch({
-      type: this.actionTypes.updateRecipients,
-      recipients,
-    });
+    this._updateRecipients(recipients);
   }
 
   _getCurrentSenderNumber(conversation) {
-    if (!conversation) {
+    if (!conversation || !conversation.messages) {
       return null;
     }
-
     const messageLength = conversation.messages.length;
+    if (messageLength < 1) {
+      return null;
+    }
     const lastMessage = conversation.messages[messageLength - 1];
-
     return getMyNumberFromMessage({
       message: lastMessage,
       myExtensionNumber: this._extensionInfo.extensionNumber,
@@ -170,10 +181,13 @@ export default class Conversation extends RcModule {
   }
 
   _getRecipients(conversation, senderNumber) {
-    if (!conversation) {
+    if (!conversation || !senderNumber || !conversation.messages) {
       return [];
     }
     const messageLength = conversation.messages.length;
+    if (messageLength < 1) {
+      return [];
+    }
     const lastMessage = conversation.messages[messageLength - 1];
     return getRecipientNumbersFromMessage({
       message: lastMessage,
@@ -184,8 +198,13 @@ export default class Conversation extends RcModule {
   _getReplyOnMessageId() {
     const lastMessage =
         this.conversation &&
+        this.conversation.messages &&
+        (this.conversation.messages.length > 0) &&
         this.conversation.messages[this.conversation.messages.length - 1];
-    return lastMessage && lastMessage.id;
+    if (lastMessage && lastMessage.id) {
+      return lastMessage.id;
+    }
+    return null;
   }
 
   _getFromNumber() {
@@ -220,16 +239,18 @@ export default class Conversation extends RcModule {
         });
         return response;
       }
-      this.store.dispatch({
-        type: this.actionTypes.replyError,
-      });
+      this._onReplyError();
       return null;
     } catch (error) {
-      this.store.dispatch({
-        type: this.actionTypes.replyError,
-      });
+      this._onReplyError();
       throw error;
     }
+  }
+
+  _onReplyError() {
+    this.store.dispatch({
+      type: this.actionTypes.replyError,
+    });
   }
 
   get status() {
