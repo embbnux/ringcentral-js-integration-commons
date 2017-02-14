@@ -1000,7 +1000,7 @@ describe('Conversation Unit Test', () => {
 
     it('should call _onReplyError when response is error', async () => {
       conversation._messageSender = {
-        send: () => { throw new Error('error')},
+        send: () => { throw new Error('error'); },
       };
       conversation._messageStore = {
         pushMessage: () => null,
