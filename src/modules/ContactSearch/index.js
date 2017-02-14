@@ -30,26 +30,45 @@ export default class ContactSearch extends RcModule {
   }
 
   initialize() {
-    this.store.subscribe(() => {
-      if (
-        this._auth.loginStatus === loginStatus.loggedIn &&
-        this._storage.ready &&
-        this.status !== moduleStatus.ready &&
-        this._readyCheck()
-      ) {
-        this.store.dispatch({
-          type: this.actionTypes.initSuccess,
-        });
-      }
-      if (
-        (this._auth.loginStatus !== loginStatus.loggedIn ||
-          !this._storage.ready) &&
-        this.status !== moduleStatus.pending
-      ) {
-        this.store.dispatch({
-          type: this.actionTypes.resetSuccess,
-        });
-      }
+    this.store.subscribe(() => this._onStateChange());
+  }
+
+  _onStateChange() {
+    if (this._shouldInit()) {
+      this._initModuleStatus();
+    } else if (this._shouldReset()) {
+      this._resetModuleStatus();
+    }
+  }
+
+  _shouldInit() {
+    return (
+      this._auth.loginStatus === loginStatus.loggedIn &&
+      this._storage.ready &&
+      !this.ready &&
+      this._readyCheck()
+    );
+  }
+
+  _shouldReset() {
+    return (
+      (
+        this._auth.loginStatus !== loginStatus.loggedIn ||
+        !this._storage.ready
+      ) &&
+      this.ready
+    );
+  }
+
+  _initModuleStatus() {
+    this.store.dispatch({
+      type: this.actionTypes.initSuccess,
+    });
+  }
+
+  _resetModuleStatus() {
+    this.store.dispatch({
+      type: this.actionTypes.resetSuccess,
     });
   }
 
@@ -74,14 +93,7 @@ export default class ContactSearch extends RcModule {
     this._searchSourcesCheck.set(sourceName, readyCheckFn);
   }
 
-  async search({ searchString, perSource = 20 }) {
-    // persist until next search
-    /**
-     * sources = [dynamicsSearchFn, rcExtensionSearchFn, rcAddressBookSearchFn];
-     * 100/1000, 100/600, 100/120,
-     * 0800
-     */
-
+  async search({ searchString }) {
     if (!this.ready || (searchString.length < 3)) {
       this.store.dispatch({
         type: this.actionTypes.prepareSearch,
