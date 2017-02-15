@@ -45,8 +45,8 @@ export default class ContactSearch extends RcModule {
     return (
       this._auth.loginStatus === loginStatus.loggedIn &&
       this._storage.ready &&
-      !this.ready &&
-      this._readyCheck()
+      this._readyCheck() &&
+      !this.ready
     );
   }
 
@@ -73,20 +73,26 @@ export default class ContactSearch extends RcModule {
   }
 
   addSearchSource({ sourceName, searchFn, readyCheckFn, formatFn }) {
+    if (!sourceName) {
+      throw new Error('ContactSearch: "sourceName" is required.');
+    }
     if (this._searchSources.has(sourceName)) {
-      throw new Error(`A search source named '${sourceName} already exists`);
+      throw new Error(`ContactSearch: A search source named "${sourceName}" already exists`);
     }
     if (this._searchSourcesCheck.has(sourceName)) {
-      throw new Error(`A search source check named '${sourceName} already exists`);
+      throw new Error(`ContactSearch: A search source check named "${sourceName}" already exists`);
+    }
+    if (this._searchSourcesFormat.has(sourceName)) {
+      throw new Error(`ContactSearch: A search source format named "${sourceName}" already exists`);
     }
     if (typeof searchFn !== 'function') {
-      throw new Error('searchFn must be a function');
+      throw new Error('ContactSearch: searchFn must be a function');
     }
     if (typeof readyCheckFn !== 'function') {
-      throw new Error('readyCheckFn must be a function');
+      throw new Error('ContactSearch: readyCheckFn must be a function');
     }
     if (typeof formatFn !== 'function') {
-      throw new Error('formatFn must be a function');
+      throw new Error('ContactSearch: formatFn must be a function');
     }
     this._searchSources.set(sourceName, searchFn);
     this._searchSourcesFormat.set(sourceName, formatFn);
@@ -130,12 +136,19 @@ export default class ContactSearch extends RcModule {
       });
       entities = this._searchSourcesFormat.get(sourceName)(entities);
       this._loadSearching({ searchString, entities });
-      this._save({ sourceName, searchString, entities });
+      this._saveSearching({ sourceName, searchString, entities });
     } catch (error) {
-      console.debug(error);
-      this.store.dispatch({
-        type: this.actionTypes.searchError,
-      });
+      this._onSearchError();
+    }
+    return null;
+  }
+
+  _searchFromCache({ sourceName, searchString }) {
+    const key = JSON.stringify([sourceName, searchString]);
+    const searching = this.cache && this.cache.contactSearch && this.cache.contactSearch[key];
+    const now = Date.now();
+    if (searching && (now - searching.timestamp) < this._ttl) {
+      return searching.entities;
     }
     return null;
   }
@@ -149,6 +162,12 @@ export default class ContactSearch extends RcModule {
     return true;
   }
 
+  _onSearchError() {
+    this.store.dispatch({
+      type: this.actionTypes.searchError,
+    });
+  }
+
   _loadSearching({ searchString, entities }) {
     this.store.dispatch({
       type: this.actionTypes.searchSuccess,
@@ -157,23 +176,13 @@ export default class ContactSearch extends RcModule {
     });
   }
 
-  _save({ sourceName, searchString, entities }) {
+  _saveSearching({ sourceName, searchString, entities }) {
     this.store.dispatch({
       type: this.actionTypes.save,
       sourceName,
       searchString,
       entities,
     });
-  }
-
-  _searchFromCache({ sourceName, searchString }) {
-    const key = JSON.stringify([sourceName, searchString]);
-    const searching = this.cache && this.cache.contactSearch && this.cache.contactSearch[key];
-    const now = Date.now();
-    if (searching && (now - searching.timestamp) < this._ttl) {
-      return searching.entities;
-    }
-    return null;
   }
 
   get cache() {
