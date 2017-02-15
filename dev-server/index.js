@@ -36,6 +36,7 @@ import TabManager from '../src/modules/TabManager';
 import NumberValidate from '../src/modules/NumberValidate';
 import MessageSender from '../src/modules/MessageSender';
 import ComposeText from '../src/modules/ComposeText';
+import ContactSearch from '../src/modules/ContactSearch';
 import MessageStore from '../src/modules/MessageStore';
 import Messages from '../src/modules/Messages';
 
@@ -237,6 +238,22 @@ class DemoPhone extends RcModule {
       messageSender: this.messageSender,
       numberValidate: this.numberValidate,
     }));
+    this.addModule('contactSearch', new ContactSearch({
+      auth: this.auth,
+      storage: this.storage,
+      getState: () => this.state.contactSearch,
+    }));
+    this.contactSearch.addSearchSource({
+      sourceName: 'test',
+      searchFn: str => [{
+        entityType: 'account',
+        name: str,
+        phoneNumber: '+1234567890',
+        phoneType: 'phone',
+      }],
+      formatFn: entities => entities,
+      readyCheckFn: () => true,
+    });
     this.addModule('messageStore', new MessageStore({
       alert: this.alert,
       auth: this.auth,
@@ -276,6 +293,7 @@ class DemoPhone extends RcModule {
       tabManager: this.tabManager.reducer,
       numberValidate: this.numberValidate.reducer,
       messageSender: this.messageSender.reducer,
+      contactSearch: this.contactSearch.reducer,
       composeText: this.composeText.reducer,
       messageStore: this.messageStore.reducer,
       messages: this.messages.reducer,
