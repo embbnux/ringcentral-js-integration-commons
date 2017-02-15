@@ -72,16 +72,15 @@ var AccountInfo = function (_DataFetcher) {
             while (1) {
               switch (_context.prev = _context.next) {
                 case 0:
-                  _context.t0 = _jsonMask2.default;
-                  _context.next = 3;
+                  _context.next = 2;
                   return client.account().get();
 
-                case 3:
-                  _context.t1 = _context.sent;
-                  _context.t2 = DEFAULT_MASK;
-                  return _context.abrupt('return', (0, _context.t0)(_context.t1, _context.t2));
+                case 2:
+                  _context.t0 = _context.sent;
+                  _context.t1 = DEFAULT_MASK;
+                  return _context.abrupt('return', (0, _jsonMask2.default)(_context.t0, _context.t1));
 
-                case 6:
+                case 5:
                 case 'end':
                   return _context.stop();
               }

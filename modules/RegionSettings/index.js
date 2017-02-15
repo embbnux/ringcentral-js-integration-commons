@@ -33,6 +33,8 @@ var _inherits2 = require('babel-runtime/helpers/inherits');
 
 var _inherits3 = _interopRequireDefault(_inherits2);
 
+require('core-js/fn/array/find');
+
 var _RcModule2 = require('../../lib/RcModule');
 
 var _RcModule3 = _interopRequireDefault(_RcModule2);
@@ -52,6 +54,10 @@ var _regionSettingsMessages2 = _interopRequireDefault(_regionSettingsMessages);
 var _actionTypes = require('./actionTypes');
 
 var _actionTypes2 = _interopRequireDefault(_actionTypes);
+
+var _validateAreaCode = require('../../lib/validateAreaCode');
+
+var _validateAreaCode2 = _interopRequireDefault(_validateAreaCode);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -123,13 +129,6 @@ var RegionSettings = function (_RcModule) {
       });
     }
   }, {
-    key: 'validateAreaCode',
-    value: function validateAreaCode(code) {
-      return !(code.length > 0 && (code.length !== 3 || code[0] === '0'
-      // /^(0|1|8)/.test(code)
-      ));
-    }
-  }, {
     key: 'checkRegionSettings',
     value: function checkRegionSettings() {
       var _this3 = this;
@@ -161,20 +160,20 @@ var RegionSettings = function (_RcModule) {
       var areaCode = _ref2.areaCode,
           countryCode = _ref2.countryCode;
 
-      if (typeof areaCode !== 'undefined' && !this.validateAreaCode(areaCode)) {
+      if (!(0, _validateAreaCode2.default)(areaCode)) {
         this._alert.danger({
           message: _regionSettingsMessages2.default.areaCodeInvalid
         });
-      } else {
-        this.store.dispatch({
-          type: this.actionTypes.setData,
-          countryCode: countryCode,
-          areaCode: areaCode
-        });
-        this._alert.info({
-          message: _regionSettingsMessages2.default.saveSuccess
-        });
+        return;
       }
+      this.store.dispatch({
+        type: this.actionTypes.setData,
+        countryCode: countryCode,
+        areaCode: areaCode && areaCode.trim()
+      });
+      this._alert.info({
+        message: _regionSettingsMessages2.default.saveSuccess
+      });
     }
   }, {
     key: 'setCountryCode',

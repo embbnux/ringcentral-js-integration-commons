@@ -33,6 +33,8 @@ var _inherits2 = require('babel-runtime/helpers/inherits');
 
 var _inherits3 = _interopRequireDefault(_inherits2);
 
+require('core-js/fn/array/find');
+
 var _fetchList = require('../../lib/fetchList');
 
 var _fetchList2 = _interopRequireDefault(_fetchList);
@@ -98,6 +100,14 @@ var ExtensionPhoneNumber = function (_DataFetcher) {
         return p.features && p.features.indexOf('CallerId') !== -1 || p.usageType === 'ForwardedNumber' && p.status === 'PortedIn';
       });
     });
+
+    _this.addSelector('smsSenderNumbers', function () {
+      return _this.numbers;
+    }, function (phoneNumbers) {
+      return phoneNumbers.filter(function (p) {
+        return p.features && p.features.indexOf('SmsSender') !== -1;
+      });
+    });
     return _this;
   }
 
@@ -125,6 +135,11 @@ var ExtensionPhoneNumber = function (_DataFetcher) {
     key: 'callerIdNumbers',
     get: function get() {
       return this._selectors.callerIdNumbers();
+    }
+  }, {
+    key: 'smsSenderNumbers',
+    get: function get() {
+      return this._selectors.smsSenderNumbers();
     }
   }]);
   return ExtensionPhoneNumber;
