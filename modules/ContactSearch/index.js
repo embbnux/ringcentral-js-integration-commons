@@ -327,7 +327,7 @@ var ContactSearch = function (_RcModule) {
                 entities = this._searchSourcesFormat.get(sourceName)(entities);
                 this._loadSearching({ searchString: searchString, entities: entities });
                 this._saveSearching({ sourceName: sourceName, searchString: searchString, entities: entities });
-                _context2.next = 18;
+                _context2.next = 19;
                 break;
 
               case 15:
@@ -335,11 +335,12 @@ var ContactSearch = function (_RcModule) {
                 _context2.t0 = _context2['catch'](1);
 
                 this._onSearchError();
-
-              case 18:
-                return _context2.abrupt('return', null);
+                throw _context2.t0;
 
               case 19:
+                return _context2.abrupt('return', null);
+
+              case 20:
               case 'end':
                 return _context2.stop();
             }
