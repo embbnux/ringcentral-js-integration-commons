@@ -1,7 +1,6 @@
 import RcModule from '../../lib/RcModule';
 import sliceExecute from '../../lib/sliceExecute';
 import moduleStatus from '../../enums/moduleStatus';
-import dateTimeIntlStatus from './dateTimeIntlStatus';
 import dateTimeIntlActionTypes from './dateTimeIntlActionTypes';
 import getDateTimeIntlReducer from './getDateTimeIntlReducer';
 import getStorageReducer from './getStorageReducer';
@@ -40,53 +39,67 @@ export default class DateTimeIntl extends RcModule {
   initialize() {
     this._addFallbackProvider();
     this.store.subscribe(() => {
-      this._initialize();
+      this._onStateChange();
     });
   }
 
-  _initialize() {
-    if (this._readyToLoad()) {
+  _onStateChange() {
+    if (this._shouldInit()) {
+      this.store.dispatch({
+        type: this.actionTypes.init,
+      });
       if (this._shouldLoad()) {
-        this._loadSettings();
-      } else {
-        this._detectPriorProvider();
-        this.store.dispatch({
-          type: this.actionTypes.init,
+        this._loadSettings().then(() => {
+          this._initProvider();
         });
+      } else {
+        this._initProvider();
       }
     } else if (this._shouldReset()) {
-      this.store.dispatch({
-        type: this.actionTypes.reset,
-      });
+      this._resetModuleStatus();
     }
   }
 
-  _readyToLoad() {
-    return this.status === dateTimeIntlStatus.pending &&
-      this._storage.status === moduleStatus.ready &&
+  _shouldInit() {
+    return this.pending &&
+      this._storage.ready &&
       this._providersReadyCheck();
   }
 
   _shouldLoad() {
     return this._auth.isFreshLogin ||
       !this.cache ||
-      Date.now() - this.cache.timestamp > this._ttl;
+      ((Date.now() - this.cache.timestamp) > this._ttl);
   }
 
   _shouldReset() {
     return (
-      this.status !== dateTimeIntlStatus.pending &&
-      this._storage.status === moduleStatus.pending
-    )
-    ||
-    (
-      this.status === dateTimeIntlStatus.ready &&
-      this._storage.status === moduleStatus.ready &&
       (
-        !this.cache ||
-        Date.now() - this.cache.timestamp > this._ttl
+        this.ready &&
+        !this._storage.ready
+      ) ||
+      (
+        this.ready &&
+        this._storage.ready &&
+        (
+          !this.cache ||
+          ((Date.now() - this.cache.timestamp) > this._ttl)
+        )
       )
     );
+  }
+
+  _initProvider() {
+    this._detectPriorProvider();
+    this.store.dispatch({
+      type: this.actionTypes.initSuccess,
+    });
+  }
+
+  _resetModuleStatus() {
+    this.store.dispatch({
+      type: this.actionTypes.resetSuccess,
+    });
   }
 
   _providersReadyCheck() {
@@ -97,8 +110,8 @@ export default class DateTimeIntl extends RcModule {
     return ready;
   }
 
-  _loadSettings() {
-    sliceExecute({
+  async _loadSettings() {
+    await sliceExecute({
       array: this._providersPrioritized,
       threshold: 1,
       handler: async (items) => {
@@ -251,8 +264,16 @@ export default class DateTimeIntl extends RcModule {
     return this.state.status;
   }
 
+  get dateTimeIntlStatus() {
+    return this.state.dateTimeIntlStatus;
+  }
+
   get ready() {
-    return this.state.status === dateTimeIntlStatus.ready;
+    return this.status === moduleStatus.ready;
+  }
+
+  get pending() {
+    return this.status === moduleStatus.pending;
   }
 
   get cache() {

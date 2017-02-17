@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import getDateTimeIntlReducer, {
-  getStatusReducer,
+  getDateTimeIntlStatusReducer,
   getLastErrorReducer,
 } from './getDateTimeIntlReducer';
 
@@ -8,31 +8,30 @@ import dateTimeIntlActionTypes from './dateTimeIntlActionTypes';
 import dateTimeIntlStatus from './dateTimeIntlStatus';
 
 describe('DateTimeIntl :: getDateTimeIntlReducer', () => {
-  it('getStatusReducer should be a function', () => {
-    expect(getStatusReducer).to.be.a('function');
+  it('getDateTimeIntlStatusReducer should be a function', () => {
+    expect(getDateTimeIntlStatusReducer).to.be.a('function');
   });
-  it('getStatusReducer should return a reducer', () => {
-    expect(getStatusReducer(dateTimeIntlActionTypes)).to.be.a('function');
+  it('getDateTimeIntlStatusReducer should return a reducer', () => {
+    expect(getDateTimeIntlStatusReducer(dateTimeIntlActionTypes)).to.be.a('function');
   });
   describe('statusReducer', () => {
-    const reducer = getStatusReducer(dateTimeIntlActionTypes);
-    it('should have initial state of pending', () => {
-      expect(reducer(undefined, {})).to.equal(dateTimeIntlStatus.pending);
+    const reducer = getDateTimeIntlStatusReducer(dateTimeIntlActionTypes);
+    it('should have initial state of idle', () => {
+      expect(reducer(undefined, {})).to.equal(dateTimeIntlStatus.idle);
     });
     it('should return original state of actionTypes is not recognized', () => {
       const originalState = {};
       expect(reducer(originalState, { type: 'foo' }))
       .to.equal(originalState);
     });
-    it('should return ready status on init/fetchError/fetchSuccess', () => {
+    it('should return ready status on fetchError/fetchSuccess', () => {
       [
-        dateTimeIntlActionTypes.init,
         dateTimeIntlActionTypes.fetchError,
         dateTimeIntlActionTypes.fetchSuccess
       ].forEach((type) => {
         expect(reducer('foo', {
           type,
-        })).to.equal(dateTimeIntlStatus.ready);
+        })).to.equal(dateTimeIntlStatus.idle);
       });
     });
     it('should return fetching status on fetch', () => {
@@ -42,15 +41,6 @@ describe('DateTimeIntl :: getDateTimeIntlReducer', () => {
         expect(reducer('foo', {
           type,
         })).to.equal(dateTimeIntlStatus.fetching);
-      });
-    });
-    it('should return pending state on reset', () => {
-      [
-        dateTimeIntlActionTypes.reset,
-      ].forEach((type) => {
-        expect(reducer('foo', {
-          type,
-        })).to.equal(dateTimeIntlStatus.pending);
       });
     });
   });

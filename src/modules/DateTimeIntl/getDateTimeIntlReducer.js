@@ -1,20 +1,15 @@
 import { combineReducers } from 'redux';
+import getModuleStatusReducer from '../../lib/getModuleStatusReducer';
 import dateTimeIntlStatus from './dateTimeIntlStatus';
 
-export function getStatusReducer(actionTypes) {
-  return (state = dateTimeIntlStatus.pending, { type }) => {
+export function getDateTimeIntlStatusReducer(actionTypes) {
+  return (state = dateTimeIntlStatus.idle, { type }) => {
     switch (type) {
       case actionTypes.fetch:
         return dateTimeIntlStatus.fetching;
-
-      case actionTypes.init:
       case actionTypes.fetchSuccess:
       case actionTypes.fetchError:
-        return dateTimeIntlStatus.ready;
-
-      case actionTypes.reset:
-        return dateTimeIntlStatus.pending;
-
+        return dateTimeIntlStatus.idle;
       default:
         return state;
     }
@@ -39,7 +34,8 @@ export function getLastErrorReducer(actionTypes) {
 
 export default function getDateTimeIntlReducer(actionTypes) {
   return combineReducers({
-    status: getStatusReducer(actionTypes),
+    status: getModuleStatusReducer(actionTypes),
+    dateTimeIntlstatus: getDateTimeIntlStatusReducer(actionTypes),
     lastError: getLastErrorReducer(actionTypes),
   });
 }
