@@ -338,6 +338,7 @@ export default class Phone extends RcModule {
     // });
 
     this.addModule('dateTimeIntl', new DateTimeIntl({
+      ...options,
       auth: this.auth,
       locale: this.locale,
       storage: this.storage,
