@@ -34,6 +34,8 @@ import NumberValidate from '../../../modules/NumberValidate';
 import MessageSender from '../../../modules/MessageSender';
 import ComposeText from '../../../modules/ComposeText';
 
+import DateTimeIntl from '../../../modules/DateTimeIntl';
+
 // import DynamicsAdapter from '../../../modules/DynamicsInteraction';
 
 // import { callMonitorReducer } from '../CallMonitor/reducers';
@@ -46,7 +48,7 @@ import ComposeText from '../../../modules/ComposeText';
 // import CallLog from '../CallLog';
 // import AutoLogger from '../AutoLogger';
 // import DataMatcher from '../DataMatcher';
-// import DateTimeIntl from '../DateTimeIntl';
+
 
 export default class Phone extends RcModule {
   constructor({
@@ -335,20 +337,12 @@ export default class Phone extends RcModule {
     //   readyCheckFn: () => this.adapter.ready,
     // });
 
-    // this.addModule('dateTimeIntl', new DateTimeIntl({
-    //   ...options,
-    //   auth: this.auth,
-    //   locale: this.locale,
-    //   storage: this.storage,
-    //   getState: () => this.state.dateTimeIntl,
-    // }));
-    // this.dateTimeIntl.addProvider({
-    //   providerName: 'dynamics',
-    //   priorityNumber: 1,
-    //   readyCheckFn: () => this.adapter.dateTimeIntlProvider().ready,
-    //   getSettingsFn: async args => this.adapter.dateTimeIntlProvider().getSettings(args),
-    //   formatDateTimeFn: args => this.adapter.dateTimeIntlProvider().formatDateTime(args),
-    // });
+    this.addModule('dateTimeIntl', new DateTimeIntl({
+      auth: this.auth,
+      locale: this.locale,
+      storage: this.storage,
+      getState: () => this.state.dateTimeIntl,
+    }));
 
     // this.addModule('contactSearch', new ContactSearch({
     //   ...options,
@@ -467,7 +461,7 @@ export default class Phone extends RcModule {
       storage: this.storage.reducer,
       // autoLogger: this.autoLogger.reducer,
       globalStorage: this.globalStorage.reducer,
-      // dateTimeIntl: this.dateTimeIntl.reducer,
+      dateTimeIntl: this.dateTimeIntl.reducer,
       // contactSearch: this.contactSearch.reducer,
       numberValidate: this.numberValidate.reducer,
       messageSender: this.messageSender.reducer,
