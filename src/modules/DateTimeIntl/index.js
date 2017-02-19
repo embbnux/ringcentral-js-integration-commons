@@ -36,28 +36,27 @@ export default class DateTimeIntl extends RcModule {
     this._storage.registerReducer({ key: this._storageKey, reducer: this._storageReducer });
   }
 
-  initialize() {
-    this._addFallbackProvider();
-    this.store.subscribe(() => {
-      this._onStateChange();
-    });
-  }
-
-  _onStateChange() {
+  async _onStateChange() {
     if (this._shouldInit()) {
       this.store.dispatch({
         type: this.actionTypes.init,
       });
       if (this._shouldLoad()) {
-        this._loadSettings().then(() => {
-          this._initProvider();
-        });
+        await this._loadSettings();
+        this._initProvider();
       } else {
         this._initProvider();
       }
     } else if (this._shouldReset()) {
       this._resetModuleStatus();
     }
+  }
+
+  initialize() {
+    this._addFallbackProvider();
+    this.store.subscribe(async () => {
+      await this._onStateChange();
+    });
   }
 
   _shouldInit() {

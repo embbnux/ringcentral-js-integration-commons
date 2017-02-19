@@ -36,20 +36,20 @@ describe('DateTimeIntl Unit Test', () => {
   });
 
   describe('_onStateChange', () => {
-    it('_initProvider should be called once when _shouldInit is true', () => {
+    it('_initProvider should be called once when _shouldInit is true', async () => {
       sinon.stub(dateTimeIntl, '_shouldInit').callsFake(() => true);
       sinon.stub(dateTimeIntl, '_shouldReset').callsFake(() => false);
       sinon.stub(dateTimeIntl, '_shouldLoad').callsFake(() => false);
       sinon.stub(dateTimeIntl, '_initProvider');
       sinon.stub(dateTimeIntl, '_resetModuleStatus');
       sinon.stub(dateTimeIntl, '_loadSettings');
-      dateTimeIntl._onStateChange();
+      await dateTimeIntl._onStateChange();
       sinon.assert.calledOnce(dateTimeIntl._initProvider);
       sinon.assert.notCalled(dateTimeIntl._loadSettings);
       sinon.assert.notCalled(dateTimeIntl._resetModuleStatus);
     });
 
-    it('_initProvider and _loadSettings should be called once when _shouldInit and _shouldLoad is true', () => {
+    it('_initProvider and _loadSettings should be called once when _shouldInit and _shouldLoad is true', async () => {
       sinon.stub(dateTimeIntl, '_shouldInit').callsFake(() => true);
       sinon.stub(dateTimeIntl, '_shouldReset').callsFake(() => false);
       sinon.stub(dateTimeIntl, '_shouldLoad').callsFake(() => true);
@@ -58,33 +58,33 @@ describe('DateTimeIntl Unit Test', () => {
       );
       sinon.stub(dateTimeIntl, '_initProvider');
       sinon.stub(dateTimeIntl, '_resetModuleStatus');
-      dateTimeIntl._onStateChange();
+      await dateTimeIntl._onStateChange();
       sinon.assert.calledOnce(dateTimeIntl._initProvider);
       sinon.assert.calledOnce(dateTimeIntl._loadSettings);
       sinon.assert.notCalled(dateTimeIntl._resetModuleStatus);
     });
 
-    it('_resetModuleStatus should be called once when _shouldReset is true', () => {
+    it('_resetModuleStatus should be called once when _shouldReset is true', async () => {
       sinon.stub(dateTimeIntl, '_shouldInit').callsFake(() => false);
       sinon.stub(dateTimeIntl, '_shouldReset').callsFake(() => true);
       sinon.stub(dateTimeIntl, '_shouldLoad').callsFake(() => false);
       sinon.stub(dateTimeIntl, '_initProvider');
       sinon.stub(dateTimeIntl, '_resetModuleStatus');
       sinon.stub(dateTimeIntl, '_loadSettings');
-      dateTimeIntl._onStateChange();
+      await dateTimeIntl._onStateChange();
       sinon.assert.notCalled(dateTimeIntl._initProvider);
       sinon.assert.notCalled(dateTimeIntl._loadSettings);
       sinon.assert.calledOnce(dateTimeIntl._resetModuleStatus);
     });
 
-    it('_initProvider and _resetModuleStatus should Not be called', () => {
+    it('_initProvider and _resetModuleStatus should Not be called', async () => {
       sinon.stub(dateTimeIntl, '_shouldInit').callsFake(() => false);
       sinon.stub(dateTimeIntl, '_shouldReset').callsFake(() => false);
       sinon.stub(dateTimeIntl, '_shouldLoad').callsFake(() => false);
       sinon.stub(dateTimeIntl, '_initProvider');
       sinon.stub(dateTimeIntl, '_resetModuleStatus');
       sinon.stub(dateTimeIntl, '_loadSettings');
-      dateTimeIntl._onStateChange();
+      await dateTimeIntl._onStateChange();
       sinon.assert.notCalled(dateTimeIntl._initProvider);
       sinon.assert.notCalled(dateTimeIntl._loadSettings);
       sinon.assert.notCalled(dateTimeIntl._resetModuleStatus);
