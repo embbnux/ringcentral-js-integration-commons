@@ -5,7 +5,7 @@ import getStorageReducer, {
   getTimestampReducer,
 } from './getStorageReducer';
 
-import dateTimeIntlActionTypes from './dateTimeIntlActionTypes';
+import actionTypes from './actionTypes';
 
 describe('DateTimeIntl :: getStorageReducer', () => {
   //
@@ -13,17 +13,17 @@ describe('DateTimeIntl :: getStorageReducer', () => {
     expect(getStorageReducer).to.be.a('function');
   });
   it('getStorageReducer should return a reducer', () => {
-    expect(getStorageReducer(dateTimeIntlActionTypes)).to.be.a('function');
+    expect(getStorageReducer(actionTypes)).to.be.a('function');
   });
 
   it('getSettingsReducer should be a function', () => {
     expect(getSettingsReducer).to.be.a('function');
   });
   it('getSettingsReducer should return a reducer', () => {
-    expect(getSettingsReducer(dateTimeIntlActionTypes)).to.be.a('function');
+    expect(getSettingsReducer(actionTypes)).to.be.a('function');
   });
   describe('getSettingsReducer', () => {
-    const reducer = getSettingsReducer(dateTimeIntlActionTypes);
+    const reducer = getSettingsReducer(actionTypes);
     it('should have initial state of plain object', () => {
       expect(Object.keys(reducer(undefined, {})).length).to.equal(0);
     });
@@ -34,7 +34,7 @@ describe('DateTimeIntl :: getStorageReducer', () => {
     });
     it('should return plain object on reset', () => {
       [
-        dateTimeIntlActionTypes.reset,
+        actionTypes.reset,
       ].forEach((type) => {
         expect(Object.keys(reducer('foo', {
           type,
@@ -43,7 +43,7 @@ describe('DateTimeIntl :: getStorageReducer', () => {
     });
     it('should return provider settings on fetch success', () => {
       [
-        dateTimeIntlActionTypes.fetchSuccess,
+        actionTypes.fetchSuccess,
       ].forEach((type) => {
         const provider = {
           providerName: 'xxx',
@@ -64,10 +64,10 @@ describe('DateTimeIntl :: getStorageReducer', () => {
     expect(getValidityReducer).to.be.a('function');
   });
   it('getValidityReducer should return a reducer', () => {
-    expect(getValidityReducer(dateTimeIntlActionTypes)).to.be.a('function');
+    expect(getValidityReducer(actionTypes)).to.be.a('function');
   });
   describe('getValidityReducer', () => {
-    const reducer = getValidityReducer(dateTimeIntlActionTypes);
+    const reducer = getValidityReducer(actionTypes);
     it('should have initial state of plain object', () => {
       expect(Object.keys(reducer(undefined, {})).length).to.equal(0);
     });
@@ -78,7 +78,7 @@ describe('DateTimeIntl :: getStorageReducer', () => {
     });
     it('should return plain object on reset', () => {
       [
-        dateTimeIntlActionTypes.reset,
+        actionTypes.reset,
       ].forEach((type) => {
         expect(Object.keys(reducer('foo', {
           type,
@@ -87,7 +87,7 @@ describe('DateTimeIntl :: getStorageReducer', () => {
     });
     it('should return undefined on fetch', () => {
       [
-        dateTimeIntlActionTypes.fetch,
+        actionTypes.fetch,
       ].forEach((type) => {
         const provider = {
           providerName: 'xxx',
@@ -100,7 +100,7 @@ describe('DateTimeIntl :: getStorageReducer', () => {
     });
     it('should return available status "y" on fetch success', () => {
       [
-        dateTimeIntlActionTypes.fetchSuccess,
+        actionTypes.fetchSuccess,
       ].forEach((type) => {
         const provider = {
           providerName: 'xxx',
@@ -113,7 +113,7 @@ describe('DateTimeIntl :: getStorageReducer', () => {
     });
     it('should return available status "n" on fetch error', () => {
       [
-        dateTimeIntlActionTypes.fetchError,
+        actionTypes.fetchError,
       ].forEach((type) => {
         const provider = {
           providerName: 'xxx',
@@ -130,10 +130,10 @@ describe('DateTimeIntl :: getStorageReducer', () => {
     expect(getTimestampReducer).to.be.a('function');
   });
   it('getTimestampReducer should return a reducer', () => {
-    expect(getTimestampReducer(dateTimeIntlActionTypes)).to.be.a('function');
+    expect(getTimestampReducer(actionTypes)).to.be.a('function');
   });
   describe('getTimestampReducer', () => {
-    const reducer = getTimestampReducer(dateTimeIntlActionTypes);
+    const reducer = getTimestampReducer(actionTypes);
     const timestamp = Date.now();
     it('should have initial state of 0', () => {
       expect(reducer(undefined, {})).to.be.eq(0);
@@ -145,7 +145,7 @@ describe('DateTimeIntl :: getStorageReducer', () => {
     });
     it('should return 0 status on reset', () => {
       [
-        dateTimeIntlActionTypes.reset,
+        actionTypes.reset,
       ].forEach((type) => {
         expect(reducer('foo', {
           type,
@@ -154,8 +154,8 @@ describe('DateTimeIntl :: getStorageReducer', () => {
     });
     it('should return timestamp on fetch success', () => {
       [
-        dateTimeIntlActionTypes.fetchSuccess,
-        dateTimeIntlActionTypes.fetchError,
+        actionTypes.fetchSuccess,
+        actionTypes.fetchError,
       ].forEach((type) => {
         expect(reducer('foo', {
           type,

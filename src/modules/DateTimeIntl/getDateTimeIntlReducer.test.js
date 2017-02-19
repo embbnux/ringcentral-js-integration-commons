@@ -4,7 +4,7 @@ import getDateTimeIntlReducer, {
   getLastErrorReducer,
 } from './getDateTimeIntlReducer';
 
-import dateTimeIntlActionTypes from './dateTimeIntlActionTypes';
+import actionTypes from './actionTypes';
 import dateTimeIntlStatus from './dateTimeIntlStatus';
 
 describe('DateTimeIntl :: getDateTimeIntlReducer', () => {
@@ -12,10 +12,10 @@ describe('DateTimeIntl :: getDateTimeIntlReducer', () => {
     expect(getDateTimeIntlStatusReducer).to.be.a('function');
   });
   it('getDateTimeIntlStatusReducer should return a reducer', () => {
-    expect(getDateTimeIntlStatusReducer(dateTimeIntlActionTypes)).to.be.a('function');
+    expect(getDateTimeIntlStatusReducer(actionTypes)).to.be.a('function');
   });
   describe('statusReducer', () => {
-    const reducer = getDateTimeIntlStatusReducer(dateTimeIntlActionTypes);
+    const reducer = getDateTimeIntlStatusReducer(actionTypes);
     it('should have initial state of idle', () => {
       expect(reducer(undefined, {})).to.equal(dateTimeIntlStatus.idle);
     });
@@ -24,10 +24,10 @@ describe('DateTimeIntl :: getDateTimeIntlReducer', () => {
       expect(reducer(originalState, { type: 'foo' }))
       .to.equal(originalState);
     });
-    it('should return ready status on fetchError/fetchSuccess', () => {
+    it('should return idle status on fetchError/fetchSuccess', () => {
       [
-        dateTimeIntlActionTypes.fetchError,
-        dateTimeIntlActionTypes.fetchSuccess
+        actionTypes.fetchError,
+        actionTypes.fetchSuccess
       ].forEach((type) => {
         expect(reducer('foo', {
           type,
@@ -36,7 +36,7 @@ describe('DateTimeIntl :: getDateTimeIntlReducer', () => {
     });
     it('should return fetching status on fetch', () => {
       [
-        dateTimeIntlActionTypes.fetch
+        actionTypes.fetch
       ].forEach((type) => {
         expect(reducer('foo', {
           type,
@@ -49,10 +49,10 @@ describe('DateTimeIntl :: getDateTimeIntlReducer', () => {
     expect(getLastErrorReducer).to.be.a('function');
   });
   it('getLastErrorReducer should return a reducer', () => {
-    expect(getLastErrorReducer(dateTimeIntlActionTypes)).to.be.a('function');
+    expect(getLastErrorReducer(actionTypes)).to.be.a('function');
   });
   describe('lastErrorReducer', () => {
-    const reducer = getLastErrorReducer(dateTimeIntlActionTypes);
+    const reducer = getLastErrorReducer(actionTypes);
     it('should have initial state of null', () => {
       expect(reducer(undefined, {})).to.equal(null);
     });
@@ -63,7 +63,7 @@ describe('DateTimeIntl :: getDateTimeIntlReducer', () => {
     });
     it('should return null status on reset', () => {
       [
-        dateTimeIntlActionTypes.reset
+        actionTypes.reset
       ].forEach((type) => {
         expect(reducer('foo', {
           type,
@@ -72,7 +72,7 @@ describe('DateTimeIntl :: getDateTimeIntlReducer', () => {
     });
     it('should return error status on fetch error', () => {
       [
-        dateTimeIntlActionTypes.fetchError,
+        actionTypes.fetchError,
       ].forEach((type) => {
         const error = 'error';
         expect(reducer('foo', {
@@ -83,9 +83,9 @@ describe('DateTimeIntl :: getDateTimeIntlReducer', () => {
     });
     it('should keep the status on init, fetch, fetchSuccess', () => {
       [
-        dateTimeIntlActionTypes.init,
-        dateTimeIntlActionTypes.fetchSuccess,
-        dateTimeIntlActionTypes.fetch,
+        actionTypes.init,
+        actionTypes.fetchSuccess,
+        actionTypes.fetch,
       ].forEach((type) => {
         expect(reducer('foo', {
           type,
@@ -98,6 +98,6 @@ describe('DateTimeIntl :: getDateTimeIntlReducer', () => {
     expect(getDateTimeIntlReducer).to.be.a('function');
   });
   it('getDateTimeIntlReducer should return a reducer', () => {
-    expect(getDateTimeIntlReducer(dateTimeIntlActionTypes)).to.be.a('function');
+    expect(getDateTimeIntlReducer(actionTypes)).to.be.a('function');
   });
 });

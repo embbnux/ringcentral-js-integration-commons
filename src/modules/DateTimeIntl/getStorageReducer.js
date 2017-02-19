@@ -2,15 +2,15 @@ import { combineReducers } from 'redux';
 
 export function getSettingsReducer(actionTypes) {
   return (state = {}, { type, provider, providerSettings }) => {
+    const newState = { ...state };
     switch (type) {
-
       case actionTypes.fetchSuccess:
-        state[provider.providerName] = providerSettings;
-        return state;
+        newState[provider.providerName] = providerSettings;
+        return newState;
 
       case actionTypes.fetchError:
-        delete state[provider.providerName];
-        return state;
+        delete newState[provider.providerName];
+        return newState;
 
       case actionTypes.reset:
         return {};
@@ -23,19 +23,20 @@ export function getSettingsReducer(actionTypes) {
 
 export function getValidityReducer(actionTypes) {
   return (state = {}, { type, provider }) => {
+    const newState = { ...state };
     switch (type) {
 
       case actionTypes.fetch:
-        delete state[provider.providerName];
-        return state;
+        delete newState[provider.providerName];
+        return newState;
 
       case actionTypes.fetchSuccess:
-        state[provider.providerName] = true;
-        return state;
+        newState[provider.providerName] = true;
+        return newState;
 
       case actionTypes.fetchError:
-        state[provider.providerName] = false;
-        return state;
+        newState[provider.providerName] = false;
+        return newState;
 
       case actionTypes.reset:
         return {};

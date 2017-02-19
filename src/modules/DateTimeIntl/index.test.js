@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import { createStore } from 'redux';
 import DateTimeIntl from './index';
 import getDateTimeIntlReducer from './getDateTimeIntlReducer';
-import actionTypes from './dateTimeIntlActionTypes';
+import actionTypes from './actionTypes';
 
 describe('DateTimeIntl Unit Test', () => {
   let dateTimeIntl;

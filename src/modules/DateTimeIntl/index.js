@@ -1,7 +1,7 @@
 import RcModule from '../../lib/RcModule';
 import sliceExecute from '../../lib/sliceExecute';
 import moduleStatus from '../../enums/moduleStatus';
-import dateTimeIntlActionTypes from './dateTimeIntlActionTypes';
+import actionTypes from './actionTypes';
 import getDateTimeIntlReducer from './getDateTimeIntlReducer';
 import getStorageReducer from './getStorageReducer';
 import BrowserDateTimeIntlProvider from './browserDateTimeIntlProvider';
@@ -18,7 +18,7 @@ export default class DateTimeIntl extends RcModule {
   }) {
     super({
       ...options,
-      actionTypes: dateTimeIntlActionTypes,
+      actionTypes,
     });
     this._auth = auth;
     this._locale = locale;
