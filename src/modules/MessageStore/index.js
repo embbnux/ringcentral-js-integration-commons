@@ -77,13 +77,6 @@ export default class MessageStore extends RcModule {
     );
   }
 
-  _shouldHandleSubscription() {
-    return (
-      this.ready &&
-      this._subscription.ready
-    );
-  }
-
   _shouleCleanCache() {
     return (
       this._auth.isFreshLogin ||
