@@ -20,7 +20,6 @@ describe('MessageStore Unit Test', () => {
       '_shouldInit',
       '_shouldReset',
       '_shouleCleanCache',
-      '_shouldHandleSubscription',
       '_initMessageStore',
       '_subscriptionHandler',
       '_resetModuleStatus',
@@ -58,7 +57,7 @@ describe('MessageStore Unit Test', () => {
       sinon.stub(messageStore, '_shouldInit').callsFake(() => true);
       sinon.stub(messageStore, '_shouldReset').callsFake(() => false);
       sinon.stub(messageStore, '_shouleCleanCache').callsFake(() => false);
-      sinon.stub(messageStore, '_shouldHandleSubscription').callsFake(() => false);
+      sinon.stub(messageStore, 'ready', { get: () => false });
       sinon.stub(messageStore, '_initMessageStore');
       sinon.stub(messageStore, '_subscriptionHandler');
       sinon.stub(messageStore, '_resetModuleStatus');
@@ -74,7 +73,7 @@ describe('MessageStore Unit Test', () => {
       sinon.stub(messageStore, '_shouldInit').callsFake(() => true);
       sinon.stub(messageStore, '_shouldReset').callsFake(() => false);
       sinon.stub(messageStore, '_shouleCleanCache').callsFake(() => true);
-      sinon.stub(messageStore, '_shouldHandleSubscription').callsFake(() => false);
+      sinon.stub(messageStore, 'ready', { get: () => false });
       sinon.stub(messageStore, '_initMessageStore');
       sinon.stub(messageStore, '_subscriptionHandler');
       sinon.stub(messageStore, '_resetModuleStatus');
@@ -90,7 +89,7 @@ describe('MessageStore Unit Test', () => {
       sinon.stub(messageStore, '_shouldInit').callsFake(() => false);
       sinon.stub(messageStore, '_shouldReset').callsFake(() => true);
       sinon.stub(messageStore, '_shouleCleanCache').callsFake(() => false);
-      sinon.stub(messageStore, '_shouldHandleSubscription').callsFake(() => false);
+      sinon.stub(messageStore, 'ready', { get: () => false });
       sinon.stub(messageStore, '_initMessageStore');
       sinon.stub(messageStore, '_subscriptionHandler');
       sinon.stub(messageStore, '_resetModuleStatus');
@@ -102,11 +101,11 @@ describe('MessageStore Unit Test', () => {
       sinon.assert.notCalled(messageStore._cleanUpCache);
     });
 
-    it('_subscriptionHandler should be called once when messageStore is ready and _subscription.message exist', () => {
+    it('_subscriptionHandler should be called once when messageStore is ready', () => {
       sinon.stub(messageStore, '_shouldInit').callsFake(() => false);
       sinon.stub(messageStore, '_shouldReset').callsFake(() => false);
       sinon.stub(messageStore, '_shouleCleanCache').callsFake(() => false);
-      sinon.stub(messageStore, '_shouldHandleSubscription').callsFake(() => true);
+      sinon.stub(messageStore, 'ready', { get: () => true });
       sinon.stub(messageStore, '_initMessageStore');
       sinon.stub(messageStore, '_subscriptionHandler');
       sinon.stub(messageStore, '_resetModuleStatus');
@@ -120,7 +119,6 @@ describe('MessageStore Unit Test', () => {
       sinon.assert.notCalled(messageStore._resetModuleStatus);
       sinon.assert.notCalled(messageStore._cleanUpCache);
       sinon.assert.calledOnce(messageStore._subscriptionHandler);
-      expect(messageStore._lastSubscriptionMessage).to.equal('123');
     });
   });
 
@@ -323,52 +321,6 @@ describe('MessageStore Unit Test', () => {
     });
   });
 
-  describe('_shouldHandleSubscription', () => {
-    it('should return true if messageStore and _subscription is ready and subscription has new message', () => {
-      sinon.stub(messageStore, 'ready', { get: () => true });
-      messageStore._subscription = {
-        ready: true,
-        message: '123',
-      };
-      messageStore._lastSubscriptionMessage = null;
-      const result = messageStore._shouldHandleSubscription();
-      expect(result).to.equal(true);
-    });
-
-    it('should return true if messageStore and _subscription is ready and subscription has old message', () => {
-      sinon.stub(messageStore, 'ready', { get: () => true });
-      messageStore._subscription = {
-        ready: true,
-        message: '123',
-      };
-      messageStore._lastSubscriptionMessage = '123';
-      const result = messageStore._shouldHandleSubscription();
-      expect(result).to.equal(false);
-    });
-
-    it('should return true if messageStore and _subscription is ready and subscription has null message', () => {
-      sinon.stub(messageStore, 'ready', { get: () => true });
-      messageStore._subscription = {
-        ready: true,
-        message: null,
-      };
-      messageStore._lastSubscriptionMessage = '123';
-      const result = messageStore._shouldHandleSubscription();
-      expect(result).to.equal(false);
-    });
-
-    it('should return true if messageStore and _subscription is ready and subscription has null message', () => {
-      sinon.stub(messageStore, 'ready', { get: () => true });
-      messageStore._subscription = {
-        ready: false,
-        message: '123',
-      };
-      messageStore._lastSubscriptionMessage = null;
-      const result = messageStore._shouldHandleSubscription();
-      expect(result).to.equal(false);
-    });
-  });
-
   describe('_initMessageStore', () => {
     it('should set status to be ready and call _syncMessages after call _initMessageStore', async () => {
       sinon.stub(messageStore, '_syncMessages');
@@ -382,7 +334,7 @@ describe('MessageStore Unit Test', () => {
   });
 
   describe('_subscriptionHandler', () => {
-    it('should call _syncMessages when subscription message is message store event', () => {
+    it('should call _syncMessages when subscription message is message store event and _lastSubscriptionMessage is null', () => {
       sinon.stub(messageStore, '_syncMessages');
       messageStore._subscription = {
         message: {
@@ -392,8 +344,10 @@ describe('MessageStore Unit Test', () => {
           }
         },
       };
+      messageStore._lastSubscriptionMessage = null;
       messageStore._subscriptionHandler();
       sinon.assert.calledOnce(messageStore._syncMessages);
+      expect(messageStore._lastSubscriptionMessage).to.equal(messageStore._subscription.message);
     });
 
     it('should not call _syncMessages when subscription message is null', () => {
@@ -401,6 +355,22 @@ describe('MessageStore Unit Test', () => {
       messageStore._subscription = {
         message: null,
       };
+      messageStore._lastSubscriptionMessage = null;
+      messageStore._subscriptionHandler();
+      sinon.assert.notCalled(messageStore._syncMessages);
+    });
+
+    it('should not call _syncMessages when subscription message is null', () => {
+      sinon.stub(messageStore, '_syncMessages');
+      messageStore._subscription = {
+        message: {
+          event: '/restapi/v1.0/account/~/extension/~/message-store',
+          body: {
+            changes: []
+          }
+        },
+      };
+      messageStore._lastSubscriptionMessage = messageStore._subscription.message;
       messageStore._subscriptionHandler();
       sinon.assert.notCalled(messageStore._syncMessages);
     });
@@ -415,6 +385,7 @@ describe('MessageStore Unit Test', () => {
           }
         },
       };
+      messageStore._lastSubscriptionMessage = null;
       messageStore._subscriptionHandler();
       sinon.assert.notCalled(messageStore._syncMessages);
     });
@@ -427,6 +398,7 @@ describe('MessageStore Unit Test', () => {
           body: null,
         },
       };
+      messageStore._lastSubscriptionMessage = null;
       messageStore._subscriptionHandler();
       sinon.assert.notCalled(messageStore._syncMessages);
     });
@@ -441,6 +413,7 @@ describe('MessageStore Unit Test', () => {
           },
         },
       };
+      messageStore._lastSubscriptionMessage = null;
       messageStore._subscriptionHandler();
       sinon.assert.notCalled(messageStore._syncMessages);
     });

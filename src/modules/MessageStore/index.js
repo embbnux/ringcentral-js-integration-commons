@@ -53,9 +53,8 @@ export default class MessageStore extends RcModule {
     } else if (this._shouldReset()) {
       this._resetModuleStatus();
     } else if (
-      this._shouldHandleSubscription()
+      this.ready
     ) {
-      this._lastSubscriptionMessage = this._subscription.message;
       this._subscriptionHandler();
     }
   }
@@ -79,16 +78,10 @@ export default class MessageStore extends RcModule {
   }
 
   _shouldHandleSubscription() {
-    if (
+    return (
       this.ready &&
-      this._subscription &&
-      this._subscription.ready &&
-      this._subscription.message &&
-      this._subscription.message !== this._lastSubscriptionMessage
-    ) {
-      return true;
-    }
-    return false;
+      this._subscription.ready
+    );
   }
 
   _shouleCleanCache() {
@@ -123,11 +116,13 @@ export default class MessageStore extends RcModule {
     const accountExtesionEndPoint = /\/message-store$/;
     const message = this._subscription.message;
     if (
-      message !== null &&
+      message &&
+      message !== this._lastSubscriptionMessage &&
       accountExtesionEndPoint.test(message.event) &&
       message.body &&
       message.body.changes
     ) {
+      this._lastSubscriptionMessage = this._subscription.message;
       this._syncMessages();
     }
   }
