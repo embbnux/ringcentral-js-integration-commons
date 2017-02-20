@@ -6,7 +6,7 @@ import {
   getRecipientNumbersFromMessage,
 } from '../../lib/messageHelper';
 
-import conversationActionTypes from './conversationActionTypes';
+import actionTypes from './actionTypes';
 import getConversationReducer from './getConversationReducer';
 
 import conversationStatus from './conversationStatus';
@@ -20,7 +20,7 @@ export default class Conversation extends RcModule {
   }) {
     super({
       ...options,
-      actionTypes: conversationActionTypes,
+      actionTypes,
     });
     this._reducer = getConversationReducer(this.actionTypes);
     this._messageSender = messageSender;

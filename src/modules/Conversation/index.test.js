@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import { createStore } from 'redux';
 import Conversation from './index';
 import getConversationReducer from './getConversationReducer';
-import actionTypes from './conversationActionTypes';
+import actionTypes from './actionTypes';
 
 describe('Conversation Unit Test', () => {
   let conversation;

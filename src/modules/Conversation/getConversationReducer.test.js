@@ -6,7 +6,7 @@ import getConversationReducer, {
   getCurrentRecipientsReducer,
 } from './getConversationReducer';
 
-import conversationActionTypes from './conversationActionTypes';
+import actionTypes from './actionTypes';
 import conversationStatus from './conversationStatus';
 
 describe('Conversation :: getConversationStatusReducer', () => {
@@ -17,7 +17,7 @@ describe('Conversation :: getConversationStatusReducer', () => {
     expect(getConversationStatusReducer()).to.be.a('function');
   });
   describe('statusReducer', () => {
-    const reducer = getConversationStatusReducer(conversationActionTypes);
+    const reducer = getConversationStatusReducer(actionTypes);
     it('should have initial state of pending', () => {
       expect(reducer(undefined, {})).to.equal(conversationStatus.idle);
     });
@@ -28,7 +28,7 @@ describe('Conversation :: getConversationStatusReducer', () => {
     });
     it('should return pushing status on reply', () => {
       [
-        conversationActionTypes.reply
+        actionTypes.reply
       ].forEach(type => {
         expect(reducer('foo', {
           type,
@@ -37,8 +37,8 @@ describe('Conversation :: getConversationStatusReducer', () => {
     });
     it('should return idle status on reply error and reply success', () => {
       [
-        conversationActionTypes.replySuccess,
-        conversationActionTypes.replyError,
+        actionTypes.replySuccess,
+        actionTypes.replyError,
       ].forEach(type => {
         expect(reducer('foo', {
           type,
@@ -56,7 +56,7 @@ describe('Conversation :: getCurrentConversationReducer', () => {
     expect(getCurrentConversationReducer()).to.be.a('function');
   });
   describe('currentReducer', () => {
-    const reducer = getCurrentConversationReducer(conversationActionTypes);
+    const reducer = getCurrentConversationReducer(actionTypes);
     it('should have initial state of null', () => {
       expect(reducer(undefined, {})).to.equal(null);
     });
@@ -67,8 +67,8 @@ describe('Conversation :: getCurrentConversationReducer', () => {
     });
     it('should return conversation on load and update', () => {
       [
-        conversationActionTypes.load,
-        conversationActionTypes.update,
+        actionTypes.load,
+        actionTypes.update,
       ].forEach(type => {
         const conversation = {
           id: '1234567890',
@@ -82,7 +82,7 @@ describe('Conversation :: getCurrentConversationReducer', () => {
     });
     it('should return null on cleanUp', () => {
       [
-        conversationActionTypes.cleanUp,
+        actionTypes.cleanUp,
       ].forEach(type => {
         expect(reducer('foo', {
           type,
@@ -100,7 +100,7 @@ describe('Conversation :: getCurrentSenderNumberReducer', () => {
     expect(getCurrentSenderNumberReducer()).to.be.a('function');
   });
   describe('senderNumberReducer', () => {
-    const reducer = getCurrentSenderNumberReducer(conversationActionTypes);
+    const reducer = getCurrentSenderNumberReducer(actionTypes);
     it('should have initial state of null', () => {
       expect(reducer(undefined, {})).to.equal(null);
     });
@@ -111,7 +111,7 @@ describe('Conversation :: getCurrentSenderNumberReducer', () => {
     });
     it('should return sender number object on updateSenderNumber', () => {
       [
-        conversationActionTypes.updateSenderNumber,
+        actionTypes.updateSenderNumber,
       ].forEach(type => {
         const senderNumber = {
           phone: '1234567890',
@@ -124,7 +124,7 @@ describe('Conversation :: getCurrentSenderNumberReducer', () => {
     });
     it('should return null on cleanUp', () => {
       [
-        conversationActionTypes.cleanUp,
+        actionTypes.cleanUp,
       ].forEach(type => {
         expect(reducer('foo', {
           type,
@@ -142,7 +142,7 @@ describe('Conversation :: getCurrentRecipientsReducer', () => {
     expect(getCurrentRecipientsReducer()).to.be.a('function');
   });
   describe('recipientsReducer', () => {
-    const reducer = getCurrentRecipientsReducer(conversationActionTypes);
+    const reducer = getCurrentRecipientsReducer(actionTypes);
     it('should have initial state of empty array', () => {
       expect(reducer(undefined, {})).to.deep.equal([]);
     });
@@ -153,7 +153,7 @@ describe('Conversation :: getCurrentRecipientsReducer', () => {
     });
     it('should return toNumber array on updateRecipients', () => {
       [
-        conversationActionTypes.updateRecipients,
+        actionTypes.updateRecipients,
       ].forEach(type => {
         const recipients = [{
           name: '1234567890',
@@ -166,7 +166,7 @@ describe('Conversation :: getCurrentRecipientsReducer', () => {
     });
     it('should return null on cleanUp', () => {
       [
-        conversationActionTypes.cleanUp,
+        actionTypes.cleanUp,
       ].forEach(type => {
         expect(reducer('foo', {
           type,
