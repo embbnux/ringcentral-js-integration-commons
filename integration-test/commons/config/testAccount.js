@@ -4,51 +4,51 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 var defaultAccount = exports.defaultAccount = {
-  username: 'Replace it with related phoneNumber(required)',
-  password: 'Replace it with related password(required)',
-  existingExtension: 'Replace it with existing extension(optional)',
-  serviceNumber: 'Replace it with your service number(optional)'
+  username: '18775890015',
+  password: 'Test!123',
+  existingExtension: '',
+  serviceNumber: ''
 };
 
 var callLogAccount = exports.callLogAccount = {
-  username: 'Replace it with related phoneNumber(required)',
-  password: 'Replace it with related password(required)',
-  existingExtension: 'Replace it with existing extension(optional)',
-  serviceNumber: 'Replace it with your service number(optional)'
+  username: '18775890015',
+  password: 'Test!123',
+  existingExtension: '',
+  serviceNumber: ''
 };
 
 var multiDialingPlanIncludingUSCAAccount = exports.multiDialingPlanIncludingUSCAAccount = {
-  username: 'Replace it with related phoneNumber(required)',
-  password: 'Replace it with related password(required)',
-  existingExtension: 'Replace it with existing extension(optional)',
-  serviceNumber: 'Replace it with your service number(optional)'
+  username: '+18775890015',
+  password: 'Test!123',
+  existingExtension: '',
+  serviceNumber: ''
 };
 
 var onlyOneUSCADialingPlanAccount = exports.onlyOneUSCADialingPlanAccount = {
-  username: 'Replace it with related phoneNumber(required)',
-  password: 'Replace it with related password(required)',
-  existingExtension: 'Replace it with existing extension(optional)',
-  serviceNumber: 'Replace it with your service number(optional)'
+  username: '13065221112',
+  password: 'Test!123',
+  existingExtension: '101',
+  serviceNumber: '911'
 };
 
 var onlyOneNoneUSCADialingPlanAccount = exports.onlyOneNoneUSCADialingPlanAccount = {
-  username: 'Replace it with related phoneNumber(required)',
-  password: 'Replace it with related password(required)',
-  existingExtension: 'Replace it with existing extension(optional)',
-  serviceNumber: 'Replace it with your service number(optional)'
+  username: '441239171113',
+  password: 'Test!123',
+  existingExtension: '',
+  serviceNumber: ''
 };
 
 var multiNoneUSCADialingPlanAccount = exports.multiNoneUSCADialingPlanAccount = {
-  username: 'Replace it with related phoneNumber(required)',
-  password: 'Replace it with related password(required)',
-  existingExtension: 'Replace it with existing extension(optional)',
-  serviceNumber: 'Replace it with your service number(optional)'
+  username: '448082390001',
+  password: 'Test!123',
+  existingExtension: '301',
+  serviceNumber: '999'
 };
 
 var smsAccount = exports.smsAccount = {
-  username: 'Replace it with related phoneNumber(required)',
-  password: 'Replace it with related password(required)',
-  existingExtension: 'Replace it with existing extension(optional)',
-  serviceNumber: 'Replace it with your service number(optional)'
+  username: '18558990011',
+  password: 'Test!123',
+  existingExtension: '',
+  serviceNumber: ''
 };
 //# sourceMappingURL=testAccount.js.map
