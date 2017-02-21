@@ -1,9 +1,11 @@
 import { expect } from 'chai';
-import getConversationReducer, {
+import {
   getConversationStatusReducer,
-  getCurrentConversationReducer,
-  getCurrentSenderNumberReducer,
-  getCurrentRecipientsReducer,
+  getConversationIdReducer,
+  getMessagesReducer,
+  getSenderNumberReducer,
+  getRecipientsReducer,
+  getMessageStoreUpdatedAtReducer,
 } from './getConversationReducer';
 
 import actionTypes from './actionTypes';
@@ -29,7 +31,7 @@ describe('Conversation :: getConversationStatusReducer', () => {
     it('should return pushing status on reply', () => {
       [
         actionTypes.reply
-      ].forEach(type => {
+      ].forEach((type) => {
         expect(reducer('foo', {
           type,
         })).to.equal(conversationStatus.pushing);
@@ -39,7 +41,7 @@ describe('Conversation :: getConversationStatusReducer', () => {
       [
         actionTypes.replySuccess,
         actionTypes.replyError,
-      ].forEach(type => {
+      ].forEach((type) => {
         expect(reducer('foo', {
           type,
         })).to.equal(conversationStatus.idle);
@@ -48,15 +50,15 @@ describe('Conversation :: getConversationStatusReducer', () => {
   });
 });
 
-describe('Conversation :: getCurrentConversationReducer', () => {
-  it('getCurrentConversationReducer should be a function', () => {
-    expect(getCurrentConversationReducer).to.be.a('function');
+describe('Conversation :: getConversationIdReducer', () => {
+  it('getConversationIdReducer should be a function', () => {
+    expect(getConversationIdReducer).to.be.a('function');
   });
-  it('getCurrentConversationReducer should return a reducer', () => {
-    expect(getCurrentConversationReducer()).to.be.a('function');
+  it('getConversationIdReducer should return a reducer', () => {
+    expect(getConversationIdReducer()).to.be.a('function');
   });
-  describe('currentReducer', () => {
-    const reducer = getCurrentConversationReducer(actionTypes);
+  describe('conversationIdReducer', () => {
+    const reducer = getConversationIdReducer(actionTypes);
     it('should have initial state of null', () => {
       expect(reducer(undefined, {})).to.equal(null);
     });
@@ -65,25 +67,21 @@ describe('Conversation :: getCurrentConversationReducer', () => {
       expect(reducer(originalState, { type: 'foo' }))
       .to.equal(originalState);
     });
-    it('should return conversation on load and update', () => {
+    it('should return conversationId on load', () => {
       [
         actionTypes.load,
-        actionTypes.update,
-      ].forEach(type => {
-        const conversation = {
-          id: '1234567890',
-          records: [{ id: '123' }],
-        };
+      ].forEach((type) => {
+        const conversationId = '1234567890';
         expect(reducer('foo', {
           type,
-          conversation
-        })).to.deep.equal(conversation);
+          conversationId
+        })).to.equal(conversationId);
       });
     });
-    it('should return null on cleanUp', () => {
+    it('should return null on unload', () => {
       [
-        actionTypes.cleanUp,
-      ].forEach(type => {
+        actionTypes.unload,
+      ].forEach((type) => {
         expect(reducer('foo', {
           type,
         })).to.equal(null);
@@ -92,15 +90,15 @@ describe('Conversation :: getCurrentConversationReducer', () => {
   });
 });
 
-describe('Conversation :: getCurrentSenderNumberReducer', () => {
-  it('getCurrentSenderNumberReducer should be a function', () => {
-    expect(getCurrentSenderNumberReducer).to.be.a('function');
+describe('Conversation :: getSenderNumberReducer', () => {
+  it('getSenderNumberReducer should be a function', () => {
+    expect(getSenderNumberReducer).to.be.a('function');
   });
-  it('getCurrentSenderNumberReducer should return a reducer', () => {
-    expect(getCurrentSenderNumberReducer()).to.be.a('function');
+  it('getSenderNumberReducer should return a reducer', () => {
+    expect(getSenderNumberReducer()).to.be.a('function');
   });
   describe('senderNumberReducer', () => {
-    const reducer = getCurrentSenderNumberReducer(actionTypes);
+    const reducer = getSenderNumberReducer(actionTypes);
     it('should have initial state of null', () => {
       expect(reducer(undefined, {})).to.equal(null);
     });
@@ -109,10 +107,10 @@ describe('Conversation :: getCurrentSenderNumberReducer', () => {
       expect(reducer(originalState, { type: 'foo' }))
       .to.equal(originalState);
     });
-    it('should return sender number object on updateSenderNumber', () => {
+    it('should return sender number object on load', () => {
       [
-        actionTypes.updateSenderNumber,
-      ].forEach(type => {
+        actionTypes.load,
+      ].forEach((type) => {
         const senderNumber = {
           phone: '1234567890',
         };
@@ -122,10 +120,10 @@ describe('Conversation :: getCurrentSenderNumberReducer', () => {
         })).to.deep.equal(senderNumber);
       });
     });
-    it('should return null on cleanUp', () => {
+    it('should return null on unload', () => {
       [
-        actionTypes.cleanUp,
-      ].forEach(type => {
+        actionTypes.unload,
+      ].forEach((type) => {
         expect(reducer('foo', {
           type,
         })).to.equal(null);
@@ -134,15 +132,15 @@ describe('Conversation :: getCurrentSenderNumberReducer', () => {
   });
 });
 
-describe('Conversation :: getCurrentRecipientsReducer', () => {
-  it('getCurrentRecipientsReducer should be a function', () => {
-    expect(getCurrentRecipientsReducer).to.be.a('function');
+describe('Conversation :: getRecipientsReducer', () => {
+  it('getRecipientsReducer should be a function', () => {
+    expect(getRecipientsReducer).to.be.a('function');
   });
-  it('getCurrentRecipientsReducer should return a reducer', () => {
-    expect(getCurrentRecipientsReducer()).to.be.a('function');
+  it('getRecipientsReducer should return a reducer', () => {
+    expect(getRecipientsReducer()).to.be.a('function');
   });
   describe('recipientsReducer', () => {
-    const reducer = getCurrentRecipientsReducer(actionTypes);
+    const reducer = getRecipientsReducer(actionTypes);
     it('should have initial state of empty array', () => {
       expect(reducer(undefined, {})).to.deep.equal([]);
     });
@@ -151,10 +149,11 @@ describe('Conversation :: getCurrentRecipientsReducer', () => {
       expect(reducer(originalState, { type: 'foo' }))
       .to.equal(originalState);
     });
-    it('should return toNumber array on updateRecipients', () => {
+    it('should return toNumber array on updateRecipients and load', () => {
       [
         actionTypes.updateRecipients,
-      ].forEach(type => {
+        actionTypes.load,
+      ].forEach((type) => {
         const recipients = [{
           name: '1234567890',
         }];
@@ -164,13 +163,86 @@ describe('Conversation :: getCurrentRecipientsReducer', () => {
         })).to.deep.equal(recipients);
       });
     });
-    it('should return null on cleanUp', () => {
+    it('should return null on unload', () => {
       [
-        actionTypes.cleanUp,
-      ].forEach(type => {
+        actionTypes.unload,
+      ].forEach((type) => {
         expect(reducer('foo', {
           type,
         })).to.deep.equal([]);
+      });
+    });
+  });
+});
+
+describe('Conversation :: getMessagesReducer', () => {
+  it('getMessagesReducer should be a function', () => {
+    expect(getMessagesReducer).to.be.a('function');
+  });
+  it('getMessagesReducer should return a reducer', () => {
+    expect(getMessagesReducer()).to.be.a('function');
+  });
+  describe('messagesReducer', () => {
+    const reducer = getMessagesReducer(actionTypes);
+    it('should have initial state of empty array', () => {
+      expect(reducer(undefined, {})).to.deep.equal([]);
+    });
+    it('should return original state of actionTypes is not recognized', () => {
+      const originalState = {};
+      expect(reducer(originalState, { type: 'foo' }))
+      .to.equal(originalState);
+    });
+    it('should return messages array on load', () => {
+      [
+        actionTypes.load,
+      ].forEach((type) => {
+        const messages = [{
+          id: '1234567890',
+        }];
+        expect(reducer('foo', {
+          type,
+          messages
+        })).to.deep.equal(messages);
+      });
+    });
+    it('should return null on unload', () => {
+      [
+        actionTypes.unload,
+      ].forEach((type) => {
+        expect(reducer('foo', {
+          type,
+        })).to.deep.equal([]);
+      });
+    });
+  });
+});
+
+describe('Conversation :: getMessageStoreUpdatedAtReducer', () => {
+  it('getMessageStoreUpdatedAtReducer should be a function', () => {
+    expect(getMessageStoreUpdatedAtReducer).to.be.a('function');
+  });
+  it('getMessageStoreUpdatedAtReducer should return a reducer', () => {
+    expect(getMessageStoreUpdatedAtReducer()).to.be.a('function');
+  });
+  describe('messageStoreUpdatedAtReducer', () => {
+    const reducer = getMessageStoreUpdatedAtReducer(actionTypes);
+    it('should have initial state of null', () => {
+      expect(reducer(undefined, {})).to.equal(null);
+    });
+    it('should return original state of actionTypes is not recognized', () => {
+      const originalState = {};
+      expect(reducer(originalState, { type: 'foo' }))
+      .to.equal(originalState);
+    });
+    it('should return conversationsTimestamp on load', () => {
+      [
+        actionTypes.load,
+      ].forEach((type) => {
+        const conversationsTimestamp = 123456789;
+        expect(reducer('foo', {
+          type,
+          conversationsTimestamp
+        })).to.equal(conversationsTimestamp);
       });
     });
   });
