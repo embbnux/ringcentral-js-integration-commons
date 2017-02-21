@@ -123,7 +123,7 @@ describe('Messages :: getLastUpdatedAtReducer', () => {
         const now = Date.now();
         expect(reducer('', {
           type,
-        })).to.equal(now);
+        })).to.least(now);
       });
     });
   });
