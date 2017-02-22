@@ -187,12 +187,14 @@ export default class DataMatcher extends RcModule {
     const filteredQueries = ignoreCache ? queries : queries.filter((query) => {
       const cacheKey = getCacheKey(sourceName, query);
       const cache = this.cache;
-      return !((cache.matchRecord[cacheKey] &&
-        now - cache.matchRecord[cacheKey].timestamp < (
+      return !(
+        (cache.matchRecord[cacheKey] &&
+        (now - cache.matchRecord[cacheKey].timestamp) < (
           cache.matchRecord[cacheKey].result === matchResult.notFound ?
             this._noMatchTtl : this._ttl
         )) ||
-        this.state.matching.indexOf(cacheKey) !== -1);
+        this.state.matching.indexOf(cacheKey) !== -1
+      );
     });
     if (filteredQueries.length) {
       this.store.dispatch({

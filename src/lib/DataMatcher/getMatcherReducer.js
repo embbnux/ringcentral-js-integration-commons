@@ -2,7 +2,7 @@ import { combineReducers } from 'redux';
 import getModuleStatusReducer from '../getModuleStatusReducer';
 import { getCacheKey } from './helpers';
 
-function getMatchingReducer(actionTypes) {
+export function getMatchingReducer(actionTypes) {
   return (state = [], { type, sourceName, queries }) => {
     let deleteKeys;
     switch (type) {

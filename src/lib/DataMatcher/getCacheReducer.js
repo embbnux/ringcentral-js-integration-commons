@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux';
 import { getCacheKey, parseCacheKey, matchResult } from './helpers';
 
-function getMatchRecordReducer(actionTypes) {
+export function getMatchRecordReducer(actionTypes) {
   return (state = {}, { type, data, sourceName, expiredKeys }) => {
     switch (type) {
       case actionTypes.matchSuccess: {
@@ -37,16 +37,23 @@ function getMatchRecordReducer(actionTypes) {
   };
 }
 
-function getDataMapReducer(actionTypes) {
+export function getDataMapReducer(actionTypes) {
   return (state = {}, { type, data, sourceName, expiredKeys }) => {
     switch (type) {
       case actionTypes.matchSuccess: {
         const newState = { ...state };
         Object.keys(data).forEach((query) => {
-          newState[query] = (data[query] || []).map(item => ({
-            ...item,
-            source: sourceName,
-          }));
+          if (newState[query] && newState[query].length > 0) {
+            newState[query] = newState[query].filter(item => (item.source !== sourceName));
+          } else {
+            newState[query] = [];
+          }
+          if (data[query] && data[query].length > 0) {
+            newState[query] = newState[query].concat(data[query].map(item => ({
+              ...item,
+              source: sourceName,
+            })));
+          }
         });
         return newState;
       }
