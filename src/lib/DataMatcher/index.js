@@ -69,10 +69,7 @@ export default class DataMatcher extends RcModule {
 
   _onStateChange() {
     if (this._shouldInit()) {
-      this.store.dispatch({
-        type: this.actionTypes.initSuccess,
-        expiredKeys: this._getExpiredKeys(),
-      });
+      this._initModuleStatus();
       this.triggerMatch();
     } else if (this._shouldReset()) {
       this._resetModuleStatus();
@@ -93,9 +90,16 @@ export default class DataMatcher extends RcModule {
       this.ready &&
       (
         !this._auth.loggedIn ||
-        (this._storage && !this._storage.ready)
+        ((!!this._storage) && !this._storage.ready)
       )
     );
+  }
+
+  _initModuleStatus() {
+    this.store.dispatch({
+      type: this.actionTypes.initSuccess,
+      expiredKeys: this._getExpiredKeys(),
+    });
   }
 
   _resetModuleStatus() {

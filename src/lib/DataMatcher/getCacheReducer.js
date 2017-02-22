@@ -71,7 +71,7 @@ export function getDataMapReducer(actionTypes) {
             const newSet = state[query].filter(item => (
               !(deleteMap[query] && deleteMap[query][item.source])
             ));
-            if (newSet.length) {
+            if (newSet.length > 0) {
               newState[query] = newSet;
             }
           });
