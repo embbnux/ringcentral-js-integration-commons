@@ -5,7 +5,7 @@ import moduleStatus from '../../enums/moduleStatus';
 
 import actionTypesBase from './actionTypesBase';
 import getMatcherReducer from './getMatcherReducer';
-import getStorageReducer from './getStorageReducer';
+import getCacheReducer from './getCacheReducer';
 
 import { getCacheKey, matchResult } from './helpers';
 
@@ -31,7 +31,7 @@ export default class DataMatcher extends RcModule {
     actionTypes = prefixEnum({ enumMap: actionTypesBase, prefix: name }),
     storageKey = `${name}Data`,
     getReducer = getMatcherReducer,
-    getDataReducer = getStorageReducer,
+    getDataReducer = getCacheReducer,
     ...options,
   }) {
     checkName(name);
