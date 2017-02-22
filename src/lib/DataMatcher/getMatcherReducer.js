@@ -23,8 +23,9 @@ function getMatchingReducer(actionTypes) {
   };
 }
 
-export default function getMatcherReducer(actionTypes) {
+export default function getMatcherReducer(actionTypes, reducers = {}) {
   return combineReducers({
+    ...reducers,
     status: getModuleStatusReducer(actionTypes),
     matching: getMatchingReducer(actionTypes),
   });

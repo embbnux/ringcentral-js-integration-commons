@@ -9,7 +9,7 @@ import getStorageReducer from './getStorageReducer';
 
 import { getCacheKey, matchResult } from './helpers';
 
-function checkName(name) {
+export function checkName(name) {
   if (!name) {
     throw new Error('DataMatcher: "name" is required.');
   }
@@ -18,13 +18,16 @@ function checkName(name) {
   }
 }
 
+const DEFAULT_TTL = 30 * 60 * 1000;
+const DEFAULT_NO_MATCHER_TTL = 30 * 1000;
+
 export default class DataMatcher extends RcModule {
   constructor({
     name,
     auth,
     storage,
-    ttl = 30 * 60 * 1000,
-    noMatchTtl = 30 * 1000,
+    ttl = DEFAULT_TTL,
+    noMatchTtl = DEFAULT_NO_MATCHER_TTL,
     actionTypes = prefixEnum({ enumMap: actionTypesBase, prefix: name }),
     storageKey = `${name}Data`,
     getReducer = getMatcherReducer,
@@ -36,7 +39,6 @@ export default class DataMatcher extends RcModule {
       ...options,
       actionTypes,
     });
-
 
     this._querySources = new Map();
     this._searchSource = {};
@@ -62,30 +64,43 @@ export default class DataMatcher extends RcModule {
   }
 
   initialize() {
-    this.store.subscribe(() => {
-      if (
-        !this.ready &&
-        this._auth.ready &&
-        this._auth.loggedIn &&
-        this._storage.ready &&
-        this._readyCheck()
-      ) {
-        this.store.dispatch({
-          type: this.actionTypes.initSuccess,
-          expiredKeys: this._getExpiredKeys(),
-        });
-        this.triggerMatch();
-      } else if (
-        this.ready &&
-        (
-          !this._auth.loggedIn ||
-          !this._storage.ready
-        )
-      ) {
-        this.store.dispatch({
-          type: this.actionTypes.resetSuccess,
-        });
-      }
+    this.store.subscribe(() => this._onStateChange());
+  }
+
+  _onStateChange() {
+    if (this._shouldInit()) {
+      this.store.dispatch({
+        type: this.actionTypes.initSuccess,
+        expiredKeys: this._getExpiredKeys(),
+      });
+      this.triggerMatch();
+    } else if (this._shouldReset()) {
+      this._resetModuleStatus();
+    }
+  }
+
+  _shouldInit() {
+    return (
+      !this.ready &&
+      this._auth.loggedIn &&
+      (!this._storage || this._storage.ready) &&
+      this._readyCheck()
+    );
+  }
+
+  _shouldReset() {
+    return (
+      this.ready &&
+      (
+        !this._auth.loggedIn ||
+        (this._storage && !this._storage.ready)
+      )
+    );
+  }
+
+  _resetModuleStatus() {
+    this.store.dispatch({
+      type: this.actionTypes.resetSuccess,
     });
   }
 
