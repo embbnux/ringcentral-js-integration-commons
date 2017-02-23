@@ -30,7 +30,11 @@ describe('DataMatcher Unit Test', () => {
       'addQuerySource',
       'triggerMatch',
       'match',
+      '_filterQueriesFromCache',
       '_matchSource',
+      '_startMatch',
+      '_finishMatch',
+      '_onMatchError',
     ].forEach((key) => {
       dataMatcher[key].restore();
     });
@@ -657,6 +661,242 @@ describe('DataMatcher Unit Test', () => {
         error = e;
       }
       expect(error.message).to.equal('DataMatcher: "getQueriesFn" is already added.');
+    });
+
+    it('should add getQueriesFn to _querySources', () => {
+      const getQueriesFn = () => null;
+      const readyCheckFn = () => null;
+      dataMatcher._querySources = new Map();
+      dataMatcher.addQuerySource({ getQueriesFn, readyCheckFn });
+      expect(dataMatcher._querySources.has(getQueriesFn)).to.equal(true);
+    });
+  });
+
+  describe('triggerMatch', () => {
+    it('should call match with queries params', async () => {
+      sinon.stub(dataMatcher, 'match');
+      sinon.stub(dataMatcher, 'ready', { get: () => true });
+      const getQueriesFn = () => [1, 2, 3];
+      const readyCheckFn = () => null;
+      dataMatcher._querySources = new Map();
+      dataMatcher._querySources.set(getQueriesFn, readyCheckFn);
+      await dataMatcher.triggerMatch();
+      sinon.assert.calledWith(dataMatcher.match, { queries: [1, 2, 3] });
+    });
+
+    it('should not call match if dataMatcher is not ready', async () => {
+      sinon.stub(dataMatcher, 'match');
+      sinon.stub(dataMatcher, 'ready', { get: () => false });
+      const getQueriesFn = () => [1, 2, 3];
+      const readyCheckFn = () => null;
+      dataMatcher._querySources = new Map();
+      dataMatcher._querySources.set(getQueriesFn, readyCheckFn);
+      await dataMatcher.triggerMatch();
+      sinon.assert.notCalled(dataMatcher.match);
+    });
+
+    it('should not call match if queries length is zero', async () => {
+      sinon.stub(dataMatcher, 'match');
+      sinon.stub(dataMatcher, 'ready', { get: () => true });
+      const getQueriesFn = () => [];
+      const readyCheckFn = () => null;
+      dataMatcher._querySources = new Map();
+      dataMatcher._querySources.set(getQueriesFn, readyCheckFn);
+      await dataMatcher.triggerMatch();
+      sinon.assert.notCalled(dataMatcher.match);
+    });
+  });
+
+  describe('match', () => {
+    it('should not call _matchSource if _searchSource is empty', async () => {
+      dataMatcher._searchSource = {};
+      sinon.stub(dataMatcher, '_matchSource');
+      const queries = [1];
+      await dataMatcher.match({ queries });
+      sinon.assert.notCalled(dataMatcher._matchSource);
+    });
+
+    it('should call _matchSource once if _searchSource has one key', async () => {
+      dataMatcher._searchSource = {
+        test: 1,
+      };
+      sinon.stub(dataMatcher, '_matchSource');
+      const queries = [1];
+      await dataMatcher.match({ queries });
+      sinon.assert.calledOnce(dataMatcher._matchSource);
+    });
+
+    it('should call _matchSource twice if _searchSource has two key', async () => {
+      dataMatcher._searchSource = {
+        test: 1,
+        test2: 2,
+      };
+      sinon.stub(dataMatcher, '_matchSource');
+      const queries = [1];
+      await dataMatcher.match({ queries });
+      sinon.assert.callCount(dataMatcher._matchSource, 2);
+    });
+  });
+
+  describe('_filterQueriesFromCache', () => {
+    it('should filter query if query is not expired ', () => {
+      const queries = ['1234'];
+      const sourceName = 'test';
+      dataMatcher._ttl = 30 * 60 * 1000;
+      dataMatcher._noMatchTtl = 30 * 1000;
+      sinon.stub(dataMatcher, 'state', {
+        get: () => ({
+          matching: [],
+        }),
+      });
+      sinon.stub(dataMatcher, 'cache', {
+        get: () => ({
+          matchRecord: {
+            '["test","1234"]': {
+              result: matchResult.notFound,
+              timestamp: Date.now(),
+            }
+          }
+        }),
+      });
+      const result = dataMatcher._filterQueriesFromCache({ sourceName, queries });
+      expect(result).to.deep.equal([]);
+    });
+
+    it('should return query if query is expired ', () => {
+      const queries = ['1234'];
+      const sourceName = 'test';
+      dataMatcher._ttl = 30 * 60 * 1000;
+      dataMatcher._noMatchTtl = 30 * 1000;
+      sinon.stub(dataMatcher, 'state', {
+        get: () => ({
+          matching: [],
+        }),
+      });
+      sinon.stub(dataMatcher, 'cache', {
+        get: () => ({
+          matchRecord: {
+            '["test","1234"]': {
+              result: matchResult.notFound,
+              timestamp: 0,
+            }
+          }
+        }),
+      });
+      const result = dataMatcher._filterQueriesFromCache({ sourceName, queries });
+      expect(result).to.deep.equal(['1234']);
+    });
+
+    it('should filter query if query is matching', () => {
+      const queries = ['1234'];
+      const sourceName = 'test';
+      dataMatcher._ttl = 30 * 60 * 1000;
+      dataMatcher._noMatchTtl = 30 * 1000;
+      sinon.stub(dataMatcher, 'state', {
+        get: () => ({
+          matching: ['["test","1234"]'],
+        }),
+      });
+      sinon.stub(dataMatcher, 'cache', {
+        get: () => ({
+          matchRecord: {}
+        }),
+      });
+      const result = dataMatcher._filterQueriesFromCache({ sourceName, queries });
+      expect(result).to.deep.equal([]);
+    });
+
+    it('should all queries if matching and matchRecord are empty', () => {
+      const queries = ['1234'];
+      const sourceName = 'test';
+      dataMatcher._ttl = 30 * 60 * 1000;
+      dataMatcher._noMatchTtl = 30 * 1000;
+      sinon.stub(dataMatcher, 'state', {
+        get: () => ({
+          matching: [],
+        }),
+      });
+      sinon.stub(dataMatcher, 'cache', {
+        get: () => ({
+          matchRecord: {}
+        }),
+      });
+      const result = dataMatcher._filterQueriesFromCache({ sourceName, queries });
+      expect(result).to.deep.equal(['1234']);
+    });
+  });
+
+  describe('_matchSource', () => {
+    it('should not call _startMatch if queries is empty', async () => {
+      sinon.stub(dataMatcher, '_filterQueriesFromCache');
+      sinon.stub(dataMatcher, '_startMatch');
+      sinon.stub(dataMatcher, '_finishMatch');
+      sinon.stub(dataMatcher, '_onMatchError');
+      const sourceName = 'test';
+      const queries = [];
+      const ignoreCache = true;
+      const quiet = false;
+      await dataMatcher._matchSource({ sourceName, queries, ignoreCache, quiet });
+      sinon.assert.notCalled(dataMatcher._startMatch);
+      sinon.assert.notCalled(dataMatcher._onMatchError);
+    });
+
+    it('should not call _startMatch if ignoreCache is false and _filterQueriesFromCache is empty', async () => {
+      sinon.stub(dataMatcher, '_filterQueriesFromCache').callsFake(
+        () => [],
+      );
+      sinon.stub(dataMatcher, '_startMatch');
+      sinon.stub(dataMatcher, '_finishMatch');
+      sinon.stub(dataMatcher, '_onMatchError');
+      const sourceName = 'test';
+      const queries = [];
+      const ignoreCache = false;
+      const quiet = false;
+      await dataMatcher._matchSource({ sourceName, queries, ignoreCache, quiet });
+      sinon.assert.notCalled(dataMatcher._startMatch);
+      sinon.assert.notCalled(dataMatcher._onMatchError);
+    });
+
+    it('should call _startMatch and _finishMatch', async () => {
+      sinon.stub(dataMatcher, '_filterQueriesFromCache');
+      sinon.stub(dataMatcher, '_startMatch');
+      sinon.stub(dataMatcher, '_finishMatch');
+      sinon.stub(dataMatcher, '_onMatchError');
+      const sourceName = 'test';
+      const queries = ['1234'];
+      const ignoreCache = true;
+      const quiet = false;
+      dataMatcher._searchSource = {
+        test: {
+          searchFn: () => ['123'],
+        }
+      };
+      await dataMatcher._matchSource({ sourceName, queries, ignoreCache, quiet });
+      sinon.assert.calledOnce(dataMatcher._startMatch);
+      sinon.assert.calledOnce(dataMatcher._finishMatch);
+      sinon.assert.notCalled(dataMatcher._onMatchError);
+    });
+
+    it('should call _onMatchError when match throw error', async () => {
+      sinon.stub(dataMatcher, '_filterQueriesFromCache');
+      sinon.stub(dataMatcher, '_startMatch');
+      sinon.stub(dataMatcher, '_finishMatch');
+      sinon.stub(dataMatcher, '_onMatchError');
+      const sourceName = 'test';
+      const queries = ['1234'];
+      const ignoreCache = true;
+      const quiet = false;
+      dataMatcher._searchSource = {
+        test: {
+          searchFn: () => {
+            throw new Error('error');
+          },
+        }
+      };
+      await dataMatcher._matchSource({ sourceName, queries, ignoreCache, quiet });
+      sinon.assert.calledOnce(dataMatcher._startMatch);
+      sinon.assert.notCalled(dataMatcher._finishMatch);
+      sinon.assert.calledOnce(dataMatcher._onMatchError);
     });
   });
 });

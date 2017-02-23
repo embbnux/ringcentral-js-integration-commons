@@ -186,9 +186,9 @@ export default class DataMatcher extends RcModule {
     )));
   }
 
-  async _matchSource({ sourceName, queries, ignoreCache, quiet }) {
+  _filterQueriesFromCache({ sourceName, queries }) {
     const now = Date.now();
-    const filteredQueries = ignoreCache ? queries : queries.filter((query) => {
+    return queries.filter((query) => {
       const cacheKey = getCacheKey(sourceName, query);
       const cache = this.cache;
       return !(
@@ -200,31 +200,60 @@ export default class DataMatcher extends RcModule {
         this.state.matching.indexOf(cacheKey) !== -1
       );
     });
+  }
+
+  async _matchSource({ sourceName, queries, ignoreCache, quiet }) {
+    const filteredQueries =
+      ignoreCache ? queries : this._filterQueriesFromCache({ sourceName, queries });
     if (filteredQueries.length) {
-      this.store.dispatch({
-        type: quiet ? this.actionTypes.quietMatch : this.actionTypes.match,
+      this._startMatch({
         sourceName,
         queries: filteredQueries,
+        quiet,
       });
       try {
         const data = await this._searchSource[sourceName].searchFn({
           queries: filteredQueries,
         });
-        this.store.dispatch({
-          type: this.actionTypes.matchSuccess,
+        this._finishMatch({
           sourceName,
           queries: filteredQueries,
           data,
         });
       } catch (error) {
-        this.store.dispatch({
-          type: this.actionTypes.matchError,
+        this._onMatchError({
           sourceName,
           queries: filteredQueries,
           error,
         });
       }
     }
+  }
+
+  _startMatch({ sourceName, queries, quiet }) {
+    this.store.dispatch({
+      type: quiet ? this.actionTypes.quietMatch : this.actionTypes.match,
+      sourceName,
+      queries,
+    });
+  }
+
+  _finishMatch({ sourceName, queries, data }) {
+    this.store.dispatch({
+      type: this.actionTypes.matchSuccess,
+      sourceName,
+      queries,
+      data,
+    });
+  }
+
+  _onMatchError({ sourceName, queries, error }) {
+    this.store.dispatch({
+      type: this.actionTypes.matchError,
+      sourceName,
+      queries,
+      error,
+    });
   }
 
   get matcherStatus() {
