@@ -5,6 +5,7 @@ import DataMatcher from './index';
 import getMatcherReducer from './getMatcherReducer';
 import getCacheReducer from './getCacheReducer';
 import actionTypes from './actionTypesBase';
+import { matchResult } from './helpers';
 
 describe('DataMatcher Unit Test', () => {
   let dataMatcher;
@@ -415,6 +416,247 @@ describe('DataMatcher Unit Test', () => {
           expect(dataMatcher._shouldReset()).to.equal(false);
         });
       });
+    });
+  });
+
+  describe('_readyCheck', () => {
+    it('should return true if _searchSource is blank and _querySources is blank', () => {
+      dataMatcher._searchSource = {};
+      dataMatcher._querySources = new Map();
+      expect(dataMatcher._readyCheck()).to.equal(true);
+    });
+
+    it('should return true if _searchSource is all ready and _querySources is blank', () => {
+      dataMatcher._searchSource = {
+        test: {
+          readyCheckFn: () => true,
+        },
+      };
+      dataMatcher._querySources = new Map();
+      expect(dataMatcher._readyCheck()).to.equal(true);
+    });
+
+    it('should return false if one of _searchSource is not ready and _querySources is blank', () => {
+      dataMatcher._searchSource = {
+        test: {
+          readyCheckFn: () => false,
+        },
+      };
+      dataMatcher._querySources = new Map();
+      expect(dataMatcher._readyCheck()).to.equal(false);
+    });
+
+    it('should return true if _searchSource is blank and _querySources is all ready', () => {
+      dataMatcher._searchSource = {};
+      dataMatcher._querySources = new Map();
+      dataMatcher._querySources.set(
+        () => null,
+        () => true,
+      );
+      expect(dataMatcher._readyCheck()).to.equal(true);
+    });
+
+    it('should return false if _searchSource is blank and one of _querySources is not ready', () => {
+      dataMatcher._searchSource = {};
+      dataMatcher._querySources = new Map();
+      dataMatcher._querySources.set(
+        () => null,
+        () => false,
+      );
+      expect(dataMatcher._readyCheck()).to.equal(false);
+    });
+
+    it('should return true if _searchSource is all ready and _querySources is all ready', () => {
+      dataMatcher._searchSource = {
+        test: {
+          readyCheckFn: () => true,
+        },
+      };
+      dataMatcher._querySources = new Map();
+      dataMatcher._querySources.set(
+        () => null,
+        () => true,
+      );
+      expect(dataMatcher._readyCheck()).to.equal(true);
+    });
+
+    it('should return false if one of _searchSource is not ready and one of _querySources is not ready', () => {
+      dataMatcher._searchSource = {
+        test: {
+          readyCheckFn: () => false,
+        },
+      };
+      dataMatcher._querySources = new Map();
+      dataMatcher._querySources.set(
+        () => null,
+        () => false,
+      );
+      expect(dataMatcher._readyCheck()).to.equal(false);
+    });
+  });
+
+  describe('_getExpiredKeys', () => {
+    it('should return empty keys if matchRecord in cache is empty', () => {
+      sinon.stub(dataMatcher, 'cache', { get: () => ({ matchRecord: {} }) });
+      const result = dataMatcher._getExpiredKeys();
+      expect(result).to.deep.equal([]);
+    });
+
+    it('should return expired keys if matchRecord which is found is expired', () => {
+      dataMatcher._ttl = 30 * 60 * 1000;
+      dataMatcher._noMatchTtl = 30 * 1000;
+      sinon.stub(dataMatcher, 'cache', {
+        get: () => ({
+          matchRecord: {
+            test: {
+              result: matchResult.found,
+              timestamp: 0,
+            }
+          }
+        })
+      });
+      const result = dataMatcher._getExpiredKeys();
+      expect(result).to.deep.equal(['test']);
+    });
+
+    it('should return expired keys if matchRecord which is unfound is expired', () => {
+      dataMatcher._ttl = 30 * 60 * 1000;
+      dataMatcher._noMatchTtl = 30 * 1000;
+      sinon.stub(dataMatcher, 'cache', {
+        get: () => ({
+          matchRecord: {
+            test: {
+              result: matchResult.notFound,
+              timestamp: 0,
+            }
+          }
+        })
+      });
+      const result = dataMatcher._getExpiredKeys();
+      expect(result).to.deep.equal(['test']);
+    });
+
+    it('should return empty keys if matchRecord is not expired', () => {
+      dataMatcher._ttl = 30 * 60 * 1000;
+      dataMatcher._noMatchTtl = 30 * 1000;
+      sinon.stub(dataMatcher, 'cache', {
+        get: () => ({
+          matchRecord: {
+            test: {
+              result: matchResult.found,
+              timestamp: Date.now(),
+            }
+          }
+        })
+      });
+      const result = dataMatcher._getExpiredKeys();
+      expect(result).to.deep.equal([]);
+    });
+  });
+
+  describe('addSearchSource', () => {
+    it('should raise that source name is required', () => {
+      const searchFn = () => null;
+      const readyCheckFn = () => null;
+      let error = null;
+      try {
+        dataMatcher.addSearchSource({ searchFn, readyCheckFn });
+      } catch (e) {
+        error = e;
+      }
+      expect(error.message).to.equal('DataMatcher: "sourceName" is required.');
+    });
+
+    it('should raise that source name already exists', () => {
+      dataMatcher._searchSource = {};
+      const sourceName = 'test';
+      const searchFn = () => null;
+      const readyCheckFn = () => null;
+      dataMatcher._searchSource[sourceName] = {};
+      let error = null;
+      try {
+        dataMatcher.addSearchSource({ sourceName, searchFn, readyCheckFn });
+      } catch (e) {
+        error = e;
+      }
+      expect(error.message).to.equal('DataMatcher: A source named "test" already exists.');
+    });
+
+    it('should raise that searchFn is not a function', () => {
+      dataMatcher._searchSource = {};
+      const sourceName = 'test';
+      const searchFn = 'abc';
+      const readyCheckFn = () => null;
+      let error = null;
+      try {
+        dataMatcher.addSearchSource({ sourceName, searchFn, readyCheckFn });
+      } catch (e) {
+        error = e;
+      }
+      expect(error.message).to.equal('DataMatcher: "searchFn" must be a function.');
+    });
+
+    it('should raise that readyCheckFn is not a function', () => {
+      dataMatcher._searchSource = {};
+      const sourceName = 'test';
+      const readyCheckFn = 'abc';
+      const searchFn = () => null;
+      let error = null;
+      try {
+        dataMatcher.addSearchSource({ sourceName, searchFn, readyCheckFn });
+      } catch (e) {
+        error = e;
+      }
+      expect(error.message).to.equal('DataMatcher: "readyCheckFn" must be a function.');
+    });
+
+    it('should add source to _searchSource', () => {
+      dataMatcher._searchSource = {};
+      const sourceName = 'test';
+      const searchFn = () => null;
+      const readyCheckFn = () => null;
+      dataMatcher.addSearchSource({ sourceName, searchFn, readyCheckFn });
+      expect(dataMatcher._searchSource).to.have.keys(sourceName);
+    });
+  });
+
+  describe('addQuerySource', () => {
+    it('should raise that getQueriesFn is not a function', () => {
+      const getQueriesFn = 'test';
+      const readyCheckFn = () => null;
+      let error = null;
+      try {
+        dataMatcher.addQuerySource({ getQueriesFn, readyCheckFn });
+      } catch (e) {
+        error = e;
+      }
+      expect(error.message).to.equal('DataMatcher: "getQueriesFn" must be a function.');
+    });
+
+    it('should raise that readyCheckFn is not a function', () => {
+      const getQueriesFn = () => null;
+      const readyCheckFn = 'test';
+      let error = null;
+      try {
+        dataMatcher.addQuerySource({ getQueriesFn, readyCheckFn });
+      } catch (e) {
+        error = e;
+      }
+      expect(error.message).to.equal('DataMatcher: "readyCheckFn" must be a function.');
+    });
+
+    it('should raise that getQueriesFn already exists', () => {
+      const getQueriesFn = () => null;
+      const readyCheckFn = () => null;
+      dataMatcher._querySources = new Map();
+      dataMatcher._querySources.set(getQueriesFn, null);
+      let error = null;
+      try {
+        dataMatcher.addQuerySource({ getQueriesFn, readyCheckFn });
+      } catch (e) {
+        error = e;
+      }
+      expect(error.message).to.equal('DataMatcher: "getQueriesFn" is already added.');
     });
   });
 });

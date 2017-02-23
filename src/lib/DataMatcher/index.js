@@ -111,7 +111,7 @@ export default class DataMatcher extends RcModule {
   _readyCheck() {
     return Object.keys(this._searchSource)
       .every(sourceName => this._searchSource[sourceName].readyCheckFn()) &&
-      this._querySources.values()::Array.prototype.every(readyCheckFn => readyCheckFn());
+      [...this._querySources.values()].every(readyCheckFn => readyCheckFn());
   }
 
   _getExpiredKeys() {
@@ -119,8 +119,8 @@ export default class DataMatcher extends RcModule {
     const now = Date.now();
     const matchRecord = this.cache.matchRecord;
     Object.keys(matchRecord).forEach((key) => {
-      const ttl = matchRecord[key].result === matchResult.notFound ?
-        this._noMatchTtl : this._ttl;
+      const ttl =
+        matchRecord[key].result === matchResult.notFound ? this._noMatchTtl : this._ttl;
       if (now - matchRecord[key].timestamp > ttl) {
         expiredKeys.push(key);
       }
