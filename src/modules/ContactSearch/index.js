@@ -24,11 +24,18 @@ export default class ContactSearch extends RcModule {
     this._searchSources = new Map();
     this._searchSourcesFormat = new Map();
     this._searchSourcesCheck = new Map();
-    this._reducer = getContactSearchReducer(this.actionTypes);
-    this._cacheReducer = getCacheReducer(this.actionTypes);
-    storage.registerReducer({ key: this._storageKey, reducer: this._cacheReducer });
+    if (this._storage) {
+      this._reducer = getContactSearchReducer(this.actionTypes);
+      storage.registerReducer({
+        key: this._storageKey,
+        reducer: getCacheReducer(this.actionTypes)
+      });
+    } else {
+      this._reducer = getContactSearchReducer(this.actionTypes, {
+        cache: getCacheReducer(this.actionTypes),
+      });
+    }
   }
-
   initialize() {
     this.store.subscribe(() => this._onStateChange());
   }
@@ -44,7 +51,7 @@ export default class ContactSearch extends RcModule {
   _shouldInit() {
     return (
       this._auth.loginStatus === loginStatus.loggedIn &&
-      this._storage.ready &&
+      (!this._storage || this._storage.ready) &&
       this._readyCheck() &&
       !this.ready
     );
@@ -54,7 +61,7 @@ export default class ContactSearch extends RcModule {
     return (
       (
         this._auth.loginStatus !== loginStatus.loggedIn ||
-        !this._storage.ready
+        (this._storage && !this._storage.ready)
       ) &&
       this.ready
     );
@@ -186,7 +193,9 @@ export default class ContactSearch extends RcModule {
   }
 
   get cache() {
-    return this._storage.getItem(this._storageKey);
+    return this._storage ?
+      this._storage.getItem(this._storageKey) :
+      this.state.cache;
   }
 
   get status() {

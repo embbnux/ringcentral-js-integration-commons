@@ -4,6 +4,8 @@ import getContactSearchReducer, {
   getSearchingReducer,
 } from './getContactSearchReducer';
 
+import getModuleStatusReducer from '../../lib/getModuleStatusReducer';
+
 import contactSearchActionTypes from './contactSearchActionTypes';
 import contactSearchStatus from './contactSearchStatus';
 
@@ -152,6 +154,26 @@ describe('getSearchingReducer', () => {
         searchString: 'test',
         entities,
       }).result).to.deep.equal(expectResult);
+    });
+  });
+});
+
+describe('getContactSearchReducer', () => {
+  it('should be a function', () => {
+    expect(getContactSearchReducer).to.be.a('function');
+  });
+  it('should return a reducer', () => {
+    expect(getContactSearchReducer(contactSearchActionTypes)).to.be.a('function');
+  });
+  it('should return a combined reducer', () => {
+    const reducer = getContactSearchReducer(contactSearchActionTypes);
+    const statusReducer = getModuleStatusReducer(contactSearchActionTypes);
+    const searchStatusReducer = getContactSearchStatusReducer(contactSearchActionTypes);
+    const searchingReducer = getSearchingReducer(contactSearchActionTypes);
+    expect(reducer(undefined, {})).to.deep.equal({
+      status: statusReducer(undefined, {}),
+      searchStatus: searchStatusReducer(undefined, {}),
+      searching: searchingReducer(undefined, {}),
     });
   });
 });
