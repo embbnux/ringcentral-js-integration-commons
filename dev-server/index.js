@@ -219,6 +219,7 @@ class DemoPhone extends RcModule {
       client: this.client,
       storage: this.storage,
       subscription: this.subscription,
+      rolesAndPermissions: this.rolesAndPermissions,
       getState: () => this.state.callLog,
     }));
     this.addModule('accountExtension', new AccountExtension({
@@ -276,7 +277,24 @@ class DemoPhone extends RcModule {
       activeCalls: this.activeCalls,
       callLog: this.callLog,
       detailedPresence: this.detailedPresence,
+      regionSettings: this.regionSettings,
       getState: () => this.state.callHistory,
+    }));
+    this.addModule('dateTimeIntl', new DateTimeIntl({
+      auth: this.auth,
+      locale: this.locale,
+      storage: this.storage,
+      getState: () => this.state.dateTimeIntl,
+    }));
+    this.addModule('contactMatcher', new ContactMatcher({
+      auth: this.auth,
+      storage: this.storage,
+      getState: () => this.state.contactMatcher,
+    }));
+    this.addModule('activityMatcher', new ActivityMatcher({
+      auth: this.auth,
+      storage: this.storage,
+      getState: () => this.state.activityMatcher,
     }));
     this.addModule('contactSearch', new ContactSearch({
       auth: this.auth,
@@ -313,27 +331,6 @@ class DemoPhone extends RcModule {
       messageStore: this.messageStore,
       getState: () => this.state.messages,
     }));
-    this.addModule('dateTimeIntl', new DateTimeIntl({
-      auth: this.auth,
-      locale: this.locale,
-      storage: this.storage,
-      getState: () => this.state.dateTimeIntl,
-    }));
-    this.addModule('contactMatcher', new ContactMatcher({
-      auth: this.auth,
-      storage: this.storage,
-      getState: () => this.state.contactMatcher,
-    }));
-    this.addModule('activityMatcher', new ActivityMatcher({
-      auth: this.auth,
-      storage: this.storage,
-      getState: () => this.state.activityMatcher,
-    }));
-    // this.contactMatcher.addQuerySource({
-    //   sourceName: 'callLog',
-    //   getQueriesFn: this.callLog.getSelector('normalizedPhoneNumbers'),
-    //   readyCheckFn: () => this.callLog.ready,
-    // });
     this._reducer = combineReducers({
       accountInfo: this.accountInfo.reducer,
       accountExtension: this.accountExtension.reducer,
@@ -365,15 +362,15 @@ class DemoPhone extends RcModule {
       subscription: this.subscription.reducer,
       tabManager: this.tabManager.reducer,
       numberValidate: this.numberValidate.reducer,
+      dateTimeIntl: this.dateTimeIntl.reducer,
+      contactMatcher: this.contactMatcher.reducer,
+      activityMatcher: this.activityMatcher.reducer,
       messageSender: this.messageSender.reducer,
       contactSearch: this.contactSearch.reducer,
       composeText: this.composeText.reducer,
       messageStore: this.messageStore.reducer,
       conversation: this.conversation.reducer,
       messages: this.messages.reducer,
-      dateTimeIntl: this.dateTimeIntl.reducer,
-      contactMatcher: this.contactMatcher.reducer,
-      activityMatcher: this.activityMatcher.reducer,
       lastAction: (state = null, action) => {
         console.log(action);
         return action;
