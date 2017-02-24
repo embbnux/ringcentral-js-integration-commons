@@ -6,7 +6,7 @@ import getContactSearchReducer, {
 
 import getModuleStatusReducer from '../../lib/getModuleStatusReducer';
 
-import contactSearchActionTypes from './contactSearchActionTypes';
+import actionTypes from './actionTypes';
 import contactSearchStatus from './contactSearchStatus';
 
 describe('ContactSearch :: getContactSearchStatusReducer', () => {
@@ -17,7 +17,7 @@ describe('ContactSearch :: getContactSearchStatusReducer', () => {
     expect(getContactSearchStatusReducer()).to.be.a('function');
   });
   describe('statusReducer', () => {
-    const reducer = getContactSearchStatusReducer(contactSearchActionTypes);
+    const reducer = getContactSearchStatusReducer(actionTypes);
     it('should have initial state of idle', () => {
       expect(reducer(undefined, {})).to.equal(contactSearchStatus.idle);
     });
@@ -28,7 +28,7 @@ describe('ContactSearch :: getContactSearchStatusReducer', () => {
     });
     it('should return searching status on search', () => {
       [
-        contactSearchActionTypes.search,
+        actionTypes.search,
       ].forEach(type => {
         expect(reducer('foo', {
           type,
@@ -37,10 +37,10 @@ describe('ContactSearch :: getContactSearchStatusReducer', () => {
     });
     it('should return idle state on prepareSearch, searchSuccess, searchError', () => {
       [
-        contactSearchActionTypes.prepareSearch,
-        contactSearchActionTypes.searchSuccess,
-        contactSearchActionTypes.searchError,
-      ].forEach(type => {
+        actionTypes.prepareSearch,
+        actionTypes.searchSuccess,
+        actionTypes.searchError,
+      ].forEach((type) => {
         expect(reducer('foo', {
           type,
         })).to.equal(contactSearchStatus.idle);
@@ -57,7 +57,7 @@ describe('getSearchingReducer', () => {
     expect(getSearchingReducer()).to.be.a('function');
   });
   describe('searchingReducer', () => {
-    const reducer = getSearchingReducer(contactSearchActionTypes);
+    const reducer = getSearchingReducer(actionTypes);
     const initialState = { searchString: '', result: [] };
     it('should have initial state of null', () => {
       expect(reducer(undefined, {})).to.deep.equal(initialState);
@@ -74,9 +74,9 @@ describe('getSearchingReducer', () => {
     });
     it('should return initial state on prepareSearch, reset and searchError', () => {
       [
-        contactSearchActionTypes.prepareSearch,
-        contactSearchActionTypes.reset,
-        contactSearchActionTypes.searchError,
+        actionTypes.prepareSearch,
+        actionTypes.reset,
+        actionTypes.searchError,
       ].forEach(type => {
         expect(reducer('foo', {
           type,
@@ -87,7 +87,7 @@ describe('getSearchingReducer', () => {
     it('should return searchString and result as key on searchSuccess', () => {
       const originalState = {};
       expect(reducer(originalState, {
-        type: contactSearchActionTypes.searchSuccess,
+        type: actionTypes.searchSuccess,
         searchString: '123',
         entities: [],
       })).to.include.keys('searchString', 'result');
@@ -95,7 +95,7 @@ describe('getSearchingReducer', () => {
     it('should return data with searchString on searchSuccess', () => {
       const originalState = {};
       expect(reducer(originalState, {
-        type: contactSearchActionTypes.searchSuccess,
+        type: actionTypes.searchSuccess,
         searchString: 'test',
         entities: [],
       }).searchString).to.equal('test');
@@ -110,7 +110,7 @@ describe('getSearchingReducer', () => {
         phoneType: 'mobile'
       }];
       expect(reducer(originalState, {
-        type: contactSearchActionTypes.searchSuccess,
+        type: actionTypes.searchSuccess,
         searchString: 'test',
         entities,
       }).result).to.deep.equal(entities);
@@ -150,7 +150,7 @@ describe('getSearchingReducer', () => {
         }
       ];
       expect(reducer(originalState, {
-        type: contactSearchActionTypes.searchSuccess,
+        type: actionTypes.searchSuccess,
         searchString: 'test',
         entities,
       }).result).to.deep.equal(expectResult);
@@ -163,13 +163,13 @@ describe('getContactSearchReducer', () => {
     expect(getContactSearchReducer).to.be.a('function');
   });
   it('should return a reducer', () => {
-    expect(getContactSearchReducer(contactSearchActionTypes)).to.be.a('function');
+    expect(getContactSearchReducer(actionTypes)).to.be.a('function');
   });
   it('should return a combined reducer', () => {
-    const reducer = getContactSearchReducer(contactSearchActionTypes);
-    const statusReducer = getModuleStatusReducer(contactSearchActionTypes);
-    const searchStatusReducer = getContactSearchStatusReducer(contactSearchActionTypes);
-    const searchingReducer = getSearchingReducer(contactSearchActionTypes);
+    const reducer = getContactSearchReducer(actionTypes);
+    const statusReducer = getModuleStatusReducer(actionTypes);
+    const searchStatusReducer = getContactSearchStatusReducer(actionTypes);
+    const searchingReducer = getSearchingReducer(actionTypes);
     expect(reducer(undefined, {})).to.deep.equal({
       status: statusReducer(undefined, {}),
       searchStatus: searchStatusReducer(undefined, {}),

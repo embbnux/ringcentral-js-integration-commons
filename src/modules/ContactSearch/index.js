@@ -2,7 +2,7 @@ import RcModule from '../../lib/RcModule';
 import loginStatus from '../../modules/Auth/loginStatus';
 import moduleStatus from '../../enums/moduleStatus';
 
-import contactSearchActionTypes from './contactSearchActionTypes';
+import actionTypes from './actionTypes';
 import getContactSearchReducer from './getContactSearchReducer';
 import getCacheReducer from './getCacheReducer';
 
@@ -15,7 +15,7 @@ export default class ContactSearch extends RcModule {
   }) {
     super({
       ...options,
-      actionTypes: contactSearchActionTypes,
+      actionTypes,
     });
     this._auth = auth;
     this._storageKey = 'contactSearchCache';
