@@ -14,6 +14,7 @@ exports.default = new _keyValueMap2.default({
   noCall: 'NoCall',
   onHold: 'OnHold',
   ringing: 'Ringing',
-  callConnected: 'CallConnected'
+  callConnected: 'CallConnected',
+  parkedCall: 'ParkedCall'
 });
 //# sourceMappingURL=telephonyStatus.js.map
