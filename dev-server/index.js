@@ -47,6 +47,7 @@ import Conversation from '../src/modules/Conversation';
 import Messages from '../src/modules/Messages';
 
 import ContactMatcher from '../src/modules/ContactMatcher';
+import ActivityMatcher from '../src/modules/ActivityMatcher';
 import DateTimeIntl from '../src/modules/DateTimeIntl';
 
 import config from './config';
@@ -323,6 +324,11 @@ class DemoPhone extends RcModule {
       storage: this.storage,
       getState: () => this.state.contactMatcher,
     }));
+    this.addModule('activityMatcher', new ActivityMatcher({
+      auth: this.auth,
+      storage: this.storage,
+      getState: () => this.state.activityMatcher,
+    }));
     // this.contactMatcher.addQuerySource({
     //   sourceName: 'callLog',
     //   getQueriesFn: this.callLog.getSelector('normalizedPhoneNumbers'),
@@ -367,6 +373,7 @@ class DemoPhone extends RcModule {
       messages: this.messages.reducer,
       dateTimeIntl: this.dateTimeIntl.reducer,
       contactMatcher: this.contactMatcher.reducer,
+      activityMatcher: this.activityMatcher.reducer,
       lastAction: (state = null, action) => {
         console.log(action);
         return action;
