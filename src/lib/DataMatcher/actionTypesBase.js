@@ -5,7 +5,6 @@ export default new Enum([
   'initSuccess',
   'resetSuccess',
   'match',
-  'quietMatch',
   'matchSuccess',
   'matchError',
   'cleanUp',

@@ -175,13 +175,12 @@ export default class DataMatcher extends RcModule {
     }
   }
 
-  match({ queries, ignoreCache = false, quiet = false }) {
+  match({ queries, ignoreCache = false }) {
     return Promise.all(Object.keys(this._searchSource).map(sourceName => (
       this._matchSource({
         sourceName,
         queries: [...new Set(queries)], // new Set for making unique
         ignoreCache,
-        quiet,
       })
     )));
   }
@@ -202,14 +201,13 @@ export default class DataMatcher extends RcModule {
     });
   }
 
-  async _matchSource({ sourceName, queries, ignoreCache, quiet }) {
+  async _matchSource({ sourceName, queries, ignoreCache }) {
     const filteredQueries =
       ignoreCache ? queries : this._filterQueriesFromCache({ sourceName, queries });
     if (filteredQueries.length) {
       this._startMatch({
         sourceName,
         queries: filteredQueries,
-        quiet,
       });
       try {
         const data = await this._searchSource[sourceName].searchFn({
@@ -230,9 +228,9 @@ export default class DataMatcher extends RcModule {
     }
   }
 
-  _startMatch({ sourceName, queries, quiet }) {
+  _startMatch({ sourceName, queries }) {
     this.store.dispatch({
-      type: quiet ? this.actionTypes.quietMatch : this.actionTypes.match,
+      type: this.actionTypes.match,
       sourceName,
       queries,
     });

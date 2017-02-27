@@ -7,7 +7,6 @@ export function getMatchingReducer(actionTypes) {
     let deleteKeys;
     switch (type) {
       case actionTypes.match:
-      case actionTypes.quietMatch:
         return state.concat(queries.map(query => getCacheKey(sourceName, query)));
 
       case actionTypes.matchSuccess:

@@ -835,8 +835,7 @@ describe('DataMatcher Unit Test', () => {
       const sourceName = 'test';
       const queries = [];
       const ignoreCache = true;
-      const quiet = false;
-      await dataMatcher._matchSource({ sourceName, queries, ignoreCache, quiet });
+      await dataMatcher._matchSource({ sourceName, queries, ignoreCache });
       sinon.assert.notCalled(dataMatcher._startMatch);
       sinon.assert.notCalled(dataMatcher._onMatchError);
     });
@@ -851,8 +850,7 @@ describe('DataMatcher Unit Test', () => {
       const sourceName = 'test';
       const queries = [];
       const ignoreCache = false;
-      const quiet = false;
-      await dataMatcher._matchSource({ sourceName, queries, ignoreCache, quiet });
+      await dataMatcher._matchSource({ sourceName, queries, ignoreCache });
       sinon.assert.notCalled(dataMatcher._startMatch);
       sinon.assert.notCalled(dataMatcher._onMatchError);
     });
@@ -865,13 +863,12 @@ describe('DataMatcher Unit Test', () => {
       const sourceName = 'test';
       const queries = ['1234'];
       const ignoreCache = true;
-      const quiet = false;
       dataMatcher._searchSource = {
         test: {
           searchFn: () => ['123'],
         }
       };
-      await dataMatcher._matchSource({ sourceName, queries, ignoreCache, quiet });
+      await dataMatcher._matchSource({ sourceName, queries, ignoreCache });
       sinon.assert.calledOnce(dataMatcher._startMatch);
       sinon.assert.calledOnce(dataMatcher._finishMatch);
       sinon.assert.notCalled(dataMatcher._onMatchError);
@@ -885,7 +882,6 @@ describe('DataMatcher Unit Test', () => {
       const sourceName = 'test';
       const queries = ['1234'];
       const ignoreCache = true;
-      const quiet = false;
       dataMatcher._searchSource = {
         test: {
           searchFn: () => {
@@ -893,7 +889,7 @@ describe('DataMatcher Unit Test', () => {
           },
         }
       };
-      await dataMatcher._matchSource({ sourceName, queries, ignoreCache, quiet });
+      await dataMatcher._matchSource({ sourceName, queries, ignoreCache });
       sinon.assert.calledOnce(dataMatcher._startMatch);
       sinon.assert.notCalled(dataMatcher._finishMatch);
       sinon.assert.calledOnce(dataMatcher._onMatchError);

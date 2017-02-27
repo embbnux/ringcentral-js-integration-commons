@@ -27,10 +27,9 @@ describe('getMatchingReducer', () => {
       .to.equal(originalState);
     });
 
-    it('should return state that concat with cachekey array when type is match or quietMatch', () => {
+    it('should return state that concat with cachekey array when type is match', () => {
       [
         actionTypes.match,
-        actionTypes.quietMatch,
       ].forEach((type) => {
         const originalState = ['123'];
         const sourceName = 'name';
