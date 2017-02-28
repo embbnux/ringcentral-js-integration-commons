@@ -1,7 +1,10 @@
 import RcModule from '../../lib/RcModule';
 import moduleStatus from '../../enums/moduleStatus';
 
+import { batchPutApi } from '../../lib/batchApiHelper';
+
 import * as messageStoreHelper from './messageStoreHelper';
+
 import actionTypes from './actionTypes';
 import getMessageStoreReducer from './getMessageStoreReducer';
 import getDataReducer from './getDataReducer';
@@ -38,12 +41,21 @@ export default class MessageStore extends RcModule {
     this._auth = auth;
     this._promise = null;
     this._lastSubscriptionMessage = null;
-    this._storageKey = 'messageStore2';
+    this._storageKey = 'messageStore';
 
     this._storage.registerReducer({
       key: this._storageKey,
       reducer: getDataReducer(this.actionTypes),
     });
+
+    this.addSelector(
+      'unreadCounts',
+      () => this.conversations,
+      conversations =>
+        conversations.reduce((pre, cur) => (pre + cur.unreadCounts), 0),
+    );
+
+    this.syncConversation = this.syncConversation.bind(this);
   }
 
   initialize() {
@@ -105,6 +117,10 @@ export default class MessageStore extends RcModule {
     });
   }
 
+  findConversationById(id) {
+    return this.conversationMap[id.toString()];
+  }
+
   async _initMessageStore() {
     await this._syncMessages();
     this._subscription.subscribe('/account/~/extension/~/message-store');
@@ -157,12 +173,42 @@ export default class MessageStore extends RcModule {
   }
 
   async _updateConversationFromSync(conversationId) {
-
+    const conversation = this.conversationMap[conversationId.toString()];
+    if (!conversation) {
+      return;
+    }
+    this.store.dispatch({
+      type: this.actionTypes.sync,
+    });
+    const oldSyncToken = conversation.syncToken;
+    const params = messageStoreHelper.getMessageSyncParams({
+      syncToken: oldSyncToken,
+      conversationId: conversation.id,
+    });
+    const response = await this._messageSyncApi(params);
+    const {
+      records,
+      syncTimestamp,
+      syncToken,
+    } = processResponseData(response);
+    this.store.dispatch({
+      type: this.actionTypes.syncConversationSuccess,
+      records,
+      syncTimestamp,
+      syncToken,
+      syncConversationId: conversation.id,
+    });
   }
 
   async _syncMessages() {
     await this._sync(async () => {
       await this._updateMessagesFromSync();
+    });
+  }
+
+  async syncConversation(id) {
+    await this._sync(async () => {
+      await this._updateConversationFromSync(id);
     });
   }
 
@@ -188,6 +234,116 @@ export default class MessageStore extends RcModule {
     });
   }
 
+  async _updateMessageApi(messageId, status) {
+    const body = {
+      readStatus: status,
+    };
+    const updateRequest = await this._client.account()
+                                            .extension()
+                                            .messageStore(messageId)
+                                            .put(body);
+    return updateRequest;
+  }
+
+  async _batchUpdateMessagesApi(messageIds, body) {
+    const ids = decodeURIComponent(messageIds.join(','));
+    const platform = this._client.service.platform();
+    const responses = await batchPutApi({
+      platform,
+      url: `/account/~/extension/~/message-store/${ids}`,
+      body,
+    });
+    return responses;
+  }
+
+  async _updateMessagesApi(messageIds, status) {
+    if (messageIds.length === 1) {
+      const result = await this._updateMessageApi(messageIds[0], status);
+      return [result];
+    }
+    const UPDATE_MESSAGE_ONCE_COUNT = 20;
+    const leftIds = messageIds.slice(0, UPDATE_MESSAGE_ONCE_COUNT);
+    const rightIds = messageIds.slice(UPDATE_MESSAGE_ONCE_COUNT);
+    const body = leftIds.map(() => (
+      { body: { readStatus: status } }
+    ));
+    const responses = await this._batchUpdateMessagesApi(leftIds, body);
+    const results = [];
+    responses.forEach((res) => {
+      if (res.response().status === 200) {
+        results.push(res.json());
+      }
+    });
+    if (rightIds.length > 0) {
+      const rightResults = await this._updateMessagesApi(rightIds, status);
+      if (rightResults.length > 0) {
+        results.concat(rightResults);
+      }
+    }
+    return results;
+  }
+
+  async readMessages(conversationId) {
+    const conversation = this.conversationMap[conversationId];
+    if (!conversation) {
+      return null;
+    }
+    const unreadMessageIds = Object.keys(conversation.unreadMessages);
+    if (unreadMessageIds.length === 0) {
+      return null;
+    }
+    try {
+      const updatedMessages = await this._updateMessagesApi(unreadMessageIds, 'Read');
+      this.store.dispatch({
+        type: this.actionTypes.updateMessages,
+        records: updatedMessages,
+      });
+    } catch (error) {
+      console.error(error);
+    }
+    return null;
+  }
+
+  matchMessageText(message, searchText) {
+    if (
+      message.subject &&
+      message.subject.toLowerCase().indexOf(searchText) >= 0
+    ) {
+      return message;
+    }
+    const matchedMessages = this.messages.filter((messageItem) => {
+      if (message.conversationId !== message.conversationId) {
+        return false;
+      }
+      if (
+        messageItem.subject &&
+        messageItem.subject.toLowerCase().indexOf(searchText) >= 0
+      ) {
+        return true;
+      }
+      return false;
+    });
+    if (matchedMessages.length > 0) {
+      return message;
+    }
+    return null;
+  }
+
+  updateConversationRecipientList(conversationId, recipients) {
+    this.store.dispatch({
+      type: this.actionTypes.updateConversationRecipients,
+      conversationId,
+      recipients,
+    });
+  }
+
+  pushMessage(record) {
+    this.store.dispatch({
+      type: this.actionTypes.updateMessages,
+      records: [record],
+    });
+  }
+
   get cache() {
     return this._storage.getItem(this._storageKey);
   }
@@ -198,6 +354,10 @@ export default class MessageStore extends RcModule {
 
   get conversations() {
     return this.cache.data.conversations;
+  }
+
+  get conversationMap() {
+    return this.cache.data.conversationMap;
   }
 
   get updatedTimestamp() {
@@ -214,6 +374,10 @@ export default class MessageStore extends RcModule {
 
   get status() {
     return this.state.status;
+  }
+
+  get unreadCounts() {
+    return this._selectors.unreadCounts();
   }
 
   get messageStoreStatus() {

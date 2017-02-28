@@ -8,6 +8,8 @@ export default new Enum([
   'sync',
   'syncError',
   'syncSuccess',
-  'saveSyncToken',
+  'syncConversationSuccess',
+  'updateMessages',
+  'updateConversationRecipients',
   'cleanUp',
-], 'messageStore2');
+], 'messageStore');
