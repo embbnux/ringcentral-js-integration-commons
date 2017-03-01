@@ -361,7 +361,7 @@ export default class MessageStore extends RcModule {
   }
 
   get updatedTimestamp() {
-    return this.cache.data.updatedTimestamp;
+    return this.cache.updatedTimestamp;
   }
 
   get syncTimestamp() {
