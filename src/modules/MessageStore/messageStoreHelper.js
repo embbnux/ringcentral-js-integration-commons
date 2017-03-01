@@ -77,6 +77,27 @@ export function prepareNewMessagesData({
   };
 }
 
+export function rebuildIndexOfConversationMap({
+  conversations,
+  conversationMap,
+}) {
+  const newConversations = [];
+  // copy old conversationMap to new conversationMap hash
+  // copy old conversations to new conversations array
+  conversations.forEach((conversation) => {
+    if (!conversation) {
+      return;
+    }
+    const conversationId = conversation.conversationId;
+    newConversations.push({ ...conversation });
+    conversationMap[conversationId].index = newConversations.length - 1;
+  });
+  return {
+    conversations: newConversations,
+    conversationMap,
+  };
+}
+
 export function findIndexOfConversations(newConversationMap, record) {
   const conversationId = record.conversation && record.conversation.id;
   const existedIndex =
@@ -135,18 +156,16 @@ export function pushRecordsToMessageData({
   };
   const addMessageToConversationMap = (message, index) => {
     const conversationId = message.conversationId;
-    if (conversationId) {
-      const conversation = newConversationMap[conversationId] || { unreadMessages: {} };
-      conversation.index = index;
-      conversation.id = conversationId;
-      setSyncTokenToConversation(conversation);
-      if (messageIsUnread(message)) {
-        conversation.unreadMessages[message.id] = 1;
-      } else if (conversation.unreadMessages[message.id]) {
-        delete conversation.unreadMessages[message.id];
-      }
-      newConversationMap[conversationId] = conversation;
+    const conversation = newConversationMap[conversationId] || { unreadMessages: {} };
+    conversation.index = index;
+    conversation.id = conversationId;
+    setSyncTokenToConversation(conversation);
+    if (messageIsUnread(message)) {
+      conversation.unreadMessages[message.id] = 1;
+    } else if (conversation.unreadMessages[message.id]) {
+      delete conversation.unreadMessages[message.id];
     }
+    newConversationMap[conversationId] = conversation;
   };
   const pushMessageToConversations = (record) => {
     const message = normalizeRecord(removeUri(record));
@@ -173,7 +192,7 @@ export function pushRecordsToMessageData({
         oldMessage.id !== message.id && oldMessage.conversationId === message.conversationId
       ));
       if (conversationMessages.length === 0) {
-        newConversations.splice(index, 1);
+        newConversations[index] = null;
         delete newConversationMap[record.conversation.id];
         return;
       }
@@ -198,7 +217,7 @@ export function pushRecordsToMessageData({
     const newCreated = new Date(record.creationTime);
     if (newCreated >= oldCreated) {
       // move the message to the top of new Messages
-      newConversations.splice(index, 1);
+      newConversations[index] = null;
       newConversations.push(newMessage);
       addMessageToConversationMap(newMessage, newConversations.length - 1);
     } else {
@@ -237,9 +256,12 @@ export function pushRecordsToMessageData({
       pushMessageToConversations(record);
     }
   });
-  return {
+  const rebuildConversation = rebuildIndexOfConversationMap({
     conversations: newConversations,
     conversationMap: newConversationMap,
+  });
+  return {
+    ...rebuildConversation,
     messages: newMessages,
   };
 }
