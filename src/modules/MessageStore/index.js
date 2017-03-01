@@ -304,29 +304,16 @@ export default class MessageStore extends RcModule {
     return null;
   }
 
-  matchMessageText(message, searchText) {
-    if (
-      message.subject &&
-      message.subject.toLowerCase().indexOf(searchText) >= 0
-    ) {
-      return message;
-    }
-    const matchedMessages = this.messages.filter((messageItem) => {
-      if (message.conversationId !== message.conversationId) {
-        return false;
-      }
+  searchMessagesText(searchText) {
+    return this.messages.filter((message) => {
       if (
-        messageItem.subject &&
-        messageItem.subject.toLowerCase().indexOf(searchText) >= 0
+        message.subject &&
+        message.subject.toLowerCase().indexOf(searchText) >= 0
       ) {
         return true;
       }
       return false;
     });
-    if (matchedMessages.length > 0) {
-      return message;
-    }
-    return null;
   }
 
   updateConversationRecipientList(conversationId, recipients) {
