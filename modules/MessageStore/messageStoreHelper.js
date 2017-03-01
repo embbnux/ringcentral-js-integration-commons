@@ -16,6 +16,7 @@ exports.normalizeRecord = normalizeRecord;
 exports.messageIsUnread = messageIsUnread;
 exports.getMessageSyncParams = getMessageSyncParams;
 exports.prepareNewMessagesData = prepareNewMessagesData;
+exports.rebuildIndexOfConversationMap = rebuildIndexOfConversationMap;
 exports.findIndexOfConversations = findIndexOfConversations;
 exports.findIndexOfMessages = findIndexOfMessages;
 exports.calcUnreadCount = calcUnreadCount;
@@ -108,6 +109,27 @@ function prepareNewMessagesData(_ref2) {
   };
 }
 
+function rebuildIndexOfConversationMap(_ref3) {
+  var conversations = _ref3.conversations,
+      conversationMap = _ref3.conversationMap;
+
+  var newConversations = [];
+  // copy old conversationMap to new conversationMap hash
+  // copy old conversations to new conversations array
+  conversations.forEach(function (conversation) {
+    if (!conversation) {
+      return;
+    }
+    var conversationId = conversation.conversationId;
+    newConversations.push((0, _extends3.default)({}, conversation));
+    conversationMap[conversationId].index = newConversations.length - 1;
+  });
+  return {
+    conversations: newConversations,
+    conversationMap: conversationMap
+  };
+}
+
 function findIndexOfConversations(newConversationMap, record) {
   var conversationId = record.conversation && record.conversation.id;
   var existedIndex = newConversationMap[conversationId] && newConversationMap[conversationId].index;
@@ -128,13 +150,13 @@ function calcUnreadCount(conversation) {
   return (0, _keys2.default)(conversation.unreadMessages).length;
 }
 
-function pushRecordsToMessageData(_ref3) {
-  var messages = _ref3.messages,
-      conversations = _ref3.conversations,
-      conversationMap = _ref3.conversationMap,
-      records = _ref3.records,
-      syncToken = _ref3.syncToken,
-      syncConversationId = _ref3.syncConversationId;
+function pushRecordsToMessageData(_ref4) {
+  var messages = _ref4.messages,
+      conversations = _ref4.conversations,
+      conversationMap = _ref4.conversationMap,
+      records = _ref4.records,
+      syncToken = _ref4.syncToken,
+      syncConversationId = _ref4.syncConversationId;
 
   var _prepareNewMessagesDa = prepareNewMessagesData({
     messages: messages,
@@ -158,18 +180,16 @@ function pushRecordsToMessageData(_ref3) {
   };
   var addMessageToConversationMap = function addMessageToConversationMap(message, index) {
     var conversationId = message.conversationId;
-    if (conversationId) {
-      var conversation = newConversationMap[conversationId] || { unreadMessages: {} };
-      conversation.index = index;
-      conversation.id = conversationId;
-      setSyncTokenToConversation(conversation);
-      if (messageIsUnread(message)) {
-        conversation.unreadMessages[message.id] = 1;
-      } else if (conversation.unreadMessages[message.id]) {
-        delete conversation.unreadMessages[message.id];
-      }
-      newConversationMap[conversationId] = conversation;
+    var conversation = newConversationMap[conversationId] || { unreadMessages: {} };
+    conversation.index = index;
+    conversation.id = conversationId;
+    setSyncTokenToConversation(conversation);
+    if (messageIsUnread(message)) {
+      conversation.unreadMessages[message.id] = 1;
+    } else if (conversation.unreadMessages[message.id]) {
+      delete conversation.unreadMessages[message.id];
     }
+    newConversationMap[conversationId] = conversation;
   };
   var pushMessageToConversations = function pushMessageToConversations(record) {
     var message = normalizeRecord((0, _removeUri2.default)(record));
@@ -196,7 +216,7 @@ function pushRecordsToMessageData(_ref3) {
         return oldMessage.id !== message.id && oldMessage.conversationId === message.conversationId;
       });
       if (conversationMessages.length === 0) {
-        newConversations.splice(index, 1);
+        newConversations[index] = null;
         delete newConversationMap[record.conversation.id];
         return;
       }
@@ -218,7 +238,7 @@ function pushRecordsToMessageData(_ref3) {
     var newCreated = new Date(record.creationTime);
     if (newCreated >= oldCreated) {
       // move the message to the top of new Messages
-      newConversations.splice(index, 1);
+      newConversations[index] = null;
       newConversations.push(newMessage);
       addMessageToConversationMap(newMessage, newConversations.length - 1);
     } else {
@@ -257,19 +277,21 @@ function pushRecordsToMessageData(_ref3) {
       pushMessageToConversations(record);
     }
   });
-  return {
+  var rebuildConversation = rebuildIndexOfConversationMap({
     conversations: newConversations,
-    conversationMap: newConversationMap,
+    conversationMap: newConversationMap
+  });
+  return (0, _extends3.default)({}, rebuildConversation, {
     messages: newMessages
-  };
+  });
 }
 
-function updateConversationRecipients(_ref4) {
-  var messages = _ref4.messages,
-      conversations = _ref4.conversations,
-      conversationMap = _ref4.conversationMap,
-      conversationId = _ref4.conversationId,
-      recipients = _ref4.recipients;
+function updateConversationRecipients(_ref5) {
+  var messages = _ref5.messages,
+      conversations = _ref5.conversations,
+      conversationMap = _ref5.conversationMap,
+      conversationId = _ref5.conversationId,
+      recipients = _ref5.recipients;
 
   var newConversations = [];
   conversations.forEach(function (conversation) {
