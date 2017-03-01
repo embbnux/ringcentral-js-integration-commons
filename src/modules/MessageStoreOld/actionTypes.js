@@ -7,9 +7,9 @@ export default new Enum([
   'resetSuccess',
   'sync',
   'syncError',
-  'syncSuccess',
-  'syncConversationSuccess',
-  'updateMessages',
-  'updateConversationRecipients',
+  'syncOver',
+  'saveConversations',
+  'saveMessages',
+  'saveSyncToken',
   'cleanUp',
 ], 'messageStore');

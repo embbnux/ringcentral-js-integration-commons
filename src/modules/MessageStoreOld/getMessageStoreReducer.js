@@ -8,7 +8,7 @@ export function getMessageStoreStatusReducer(types) {
       case types.sync:
         return messageStoreStatus.syncing;
       case types.syncError:
-      case types.syncSuccess:
+      case types.syncOver:
         return messageStoreStatus.idle;
       default:
         return state;
