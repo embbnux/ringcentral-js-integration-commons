@@ -719,24 +719,14 @@ var MessageStore = function (_RcModule) {
       return readMessages;
     }()
   }, {
-    key: 'matchMessageText',
-    value: function matchMessageText(message, searchText) {
-      if (message.subject && message.subject.toLowerCase().indexOf(searchText) >= 0) {
-        return message;
-      }
-      var matchedMessages = this.messages.filter(function (messageItem) {
-        if (message.conversationId !== message.conversationId) {
-          return false;
-        }
-        if (messageItem.subject && messageItem.subject.toLowerCase().indexOf(searchText) >= 0) {
+    key: 'searchMessagesText',
+    value: function searchMessagesText(searchText) {
+      return this.messages.filter(function (message) {
+        if (message.subject && message.subject.toLowerCase().indexOf(searchText) >= 0) {
           return true;
         }
         return false;
       });
-      if (matchedMessages.length > 0) {
-        return message;
-      }
-      return null;
     }
   }, {
     key: 'updateConversationRecipientList',
