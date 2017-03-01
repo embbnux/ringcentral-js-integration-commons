@@ -43,7 +43,7 @@ export function uniqueRecipients(recipients) {
   recipients.forEach((recipient) => {
     recipientMap[JSON.stringify(recipient)] = recipient;
   });
-  return Object.values(recipients);
+  return Object.values(recipientMap);
 }
 
 export function getRecipientNumbersFromMessage({ message, myNumber }) {
