@@ -104,7 +104,8 @@ describe('MessageStore:: Helper :: prepareNewMessagesData', () => {
     };
   });
 
-  it('should return new object of newConversations, newConversationMap, newMessages, messageMap', () => {
+  it(`should return new object of newConversations,
+      newConversationMap, newMessages, messageMap`, () => {
     const {
       newConversations,
       newConversationMap,
@@ -496,7 +497,7 @@ describe('MessageStore:: Helper :: pushRecordsToMessageData', () => {
     expect(result.conversationMap).to.deep.equal(expectConversationMap);
   });
 
-  it('should update conversations correctly if records include a new one and a existed conversation', () => {
+  it('should update conversations if records include a new one and a existed conversation', () => {
     fillRecordToOldData();
     const newConversationRecord = { ...record, id: 1234567, conversation: { id: '1234567891' } };
     const newRecord = { ...record, readStatus: 'Read' };

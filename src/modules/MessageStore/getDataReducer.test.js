@@ -49,7 +49,8 @@ describe('MessageStore :: Data :: getMessageDataReducer', () => {
     });
 
     it(`should return data with conversations, conversationMap and messages as key
-        on syncSuccess, updateMessages, syncConversationSuccess, updateConversationRecipients`, () => {
+        on syncSuccess, updateMessages, syncConversationSuccess,
+        updateConversationRecipients`, () => {
       const originalState = initialConversationsDataState;
       [
         actionTypes.syncSuccess,
@@ -101,7 +102,7 @@ describe('MessageStore :: Data :: getMessageDataReducer', () => {
           conversations: [{ ...record, conversationId: '1234567890', unreadCounts: 1 }],
           messages: [{ ...record, conversationId: '1234567890' }],
           conversationMap: {
-            '1234567890': {
+            1234567890: {
               id: '1234567890',
               index: 0,
               unreadMessages: { 1234568: 1 },
@@ -144,7 +145,7 @@ describe('MessageStore :: Data :: getMessageDataReducer', () => {
           id: 123456,
         }],
         conversationMap: {
-          '12345': {
+          12345: {
             id: '12345',
             index: 0,
           },
@@ -165,7 +166,7 @@ describe('MessageStore :: Data :: getMessageDataReducer', () => {
           }],
           messages: [],
           conversationMap: {
-            '12345': {
+            12345: {
               id: '12345',
               index: 0,
             },

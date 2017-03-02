@@ -342,7 +342,7 @@ describe('MessageStore Unit Test', () => {
     it('should return conversation successfully when string id is exist', () => {
       sinon.stub(messageStore, 'conversationMap', {
         get: () => ({
-          '123456': { id: '123456' }
+          123456: { id: '123456' }
         }),
       });
       const result = messageStore.findConversationById('123456');
@@ -373,7 +373,8 @@ describe('MessageStore Unit Test', () => {
       sinon.assert.notCalled(messageStore._syncMessages);
     });
 
-    it('should not call _syncMessages when subscription message is same as _lastSubscriptionMessage', () => {
+    it(`should not call _syncMessages
+        when subscription message is same as _lastSubscriptionMessage`, () => {
       sinon.stub(messageStore, '_syncMessages');
       messageStore._subscription = {
         message: {
@@ -388,7 +389,8 @@ describe('MessageStore Unit Test', () => {
       sinon.assert.notCalled(messageStore._syncMessages);
     });
 
-    it('should call _syncMessages when subscription has message store event and _lastSubscriptionMessage is null', () => {
+    it(`should call _syncMessages when subscription has message store event
+        and _lastSubscriptionMessage is null`, () => {
       sinon.stub(messageStore, '_syncMessages');
       messageStore._subscription = {
         message: {
@@ -404,7 +406,7 @@ describe('MessageStore Unit Test', () => {
       expect(messageStore._lastSubscriptionMessage).to.equal(messageStore._subscription.message);
     });
 
-    it('should not call _syncMessages when subscription message is not message store event', () => {
+    it('should not call _syncMessages when subscription message is not message event', () => {
       sinon.stub(messageStore, '_syncMessages');
       messageStore._subscription = {
         message: {
@@ -419,7 +421,8 @@ describe('MessageStore Unit Test', () => {
       sinon.assert.notCalled(messageStore._syncMessages);
     });
 
-    it('should not call _syncMessages when subscription message is message store event but empty body', () => {
+    it(`should not call _syncMessages
+        when subscription message is message event but empty body`, () => {
       sinon.stub(messageStore, '_syncMessages');
       messageStore._subscription = {
         message: {
@@ -432,7 +435,8 @@ describe('MessageStore Unit Test', () => {
       sinon.assert.notCalled(messageStore._syncMessages);
     });
 
-    it('should not call _syncMessages when subscription message is message store event but empty changes', () => {
+    it(`should not call _syncMessages
+        when subscription message is message store event but empty changes`, () => {
       sinon.stub(messageStore, '_syncMessages');
       messageStore._subscription = {
         message: {
@@ -471,7 +475,7 @@ describe('MessageStore Unit Test', () => {
     it('should return call _messageSyncApi successfully', async () => {
       sinon.stub(messageStore, 'conversationMap', {
         get: () => ({
-          '123456': {
+          123456: {
             id: '123456',
             syncToken: 'abcd',
           }
@@ -535,13 +539,12 @@ describe('MessageStore Unit Test', () => {
       messageStore._promise = null;
       sinon.stub(messageStore, '_updateMessagesFromSync').throws(new Error('error'));
       sinon.stub(messageStore, '_onSyncError');
-      let error;
       try {
         await messageStore._sync(async () => {
           await messageStore._updateMessagesFromSync();
         });
       } catch (e) {
-        error = e;
+        // on Error
       }
       sinon.assert.calledOnce(messageStore._onSyncError);
       expect(messageStore._promise).to.equal(null);
