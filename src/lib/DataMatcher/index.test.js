@@ -486,12 +486,14 @@ describe('DataMatcher Unit Test', () => {
         );
       });
 
-      it('should return false if _searchSource is blank and one of _querySources is not ready', () => {
+      it(`should return false if _searchSource is blank and
+          one of _querySources is not ready`, () => {
         dataMatcher._searchSource = {};
         expect(dataMatcher._readyCheck()).to.equal(false);
       });
 
-      it('should return false if one of _searchSource is not ready and one of _querySources is not ready', () => {
+      it(`should return false if one of _searchSource is not ready
+          and one of _querySources is not ready`, () => {
         dataMatcher._searchSource = {
           test: {
             readyCheckFn: () => false,
