@@ -78,7 +78,7 @@ describe('MessageStore :: Data :: getMessageDataReducer', () => {
           conversations: [{ ...record, conversationId: '1234567890', unreadCounts: 1 }],
           messages: [{ ...record, conversationId: '1234567890' }],
           conversationMap: {
-            '1234567890': {
+            1234567890: {
               id: '1234567890',
               index: 0,
               unreadMessages: { 1234568: 1 },
@@ -127,7 +127,7 @@ describe('MessageStore :: Data :: getMessageDataReducer', () => {
           conversations: [{ ...record, conversationId: '1234567890', unreadCounts: 1 }],
           messages: [{ ...record, conversationId: '1234567890' }],
           conversationMap: {
-            '1234567890': {
+            1234567890: {
               id: '1234567890',
               index: 0,
               unreadMessages: { 1234568: 1 },
@@ -205,7 +205,8 @@ describe('MessageStore :: Data :: getUpdatedTimestampReducer', () => {
         .to.equal(originalState);
     });
 
-    it('should return data on syncSuccess, syncConversationSuccess, updateConversationRecipients, updateMessages', () => {
+    it(`should return data on syncSuccess, syncConversationSuccess,
+        updateConversationRecipients, updateMessages`, () => {
       [
         actionTypes.syncSuccess,
         actionTypes.syncConversationSuccess,
