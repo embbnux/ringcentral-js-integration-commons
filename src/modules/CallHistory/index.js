@@ -1,6 +1,8 @@
 import RcModule from '../../lib/RcModule';
 import moduleStatus from '../../enums/moduleStatus';
-import { sortByStartTime } from '../../lib/callLogHelpers';
+import {
+  sortByStartTime,
+} from '../../lib/callLogHelpers';
 import actionTypes from './actionTypes';
 import getCallHistoryReducer from './getCallHistoryReducer';
 import ensureExist from '../../lib/ensureExist';
@@ -8,52 +10,29 @@ import normalizeNumber from '../../lib/normalizeNumber';
 
 export default class CallHistory extends RcModule {
   constructor({
-    detailedPresence,
+    accountInfo,
     callLog,
-    activeCalls,
+    callMonitor,
     activityMatcher,
     contactMatcher,
-    regionSettings,
     ...options
   }) {
     super({
       ...options,
       actionTypes,
     });
-    this._activeCalls = this::ensureExist(activeCalls, 'activeCalls');
+    this._accountInfo = this::ensureExist(accountInfo, 'accountInfo');
     this._callLog = this::ensureExist(callLog, 'callLog');
-    this._detailedPresence = this::ensureExist(detailedPresence, 'detailedPresence');
-    // this._activityMatcher = this::ensureExist(activityMatcher, 'activityMatcher');
-    // this._contactMatcher = this::ensureExist(contactMatcher, 'contactMatcher');
-    this._regionSettings = this::ensureExist(regionSettings, 'regionSettings');
     this._activityMatcher = activityMatcher;
     this._contactMatcher = contactMatcher;
+    this._callMonitor = callMonitor;
     this._reducer = getCallHistoryReducer(this.actionTypes);
 
-    this.addSelector('filteredCalls',
-      () => this._callLog.calls,
-      () => this._activeCalls.calls,
-      () => this._detailedPresence.calls,
-      (callsFromCallLog, callsFromActiveCalls, callsFromPresence) => {
-        const indexMap = {};
-        callsFromCallLog.forEach((call) => {
-          indexMap[call.sessionId] = true;
-        });
-        const presentInPresenceCalls = {};
-        callsFromPresence.forEach((call) => {
-          presentInPresenceCalls[call.sessionId] = true;
-        });
-        return callsFromActiveCalls
-          .filter(call => !indexMap[call.sessionId] && !presentInPresenceCalls[call.sessionId])
-          .concat(callsFromCallLog);
-      }
-    );
     this.addSelector('normalizedCalls',
-      this._selectors.filteredCalls,
-      () => this._regionSettings.countryCode,
-      () => this._regionSettings.areaCode,
-      (filteredCalls, countryCode, areaCode) => (
-        filteredCalls.map((call) => {
+      () => this._callLog.calls,
+      () => this._accountInfo.country.isoCode,
+      (calls, countryCode) => (
+        calls.map((call) => {
           const callFrom = {
             ...call.from,
           };
@@ -61,7 +40,6 @@ export default class CallHistory extends RcModule {
             callFrom.phoneNumber = normalizeNumber({
               phoneNumber: callFrom.phoneNumber,
               countryCode,
-              areaCode,
             });
           }
           const callTo = {
@@ -71,7 +49,6 @@ export default class CallHistory extends RcModule {
             callTo.phoneNumber = normalizeNumber({
               phoneNumber: callTo.phoneNumber,
               countryCode,
-              areaCode,
             });
           }
           return {
@@ -85,14 +62,17 @@ export default class CallHistory extends RcModule {
 
     this.addSelector('calls',
       this._selectors.normalizedCalls,
+      () => this.state.endedCalls,
       () => (this._contactMatcher && this._contactMatcher.ready ?
         this._contactMatcher.cache :
         null),
       () => (this._activityMatcher && this._activityMatcher.ready ?
         this._activityMatcher.cache :
         null),
-      (normalizedCalls, contactCache, activityCache) => (
-        normalizedCalls.map((call) => {
+      (normalizedCalls, endedCalls, contactCache, activityCache) => {
+        const sessionIds = {};
+        return normalizedCalls.map((call) => {
+          sessionIds[call.sessionId] = true;
           const fromNumber = call.from && (call.from.phoneNumber || call.from.extensionNumber);
           const toNumber = call.to && (call.to.phoneNumber || call.to.extensionNumber);
           return {
@@ -101,13 +81,15 @@ export default class CallHistory extends RcModule {
             toMatches: (toNumber && contactCache && contactCache.dataMap[toNumber]) || [],
             activityMatches: (activityCache && activityCache.dataMap[call.sessionId]) || [],
           };
-        }).sort(sortByStartTime)
-      ),
+        }).concat(endedCalls.filter(call => !sessionIds[call.sessionId]))
+          .sort(sortByStartTime);
+      },
     );
 
     this.addSelector('uniqueNumbers',
       this._selectors.normalizedCalls,
-      (normalizedCalls) => {
+      () => this.state.endedCalls,
+      (normalizedCalls, endedCalls) => {
         const output = [];
         const numberMap = {};
         function addIfNotExist(number) {
@@ -116,7 +98,7 @@ export default class CallHistory extends RcModule {
             numberMap[number] = true;
           }
         }
-        normalizedCalls.forEach((call) => {
+        function addNumbersFromCall(call) {
           if (call.from && call.from.phoneNumber) {
             addIfNotExist(call.from.phoneNumber);
           } else if (call.from && call.from.extensionNumber) {
@@ -127,7 +109,9 @@ export default class CallHistory extends RcModule {
           } else if (call.to && call.to.extensionNumber) {
             addIfNotExist(call.to.extensionNumber);
           }
-        });
+        }
+        normalizedCalls.forEach(addNumbersFromCall);
+        endedCalls.forEach(addNumbersFromCall);
         return output;
       },
     );
@@ -136,25 +120,34 @@ export default class CallHistory extends RcModule {
       this._contactMatcher.addQuerySource({
         getQueriesFn: this._selectors.uniqueNumbers,
         readyCheckFn: () => (
-          this._activeCalls.ready &&
-          this._detailedPresence.ready &&
+          (!this._callMonitor || this._callMonitor.ready) &&
           this._callLog.ready &&
-          this._regionSettings.ready
+          this._accountInfo.ready
         ),
       });
     }
 
     this.addSelector('sessionIds',
-      this._selectors.filteredCalls,
-      filteredCalls => filteredCalls.map(call => call.sessionId),
+      () => this._callLog.calls,
+      () => this.state.endedCalls,
+      (calls, endedCalls) => {
+        const sessionIds = {};
+        return calls.map((call) => {
+          sessionIds[call.sessionId] = true;
+          return call.sessionIds;
+        }).concat(
+          endedCalls
+            .filter(call => !sessionIds[call.sessionId])
+            .map(call => call.sessionId)
+          );
+      },
     );
 
     if (this._activityMatcher) {
       this._activityMatcher.addQuerySource({
         getQueriesFn: this._selectors.sessionIds,
         readyCheckFn: () => (
-          this._activeCalls.ready &&
-          this._detailedPresence.ready &&
+          (!this._callMonitor || this._callMonitor.ready) &&
           this._callLog.ready
         ),
       });
@@ -163,9 +156,8 @@ export default class CallHistory extends RcModule {
   _onStateChange = async () => {
     if (
       this._callLog.ready &&
-      this._activeCalls.ready &&
-      this._detailedPresence.ready &&
-      this._regionSettings.ready &&
+      (!this._callMonitor || this._callMonitor.ready) &&
+      this._accountInfo.ready &&
       (!this._contactMatcher || this._contactMatcher.ready) &&
       (!this._activityMatcher || this._activityMatcher.ready) &&
       this.pending
@@ -179,9 +171,8 @@ export default class CallHistory extends RcModule {
     } else if (
       (
         !this._callLog.ready ||
-        !this._activeCalls.ready ||
-        !this._detailedPresence.ready ||
-        !this._regionSettings.ready ||
+        (this._callMonitor && !this._callMonitor.ready) ||
+        !this._accountInfo.ready ||
         (this._contactMatcher && !this._contactMatcher.ready) ||
         (this._activityMatcher && !this._activityMatcher.ready)
       ) &&
@@ -190,6 +181,10 @@ export default class CallHistory extends RcModule {
       this.store.dispatch({
         type: this.actionTypes.reset,
       });
+      this._lastProcessedCalls = null;
+      this._lastProcessedIds = null;
+      this._lastProcessedMonitorCalls = null;
+      this._lastProcessedNumbers = null;
       this.store.dispatch({
         type: this.actionTypes.resetSuccess,
       });
@@ -208,6 +203,38 @@ export default class CallHistory extends RcModule {
         this._lastProcessedIds = sessionIds;
         if (this._activityMatcher && this._activityMatcher.ready) {
           this._activityMatcher.triggerMatch();
+        }
+      }
+      if (this._callMonitor) {
+        const monitorCalls = this._callMonitor.calls;
+        if (this._lastProcessedMonitorCalls !== monitorCalls) {
+          const endedCalls = (this._lastProcessedMonitorCalls || [])
+            .filter(call => (
+              !monitorCalls.find(currentCall => call.sessionId === currentCall.sessionId)
+            ));
+          this._lastProcessedMonitorCalls = monitorCalls;
+          if (endedCalls.length) {
+            this.store.dispatch({
+              type: this.actionTypes.addEndedCalls,
+              endedCalls,
+              timestamp: Date.now(),
+            });
+          }
+        }
+      }
+      const currentCalls = this._callLog.calls;
+      if (currentCalls !== this._lastProcessedCalls) {
+        this._lastProcessedCalls = currentCalls;
+        const ids = {};
+        currentCalls.forEach((call) => {
+          ids[call.sessionId] = true;
+        });
+        const shouldRemove = this.state.endedCalls.filter(call => ids[call.sessionId]);
+        if (shouldRemove.length) {
+          this.store.dispatch({
+            type: this.actionTypes.removeEndedCalls,
+            endedCalls: shouldRemove,
+          });
         }
       }
     }

@@ -14,14 +14,17 @@ import subscriptionFilters from '../../enums/subscriptionFilters';
 import syncTypes from '../../enums/syncTypes';
 import {
   hasEndedCalls,
+  removeDuplicateIntermediateCalls,
+  removeInboundRingOutLegs,
 } from '../../lib/callLogHelpers';
+import callResults from '../../enums/callResults';
 
 const DEFAULT_TTL = 5 * 60 * 1000;
 const DEFAULT_TOKEN_EXPIRES_IN = 60 * 60 * 1000;
 const DEFAULT_DAY_SPAN = 7;
 const RECORD_COUNT = 250;
 const DEFAULT_TIME_TO_RETRY = 62 * 1000;
-const SYNC_DELAY = 20 * 1000;
+const SYNC_DELAY = 30 * 1000;
 
 export function processData(data) {
   return {
@@ -92,6 +95,18 @@ export default class CallLog extends Pollable {
     });
 
     this._reducer = getCallLogReducer(this.actionTypes);
+
+    this.addSelector('calls',
+      () => this.data,
+      data => (
+        // TODO make sure removeDuplicateIntermediateCalls is necessary here
+        removeInboundRingOutLegs(removeDuplicateIntermediateCalls(data.filter(call => (
+          // [RCINT-3472] calls with result === 'stopped' seems to be useless
+          call.result !== callResults.stopped
+        ))))
+      ),
+    );
+
     this._promise = null;
     this._lastMessage = null;
   }
@@ -180,8 +195,12 @@ export default class CallLog extends Pollable {
     return this.state.status === moduleStatus.ready;
   }
 
-  get calls() {
+  get data() {
     return this._storage.getItem(this._dataStorageKey);
+  }
+
+  get calls() {
+    return this._selectors.calls();
   }
 
   get token() {

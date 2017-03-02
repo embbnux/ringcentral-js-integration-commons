@@ -2,8 +2,12 @@ import Presence from '../Presence';
 import moduleStatus from '../../enums/moduleStatus';
 import actionTypes from './actionTypes';
 import getDetailedPresenceReducer from './getDetailedPresenceReducer';
-import telephonyStatuses from '../../enums/telephonyStatuses';
 import subscriptionFilters from '../../enums/subscriptionFilters';
+import {
+  isEnded,
+  isRinging,
+  removeInboundRingOutLegs,
+} from '../../lib/callLogHelpers';
 
 const presenceRegExp = /\/presence(\?.*)?/;
 
@@ -13,10 +17,6 @@ export default class DetailedPresence extends Presence {
     client,
     subscription,
     connectivityMonitor,
-    onRinging,
-    onNewCall,
-    onCallUpdated,
-    onCallEnded,
     ...options
   }) {
     super({
@@ -27,10 +27,6 @@ export default class DetailedPresence extends Presence {
     this._client = client;
     this._subscription = subscription;
     this._connectivityMonitor = connectivityMonitor;
-    this._onRinging = onRinging;
-    this._onNewCall = onNewCall;
-    this._onCallUpdated = onCallUpdated;
-    this._onCallEnded = onCallEnded;
 
     this._reducer = getDetailedPresenceReducer(this.actionTypes);
     this._lastMessage = null;
@@ -38,7 +34,15 @@ export default class DetailedPresence extends Presence {
       () => this.state.calls,
       calls => calls.map(call => call.sessionId),
     );
-    this._lastProcessedCalls = [];
+
+    this.addSelector('calls',
+      () => this.state.data,
+      data => (
+        removeInboundRingOutLegs(data)
+          .filter(call => !isEnded(call))
+      ),
+    );
+
     this._lastTelephonyStatus = null;
   }
 
@@ -84,7 +88,6 @@ export default class DetailedPresence extends Presence {
       ) &&
       this.ready
     ) {
-      this._lastProcessedCalls = [];
       this.store.dispatch({
         type: this.actionTypes.resetSuccess,
       });
@@ -108,56 +111,17 @@ export default class DetailedPresence extends Presence {
         this._fetch();
       }
     }
-    if (
-      this.ready &&
-      this._lastProcessedCalls !== this.calls
-    ) {
-      const oldCalls = [...this._lastProcessedCalls];
-      this._lastProcessedCalls = this.calls;
-
-      this.calls.forEach((call) => {
-        const oldCallIndex = oldCalls.findIndex(item => item.sessionId === call.sessionId);
-        if (oldCallIndex === -1) {
-          if (typeof this._onNewCall === 'function') {
-            this._onNewCall(call);
-          }
-        } else {
-          const oldCall = oldCalls[oldCallIndex];
-          oldCalls.splice(oldCallIndex, 1);
-          if (
-            call.telephonyStatus !== oldCall.telephonyStatus &&
-            typeof this._onCallUpdated === 'function'
-          ) {
-            this._onCallUpdated(call);
-          }
-        }
-      });
-      oldCalls.forEach((call) => {
-        if (typeof this._onCallEnded === 'function') {
-          this._onCallEnded(call);
-        }
-      });
-    }
-    if (
-      this.ready &&
-      this._lastTelephonyStatus !== this.telephonyStatus
-    ) {
-      this._lastTelephonyStatus = this.telephonyStatus;
-      if (
-        this._lastTelephonyStatus === telephonyStatuses.ringing &&
-        typeof this._onRinging === 'function'
-      ) {
-        this._onRinging();
-      }
-    }
   }
 
   initialize() {
     this.store.subscribe(this._onStateChange);
   }
 
+  get data() {
+    return this.state.data;
+  }
   get calls() {
-    return this.state.calls;
+    return this._selectors.calls();
   }
 
   get telephonyStatus() {

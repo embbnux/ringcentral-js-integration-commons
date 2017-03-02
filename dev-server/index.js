@@ -49,6 +49,7 @@ import Messages from '../src/modules/Messages';
 import ContactMatcher from '../src/modules/ContactMatcher';
 import ActivityMatcher from '../src/modules/ActivityMatcher';
 import DateTimeIntl from '../src/modules/DateTimeIntl';
+import Conference from '../src/modules/Conference';
 
 import config from './config';
 
@@ -268,16 +269,15 @@ class DemoPhone extends RcModule {
       numberValidate: this.numberValidate,
     }));
     this.addModule('callMonitor', new CallMonitor({
+      accountInfo: this.accountInfo,
       detailedPresence: this.detailedPresence,
       activeCalls: this.activeCalls,
-      regionSettings: this.regionSettings,
       getState: () => this.state.callMonitor,
     }));
     this.addModule('callHistory', new CallHistory({
-      activeCalls: this.activeCalls,
+      accountInfo: this.accountInfo,
       callLog: this.callLog,
-      detailedPresence: this.detailedPresence,
-      regionSettings: this.regionSettings,
+      callMonitor: this.callMonitor,
       getState: () => this.state.callHistory,
     }));
     this.addModule('dateTimeIntl', new DateTimeIntl({
@@ -331,6 +331,12 @@ class DemoPhone extends RcModule {
       messageStore: this.messageStore,
       getState: () => this.state.messages,
     }));
+    this.addModule('conference', new Conference({
+      auth: this.auth,
+      client: this.client,
+      regionSettings: this.regionSettings,
+      getState: () => this.state.conference,
+    }));
     this._reducer = combineReducers({
       accountInfo: this.accountInfo.reducer,
       accountExtension: this.accountExtension.reducer,
@@ -371,6 +377,7 @@ class DemoPhone extends RcModule {
       messageStore: this.messageStore.reducer,
       conversation: this.conversation.reducer,
       messages: this.messages.reducer,
+      conference: this.conference.reducer,
       lastAction: (state = null, action) => {
         console.log(action);
         return action;

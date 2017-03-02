@@ -4,53 +4,69 @@ import moduleStatus from '../../enums/moduleStatus';
 import actionTypes from './actionTypes';
 import getCallMonitorReducer from './getCallMonitorReducer';
 import normalizeNumber from '../../lib/normalizeNumber';
+import {
+  isRinging,
+  sortByStartTime,
+} from '../../lib/callLogHelpers';
+import ensureExist from '../../lib/ensureExist';
+
 
 export default class CallMonitor extends RcModule {
   constructor({
+    accountInfo,
     detailedPresence,
     activeCalls,
     activityMatcher,
     contactMatcher,
-    regionSettings,
+    onRinging,
+    onNewCall,
+    onCallUpdated,
+    onCallEnded,
     ...options
   }) {
     super({
       ...options,
       actionTypes,
     });
-    this._detailedPresence = detailedPresence;
-    this._activeCalls = activeCalls;
+    this._accountInfo = this::ensureExist(accountInfo, 'accountInfo');
+    this._detailedPresence = this::ensureExist(detailedPresence, 'detailedPresence');
+    this._activeCalls = this::ensureExist(activeCalls, 'activeCalls');
     this._contactMatcher = contactMatcher;
     this._activityMatcher = activityMatcher;
-    this._regionSettings = regionSettings;
+    this._onRinging = onRinging;
+    this._onNewCall = onNewCall;
+    this._onCallUpdated = onCallUpdated;
+    this._onCallEnded = onCallEnded;
+
     this._reducer = getCallMonitorReducer(this.actionTypes);
     this.addSelector('normalizedCalls',
       () => this._detailedPresence.calls,
       () => this._activeCalls.calls,
-      () => this._regionSettings.countryCode,
-      () => this._regionSettings.areaCode,
-      (callsFromPresence, callsFromActiveCalls, countryCode, areaCode) => (
+      () => this._accountInfo.country.isoCode,
+      (callsFromPresence, callsFromActiveCalls, countryCode) => (
         callsFromPresence.map((call) => {
-          const activeCall = callsFromActiveCalls.find(item => item.sessionId === call.sessionId);
+          const activeCall = call.inboundLeg &&
+            callsFromActiveCalls.find(item => item.sessionId === call.inboundLeg.sessionId);
+
+          // use account countryCode to normalize number due to API issues [RCINT-3419]
           const fromNumber = normalizeNumber({
             phoneNumber: call.from && call.from.phoneNumber,
             countryCode,
-            areaCode,
           });
           const toNumber = normalizeNumber({
             phoneNumber: call.to && call.to.phoneNumber,
             countryCode,
-            areaCode,
           });
+
           return {
             ...call,
             from: {
+              ...((activeCall && activeCall.to) || {}),
               phoneNumber: fromNumber,
-              name: activeCall && activeCall.from && activeCall.from.name,
             },
             to: {
+              ...((activeCall && activeCall.from) || {}),
               phoneNumber: toNumber,
-              name: activeCall && activeCall.to && activeCall.to.name,
             },
             startTime: (activeCall && activeCall.startTime) || call.startTime,
           };
@@ -75,7 +91,7 @@ export default class CallMonitor extends RcModule {
             toMatches: (toNumber && contactCache && contactCache.dataMap[toNumber]) || [],
             activityMatches: (activityCache && activityCache.dataMap[call.sessionId]) || [],
           };
-        })
+        }).sort(sortByStartTime)
       )
     );
 
@@ -106,9 +122,9 @@ export default class CallMonitor extends RcModule {
       this._contactMatcher.addQuerySource({
         getQueriesFn: this._selectors.uniqueNumbers,
         readyCheckFn: () => (
+          this._accountInfo.ready &&
           this._activeCalls.ready &&
-          this._detailedPresence.ready &&
-          this._regionSettings.ready
+          this._detailedPresence.ready
         ),
       });
     }
@@ -124,13 +140,15 @@ export default class CallMonitor extends RcModule {
     }
 
     this._lastProcessedNumbers = null;
+    this._lastProcessedCalls = null;
+    this._lastProcessedIds = null;
   }
 
   _onStateChange = async () => {
     if (
+      this._accountInfo.ready &&
       this._detailedPresence.ready &&
       this._activeCalls.ready &&
-      this._regionSettings.ready &&
       (!this._contactMatcher || this._contactMatcher.ready) &&
       (!this._activityMatcher || this._activityMatcher.ready) &&
       this.pending
@@ -143,9 +161,9 @@ export default class CallMonitor extends RcModule {
       });
     } else if (
       (
+        !this._accountInfo.ready ||
         !this._detailedPresence.ready ||
         !this._activeCalls.ready ||
-        !this._regionSettings.ready ||
         (this._contactMatcher && !this._contactMatcher.ready) ||
         (this._activityMatcher && !this._activityMatcher.ready)
       ) &&
@@ -154,6 +172,9 @@ export default class CallMonitor extends RcModule {
       this.store.dispatch({
         type: this.actionTypes.reset,
       });
+      this._lastProcessedCalls = null;
+      this._lastProcessedIds = null;
+      this._lastProcessedNumbers = null;
       this.store.dispatch({
         type: this.actionTypes.resetSuccess,
       });
@@ -173,6 +194,42 @@ export default class CallMonitor extends RcModule {
         if (this._activityMatcher && this._activityMatcher.ready) {
           this._activityMatcher.triggerMatch();
         }
+      }
+
+      if (
+        this._lastProcessedCalls !== this.calls
+      ) {
+        const oldCalls = (
+          this._lastProcessedCalls &&
+          this._lastProcessedCalls.slice()
+        ) || [];
+        this._lastProcessedCalls = this.calls;
+
+        this.calls.forEach((call) => {
+          const oldCallIndex = oldCalls.findIndex(item => item.sessionId === call.sessionId);
+          if (oldCallIndex === -1) {
+            if (typeof this._onNewCall === 'function') {
+              this._onNewCall(call);
+            }
+            if (typeof this._onRinging === 'function' && isRinging(call)) {
+              this._onRinging(call);
+            }
+          } else {
+            const oldCall = oldCalls[oldCallIndex];
+            oldCalls.splice(oldCallIndex, 1);
+            if (
+              call.telephonyStatus !== oldCall.telephonyStatus &&
+              typeof this._onCallUpdated === 'function'
+            ) {
+              this._onCallUpdated(call);
+            }
+          }
+        });
+        oldCalls.forEach((call) => {
+          if (typeof this._onCallEnded === 'function') {
+            this._onCallEnded(call);
+          }
+        });
       }
     }
   }
