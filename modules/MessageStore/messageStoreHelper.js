@@ -16,7 +16,7 @@ exports.normalizeRecord = normalizeRecord;
 exports.messageIsUnread = messageIsUnread;
 exports.getMessageSyncParams = getMessageSyncParams;
 exports.prepareNewMessagesData = prepareNewMessagesData;
-exports.rebuildIndexOfConversationMap = rebuildIndexOfConversationMap;
+exports.filterNullFromConversations = filterNullFromConversations;
 exports.findIndexOfConversations = findIndexOfConversations;
 exports.findIndexOfMessages = findIndexOfMessages;
 exports.calcUnreadCount = calcUnreadCount;
@@ -88,7 +88,7 @@ function prepareNewMessagesData(_ref2) {
       unreadMessages: (0, _extends3.default)({}, conversationMap[key].unreadMessages)
     });
     // if converstation is not sync with conversation Id, update all conversation sync token
-    if (syncToken && !syncConversationId) {
+    if (syncToken && (!syncConversationId || syncConversationId === key)) {
       conversation.syncToken = syncToken;
     }
     newConversationMap[key] = conversation;
@@ -109,7 +109,7 @@ function prepareNewMessagesData(_ref2) {
   };
 }
 
-function rebuildIndexOfConversationMap(_ref3) {
+function filterNullFromConversations(_ref3) {
   var conversations = _ref3.conversations,
       conversationMap = _ref3.conversationMap;
 
@@ -228,7 +228,7 @@ function pushRecordsToMessageData(_ref4) {
     message.unreadCounts = calcUnreadCount(conversation);
   };
   var deleteMessageFromMessages = function deleteMessageFromMessages(index, record) {
-    newMessages.splice(index, 1);
+    newMessages[index] = null;
     delete messageMap[record.id];
   };
   var replaceMessageInConversations = function replaceMessageInConversations(index, record) {
@@ -277,12 +277,14 @@ function pushRecordsToMessageData(_ref4) {
       pushMessageToConversations(record);
     }
   });
-  var rebuildConversation = rebuildIndexOfConversationMap({
+  var filteredConversation = filterNullFromConversations({
     conversations: newConversations,
     conversationMap: newConversationMap
   });
-  return (0, _extends3.default)({}, rebuildConversation, {
-    messages: newMessages
+  return (0, _extends3.default)({}, filteredConversation, {
+    messages: newMessages.filter(function (item) {
+      return item !== null;
+    })
   });
 }
 
@@ -293,13 +295,18 @@ function updateConversationRecipients(_ref5) {
       conversationId = _ref5.conversationId,
       recipients = _ref5.recipients;
 
+  var conversationIndex = conversationMap[conversationId] && conversationMap[conversationId].index;
+  if (conversationIndex === undefined) {
+    return { messages: messages, conversationMap: conversationMap, conversations: conversations };
+  }
   var newConversations = [];
   conversations.forEach(function (conversation) {
     newConversations.push((0, _extends3.default)({}, conversation));
   });
-  var conversationIndex = conversationMap[conversationId].index;
   var conversation = newConversations[conversationIndex];
-  conversation.recipients = recipients;
+  conversation.recipients = recipients.map(function (recipient) {
+    return (0, _extends3.default)({}, recipient);
+  });
   return {
     messages: messages,
     conversationMap: conversationMap,

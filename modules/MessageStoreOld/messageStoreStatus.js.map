@@ -1,1 +1,0 @@
-{"version":3,"sources":["modules/MessageStoreOld/messageStoreStatus.js"],"names":[],"mappings":";;;;;;AAAA;;;;;;kBAEe,mBAAS,CACtB,SADsB,EAEtB,SAFsB,EAGtB,MAHsB,CAAT,EAIZ,cAJY,C","file":"messageStoreStatus.js","sourcesContent":["import Enum from '../../lib/Enum';\n\nexport default new Enum([\n  'syncing',\n  'pushing',\n  'idle',\n], 'messageStore');\n"]}
