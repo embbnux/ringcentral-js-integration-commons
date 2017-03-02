@@ -29,7 +29,8 @@ describe('getMatchRecordReducer', () => {
         .to.equal(originalState);
     });
 
-    it('should return matchRecord with cache key and result is found when type is matchSuccess and data is found', () => {
+    it(`should return matchRecord with cache key and result is found
+        when type is matchSuccess and data is found`, () => {
       const originalState = {};
       const data = {
         test: [1],
@@ -44,7 +45,8 @@ describe('getMatchRecordReducer', () => {
       expect(result['["name","test"]'].result).to.equal(matchResult.found);
     });
 
-    it('should return matchRecord with cache key and result is unfound when type is matchSuccess and data is unfound', () => {
+    it(`should return matchRecord with cache key and result is unfound
+        when type is matchSuccess and data is unfound`, () => {
       const originalState = {};
       const data = {
         test: [],
@@ -59,7 +61,8 @@ describe('getMatchRecordReducer', () => {
       expect(result['["name","test"]'].result).to.equal(matchResult.notFound);
     });
 
-    it('should return state without key that included in expiredKeys when type is cleanUp or initSuccess', () => {
+    it(`should return state without key that included in expiredKeys
+        when type is cleanUp or initSuccess`, () => {
       [
         actionTypes.cleanUp,
         actionTypes.initSuccess,
@@ -76,7 +79,8 @@ describe('getMatchRecordReducer', () => {
       });
     });
 
-    it('should return originalState if expiredKeys length is zero when type is cleanUp or initSuccess', () => {
+    it(`should return originalState if expiredKeys length is zero
+        when type is cleanUp or initSuccess`, () => {
       [
         actionTypes.cleanUp,
         actionTypes.initSuccess,
@@ -164,7 +168,8 @@ describe('getDataMapReducer', () => {
       expect(result).to.deep.equal(expectState);
     });
 
-    it('should return originalState if expiredKeys length is zero when type is cleanUp or initSuccess', () => {
+    it(`should return originalState
+        if expiredKeys length is zero when type is cleanUp or initSuccess`, () => {
       [
         actionTypes.cleanUp,
         actionTypes.initSuccess,
@@ -181,7 +186,8 @@ describe('getDataMapReducer', () => {
       });
     });
 
-    it('should return state without key that included in expiredKeys when type is cleanUp or initSuccess', () => {
+    it(`should return state without key that included in expiredKeys
+        when type is cleanUp or initSuccess`, () => {
       [
         actionTypes.cleanUp,
         actionTypes.initSuccess,

@@ -42,7 +42,8 @@ describe('getMatchingReducer', () => {
       });
     });
 
-    it('should return state that do not include queries when type is matchError or matchSuccess', () => {
+    it(`should return state that do not include queries
+        when type is matchError or matchSuccess`, () => {
       [
         actionTypes.matchSuccess,
         actionTypes.matchError,

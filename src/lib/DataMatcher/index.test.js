@@ -424,78 +424,81 @@ describe('DataMatcher Unit Test', () => {
   });
 
   describe('_readyCheck', () => {
-    it('should return true if _searchSource is blank and _querySources is blank', () => {
-      dataMatcher._searchSource = {};
-      dataMatcher._querySources = new Map();
-      expect(dataMatcher._readyCheck()).to.equal(true);
+    describe('when _querySources is blank', () => {
+      beforeEach(() => {
+        dataMatcher._querySources = new Map();
+      });
+
+      it('should return true if _searchSource is blank and ', () => {
+        dataMatcher._searchSource = {};
+        expect(dataMatcher._readyCheck()).to.equal(true);
+      });
+
+      it('should return true if _searchSource is all ready', () => {
+        dataMatcher._searchSource = {
+          test: {
+            readyCheckFn: () => true,
+          },
+        };
+        expect(dataMatcher._readyCheck()).to.equal(true);
+      });
+
+      it('should return false if one of _searchSource is not ready', () => {
+        dataMatcher._searchSource = {
+          test: {
+            readyCheckFn: () => false,
+          },
+        };
+        expect(dataMatcher._readyCheck()).to.equal(false);
+      });
     });
 
-    it('should return true if _searchSource is all ready and _querySources is blank', () => {
-      dataMatcher._searchSource = {
-        test: {
-          readyCheckFn: () => true,
-        },
-      };
-      dataMatcher._querySources = new Map();
-      expect(dataMatcher._readyCheck()).to.equal(true);
+    describe('_querySources is all ready', () => {
+      beforeEach(() => {
+        dataMatcher._querySources = new Map();
+        dataMatcher._querySources.set(
+          () => null,
+          () => true,
+        );
+      });
+
+      it('should return true if _searchSource is blank', () => {
+        dataMatcher._searchSource = {};
+        expect(dataMatcher._readyCheck()).to.equal(true);
+      });
+
+      it('should return true if _searchSource is all ready', () => {
+        dataMatcher._searchSource = {
+          test: {
+            readyCheckFn: () => true,
+          },
+        };
+        expect(dataMatcher._readyCheck()).to.equal(true);
+      });
     });
 
-    it('should return false if one of _searchSource is not ready and _querySources is blank', () => {
-      dataMatcher._searchSource = {
-        test: {
-          readyCheckFn: () => false,
-        },
-      };
-      dataMatcher._querySources = new Map();
-      expect(dataMatcher._readyCheck()).to.equal(false);
-    });
+    describe('_querySources is all ready', () => {
+      beforeEach(() => {
+        dataMatcher._querySources = new Map();
+        dataMatcher._querySources.set(
+          () => null,
+          () => false,
+        );
+      });
 
-    it('should return true if _searchSource is blank and _querySources is all ready', () => {
-      dataMatcher._searchSource = {};
-      dataMatcher._querySources = new Map();
-      dataMatcher._querySources.set(
-        () => null,
-        () => true,
-      );
-      expect(dataMatcher._readyCheck()).to.equal(true);
-    });
+      it('should return false if _searchSource is blank and one of _querySources is not ready', () => {
+        dataMatcher._searchSource = {};
+        expect(dataMatcher._readyCheck()).to.equal(false);
+      });
 
-    it('should return false if _searchSource is blank and one of _querySources is not ready', () => {
-      dataMatcher._searchSource = {};
-      dataMatcher._querySources = new Map();
-      dataMatcher._querySources.set(
-        () => null,
-        () => false,
-      );
-      expect(dataMatcher._readyCheck()).to.equal(false);
-    });
-
-    it('should return true if _searchSource is all ready and _querySources is all ready', () => {
-      dataMatcher._searchSource = {
-        test: {
-          readyCheckFn: () => true,
-        },
-      };
-      dataMatcher._querySources = new Map();
-      dataMatcher._querySources.set(
-        () => null,
-        () => true,
-      );
-      expect(dataMatcher._readyCheck()).to.equal(true);
-    });
-
-    it('should return false if one of _searchSource is not ready and one of _querySources is not ready', () => {
-      dataMatcher._searchSource = {
-        test: {
-          readyCheckFn: () => false,
-        },
-      };
-      dataMatcher._querySources = new Map();
-      dataMatcher._querySources.set(
-        () => null,
-        () => false,
-      );
-      expect(dataMatcher._readyCheck()).to.equal(false);
+      it('should return false if one of _searchSource is not ready and one of _querySources is not ready', () => {
+        dataMatcher._searchSource = {
+          test: {
+            readyCheckFn: () => false,
+          },
+        };
+        expect(dataMatcher._readyCheck()).to.equal(false);
+      });
     });
   });
 
@@ -840,7 +843,8 @@ describe('DataMatcher Unit Test', () => {
       sinon.assert.notCalled(dataMatcher._onMatchError);
     });
 
-    it('should not call _startMatch if ignoreCache is false and _filterQueriesFromCache is empty', async () => {
+    it(`should not call _startMatch if ignoreCache is false
+        and _filterQueriesFromCache is empty`, async () => {
       sinon.stub(dataMatcher, '_filterQueriesFromCache').callsFake(
         () => [],
       );
