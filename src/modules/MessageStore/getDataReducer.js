@@ -55,7 +55,7 @@ export function getUpdatedTimestampReducer(types) {
       case types.updateConversationRecipients:
       case types.updateMessages:
         return Date.now();
-      case types.resetSuccess:
+      case types.cleanUp:
         return null;
       default:
         return state;
@@ -81,7 +81,7 @@ export function getSyncTimestampReducer(types) {
     switch (type) {
       case types.syncSuccess:
         return syncTimestamp;
-      case types.resetSuccess:
+      case types.cleanUp:
         return null;
       default:
         return state;

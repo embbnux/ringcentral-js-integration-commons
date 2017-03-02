@@ -56,7 +56,7 @@ export function prepareNewMessagesData({
       },
     };
     // if converstation is not sync with conversation Id, update all conversation sync token
-    if (syncToken && !syncConversationId) {
+    if (syncToken && (!syncConversationId || syncConversationId === key)) {
       conversation.syncToken = syncToken;
     }
     newConversationMap[key] = conversation;
@@ -77,7 +77,7 @@ export function prepareNewMessagesData({
   };
 }
 
-export function rebuildIndexOfConversationMap({
+export function filterNullFromConversations({
   conversations,
   conversationMap,
 }) {
@@ -204,7 +204,7 @@ export function pushRecordsToMessageData({
     message.unreadCounts = calcUnreadCount(conversation);
   };
   const deleteMessageFromMessages = (index, record) => {
-    newMessages.splice(index, 1);
+    newMessages[index] = null;
     delete messageMap[record.id];
   };
   const replaceMessageInConversations = (index, record) => {
@@ -256,13 +256,13 @@ export function pushRecordsToMessageData({
       pushMessageToConversations(record);
     }
   });
-  const rebuildConversation = rebuildIndexOfConversationMap({
+  const filteredConversation = filterNullFromConversations({
     conversations: newConversations,
     conversationMap: newConversationMap,
   });
   return {
-    ...rebuildConversation,
-    messages: newMessages,
+    ...filteredConversation,
+    messages: newMessages.filter(item => (item !== null)),
   };
 }
 
@@ -273,13 +273,17 @@ export function updateConversationRecipients({
   conversationId,
   recipients,
 }) {
+  const conversationIndex =
+    conversationMap[conversationId] && conversationMap[conversationId].index;
+  if (conversationIndex === undefined) {
+    return { messages, conversationMap, conversations };
+  }
   const newConversations = [];
   conversations.forEach((conversation) => {
     newConversations.push({ ...conversation });
   });
-  const conversationIndex = conversationMap[conversationId].index;
   const conversation = newConversations[conversationIndex];
-  conversation.recipients = recipients;
+  conversation.recipients = recipients.map(recipient => ({ ...recipient }));
   return {
     messages,
     conversationMap,
