@@ -20,7 +20,7 @@ export default (auth, client, account, alert, regionSettings, composeText, messa
       await waitUntilObjectSizeGreaterThan(() => composeText.senderNumber, 'Sender Number', 0, 3);
     });
 
-    conditionalDescribe('Should Init Successfully with Deafult Setting', () => {
+    conditionalDescribe('Should Init Successfully with Default Setting', () => {
       this.timeout(20000);
       it('Should Set Sender Number with First SmsSender Phone Number by Default', () => {
         expect(composeText.senderNumber).to.equals(messageSender.senderNumbersList[0]);
