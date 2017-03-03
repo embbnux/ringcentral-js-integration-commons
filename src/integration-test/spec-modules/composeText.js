@@ -320,10 +320,16 @@ export default (auth, client, account, alert, regionSettings, composeText, messa
             composeText.updateMessageText('test');
             const response = await composeText.send();
             expect(response).to.include.keys('id', 'conversation');
-            expect(response.type).to.equals('SMS');
-            expect(response.subject).to.equals('test');
-            const rawRequest = clientHistoryRequest.getRawResponse(ClientHistoryRequest.endPoints.sms);
-            expect(JSON.stringify(response)).to.equal(JSON.stringify(rawRequest));
+            expect(containsErrorMessage(alert.state.messages, messageSenderMessages.noAreaCode))
+              .to.equal(undefined);
+            expect(containsErrorMessage(alert.state.messages, messageSenderMessages.specialNumber))
+              .to.equal(undefined);
+            expect(containsErrorMessage(alert.state.messages, messageSenderMessages.notAnExtension))
+              .to.equal(undefined);
+            expect(containsErrorMessage(alert.state.messages, messageSenderMessages.noToNumber))
+              .to.equal(undefined);
+            expect(containsErrorMessage(alert.state.messages, messageSenderMessages.notSmsToExtension))
+              .to.equal(undefined);
           });
 
           it('Should Not Alert Anything - to Number in (xxx) xxx-xxxx Format', async () => {
@@ -331,24 +337,6 @@ export default (auth, client, account, alert, regionSettings, composeText, messa
             composeText.updateMessageText('test');
             const response = await composeText.send();
             expect(response).to.include.keys('id', 'conversation');
-            expect(response.type).to.equals('SMS');
-            expect(response.subject).to.equals('test');
-            const rawRequest = clientHistoryRequest.getRawResponse(ClientHistoryRequest.endPoints.sms);
-            expect(JSON.stringify(response)).to.equal(JSON.stringify(rawRequest));
-          });
-
-          it('Should Alert notSmsToExtension - to Number in (xxx)xxx-xxxx*xxx Format', async () => {
-            composeText.updateTypingToNumber('(855) 899-0011*101');
-            composeText.updateMessageText('test');
-            try {
-              await composeText.send();
-            } catch (error) {
-              console.debug('message sender e:', error);
-            }
-            expect(containsErrorMessage(
-              alert.state.messages,
-              messageSenderMessages.notSmsToExtension
-            )).to.not.equal(undefined);
             expect(containsErrorMessage(alert.state.messages, messageSenderMessages.noAreaCode))
               .to.equal(undefined);
             expect(containsErrorMessage(alert.state.messages, messageSenderMessages.specialNumber))
@@ -357,20 +345,15 @@ export default (auth, client, account, alert, regionSettings, composeText, messa
               .to.equal(undefined);
             expect(containsErrorMessage(alert.state.messages, messageSenderMessages.noToNumber))
               .to.equal(undefined);
+            expect(containsErrorMessage(alert.state.messages, messageSenderMessages.notSmsToExtension))
+              .to.equal(undefined);
           });
 
-          it('Should Alert notSmsToExtension - to Number in (xxx) xxx-xxxx*xxx Format', async () => {
-            composeText.updateTypingToNumber('(855) 899-0011*101');
+          it('Should Not Alert Anything - to Number in (xxx)xxx-xxxx*xxx Format', async () => {
+            composeText.updateTypingToNumber('(855)899-0011*101');
             composeText.updateMessageText('test');
-            try {
-              await composeText.send();
-            } catch (error) {
-              console.debug('message sender e:', error);
-            }
-            expect(containsErrorMessage(
-              alert.state.messages,
-              messageSenderMessages.notSmsToExtension
-            )).to.not.equal(undefined);
+            const response = await composeText.send();
+            expect(response).to.include.keys('id', 'conversation');
             expect(containsErrorMessage(alert.state.messages, messageSenderMessages.noAreaCode))
               .to.equal(undefined);
             expect(containsErrorMessage(alert.state.messages, messageSenderMessages.specialNumber))
@@ -378,6 +361,25 @@ export default (auth, client, account, alert, regionSettings, composeText, messa
             expect(containsErrorMessage(alert.state.messages, messageSenderMessages.notAnExtension))
               .to.equal(undefined);
             expect(containsErrorMessage(alert.state.messages, messageSenderMessages.noToNumber))
+              .to.equal(undefined);
+            expect(containsErrorMessage(alert.state.messages, messageSenderMessages.notSmsToExtension))
+              .to.equal(undefined);
+          });
+
+          it('Should Not Alert Anything - to Number in (xxx) xxx-xxxx*xxx Format', async () => {
+            composeText.updateTypingToNumber('(855) 899-0011*101');
+            composeText.updateMessageText('test');
+            const response = await composeText.send();
+            expect(response).to.include.keys('id', 'conversation');
+            expect(containsErrorMessage(alert.state.messages, messageSenderMessages.noAreaCode))
+              .to.equal(undefined);
+            expect(containsErrorMessage(alert.state.messages, messageSenderMessages.specialNumber))
+              .to.equal(undefined);
+            expect(containsErrorMessage(alert.state.messages, messageSenderMessages.notAnExtension))
+              .to.equal(undefined);
+            expect(containsErrorMessage(alert.state.messages, messageSenderMessages.noToNumber))
+              .to.equal(undefined);
+            expect(containsErrorMessage(alert.state.messages, messageSenderMessages.notSmsToExtension))
               .to.equal(undefined);
           });
 
@@ -386,25 +388,6 @@ export default (auth, client, account, alert, regionSettings, composeText, messa
             composeText.updateMessageText('test');
             const response = await composeText.send();
             expect(response).to.include.keys('id', 'conversation');
-            expect(response.type).to.equals('SMS');
-            expect(response.subject).to.equals('test');
-            const rawRequest
-              = clientHistoryRequest.getRawResponse(ClientHistoryRequest.endPoints.sms);
-            expect(JSON.stringify(response)).to.equal(JSON.stringify(rawRequest));
-          });
-
-          it('Should Alert notSmsToExtension - to Number in xxx-xxx-xxxx*xxx Format', async () => {
-            composeText.updateTypingToNumber('855-899-0011*101');
-            composeText.updateMessageText('test');
-            try {
-              await composeText.send();
-            } catch (error) {
-              console.debug('message sender e:', error);
-            }
-            expect(containsErrorMessage(
-              alert.state.messages,
-              messageSenderMessages.notSmsToExtension
-            )).to.not.equal(undefined);
             expect(containsErrorMessage(alert.state.messages, messageSenderMessages.noAreaCode))
               .to.equal(undefined);
             expect(containsErrorMessage(alert.state.messages, messageSenderMessages.specialNumber))
@@ -412,6 +395,25 @@ export default (auth, client, account, alert, regionSettings, composeText, messa
             expect(containsErrorMessage(alert.state.messages, messageSenderMessages.notAnExtension))
               .to.equal(undefined);
             expect(containsErrorMessage(alert.state.messages, messageSenderMessages.noToNumber))
+              .to.equal(undefined);
+            expect(containsErrorMessage(alert.state.messages, messageSenderMessages.notSmsToExtension))
+              .to.equal(undefined);
+          });
+
+          it('Should Not Alert Anything - to Number in xxx-xxx-xxxx*xxx Format', async () => {
+            composeText.updateTypingToNumber('855-899-0011*101');
+            composeText.updateMessageText('test');
+            const response = await composeText.send();
+            expect(response).to.include.keys('id', 'conversation');
+            expect(containsErrorMessage(alert.state.messages, messageSenderMessages.noAreaCode))
+              .to.equal(undefined);
+            expect(containsErrorMessage(alert.state.messages, messageSenderMessages.specialNumber))
+              .to.equal(undefined);
+            expect(containsErrorMessage(alert.state.messages, messageSenderMessages.notAnExtension))
+              .to.equal(undefined);
+            expect(containsErrorMessage(alert.state.messages, messageSenderMessages.noToNumber))
+              .to.equal(undefined);
+            expect(containsErrorMessage(alert.state.messages, messageSenderMessages.notSmsToExtension))
               .to.equal(undefined);
           });
         });
@@ -680,28 +682,6 @@ export default (auth, client, account, alert, regionSettings, composeText, messa
           expect(containsErrorMessage(
             alert.state.messages,
             messageSenderMessages.recipientNumberInvalids
-          )).to.not.equal(undefined);
-          expect(containsErrorMessage(alert.state.messages, messageSenderMessages.noAreaCode))
-            .to.equal(undefined);
-          expect(containsErrorMessage(alert.state.messages, messageSenderMessages.specialNumber))
-            .to.equal(undefined);
-          expect(containsErrorMessage(alert.state.messages, messageSenderMessages.notAnExtension))
-            .to.equal(undefined);
-          expect(containsErrorMessage(alert.state.messages, messageSenderMessages.noToNumber))
-            .to.equal(undefined);
-        });
-
-        it('Should Alert of notSmsToExtension - toNumber is phoneNumber with extensionNumber', async () => {
-          composeText.addToNumber({ phoneNumber: '18558990011*101' });
-          composeText.updateMessageText('test sender');
-          try {
-            await composeText.send();
-          } catch (error) {
-            console.debug('message sender e:', error);
-          }
-          expect(containsErrorMessage(
-            alert.state.messages,
-            messageSenderMessages.notSmsToExtension
           )).to.not.equal(undefined);
           expect(containsErrorMessage(alert.state.messages, messageSenderMessages.noAreaCode))
             .to.equal(undefined);

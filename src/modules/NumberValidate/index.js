@@ -2,7 +2,6 @@ import RcModule from '../../lib/RcModule';
 import isBlank from '../../lib/isBlank';
 import moduleStatus from '../../enums/moduleStatus';
 import normalizeNumber from '../../lib/normalizeNumber';
-import cleanNumber from '../../lib/cleanNumber';
 import parseNumber from '../../lib/parseNumber';
 
 import numberValidateActionTypes from './numberValidateActionTypes';
