@@ -71,8 +71,11 @@ export default class NumberValidate extends RcModule {
     if (isBlank(phoneNumber)) {
       return true;
     }
-    const cleaned = cleanNumber(phoneNumber);
-    if (cleaned.length === 0) {
+    const {
+      number,
+      hasInvalidChars,
+    } = parseNumber(phoneNumber);
+    if (hasInvalidChars || number === '') {
       return true;
     }
     return false;
@@ -84,12 +87,14 @@ export default class NumberValidate extends RcModule {
       number,
       isServiceNumber
     } = parseNumber(phoneNumber);
+    const countryCode = this._regionSettings.countryCode;
+    const areaCode = this._regionSettings.areaCode;
     if (
       !isServiceNumber &&
       !hasPlus &&
       number.length === 7 &&
-      (this._regionSettings.countryCode === 'CA' || this._regionSettings.countryCode === 'US') &&
-      this._regionSettings.areaCode === ''
+      (countryCode === 'CA' || countryCode === 'US') &&
+      areaCode === ''
     ) {
       return true;
     }
