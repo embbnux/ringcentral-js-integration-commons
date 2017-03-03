@@ -9,10 +9,6 @@ var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
 
-var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
-
-var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
-
 var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
@@ -61,13 +57,11 @@ var _getDetailedPresenceReducer = require('./getDetailedPresenceReducer');
 
 var _getDetailedPresenceReducer2 = _interopRequireDefault(_getDetailedPresenceReducer);
 
-var _telephonyStatuses = require('../../enums/telephonyStatuses');
-
-var _telephonyStatuses2 = _interopRequireDefault(_telephonyStatuses);
-
 var _subscriptionFilters = require('../../enums/subscriptionFilters');
 
 var _subscriptionFilters2 = _interopRequireDefault(_subscriptionFilters);
+
+var _callLogHelpers = require('../../lib/callLogHelpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -83,11 +77,7 @@ var DetailedPresence = function (_Presence) {
         client = _ref.client,
         subscription = _ref.subscription,
         connectivityMonitor = _ref.connectivityMonitor,
-        onRinging = _ref.onRinging,
-        onNewCall = _ref.onNewCall,
-        onCallUpdated = _ref.onCallUpdated,
-        onCallEnded = _ref.onCallEnded,
-        options = (0, _objectWithoutProperties3.default)(_ref, ['auth', 'client', 'subscription', 'connectivityMonitor', 'onRinging', 'onNewCall', 'onCallUpdated', 'onCallEnded']);
+        options = (0, _objectWithoutProperties3.default)(_ref, ['auth', 'client', 'subscription', 'connectivityMonitor']);
     (0, _classCallCheck3.default)(this, DetailedPresence);
 
     var _this = (0, _possibleConstructorReturn3.default)(this, (DetailedPresence.__proto__ || (0, _getPrototypeOf2.default)(DetailedPresence)).call(this, (0, _extends3.default)({}, options, {
@@ -140,7 +130,6 @@ var DetailedPresence = function (_Presence) {
 
             case 9:
               if ((!_this._auth.loggedIn || !_this._subscription.ready || _this._connectivityMonitor && !_this._connectivityMonitor.ready) && _this.ready) {
-                _this._lastProcessedCalls = [];
                 _this.store.dispatch({
                   type: _this.actionTypes.resetSuccess
                 });
@@ -156,42 +145,6 @@ var DetailedPresence = function (_Presence) {
               }
 
             case 10:
-              if (_this.ready && _this._lastProcessedCalls !== _this.calls) {
-                (function () {
-                  var oldCalls = [].concat((0, _toConsumableArray3.default)(_this._lastProcessedCalls));
-                  _this._lastProcessedCalls = _this.calls;
-
-                  _this.calls.forEach(function (call) {
-                    var oldCallIndex = oldCalls.findIndex(function (item) {
-                      return item.sessionId === call.sessionId;
-                    });
-                    if (oldCallIndex === -1) {
-                      if (typeof _this._onNewCall === 'function') {
-                        _this._onNewCall(call);
-                      }
-                    } else {
-                      var oldCall = oldCalls[oldCallIndex];
-                      oldCalls.splice(oldCallIndex, 1);
-                      if (call.telephonyStatus !== oldCall.telephonyStatus && typeof _this._onCallUpdated === 'function') {
-                        _this._onCallUpdated(call);
-                      }
-                    }
-                  });
-                  oldCalls.forEach(function (call) {
-                    if (typeof _this._onCallEnded === 'function') {
-                      _this._onCallEnded(call);
-                    }
-                  });
-                })();
-              }
-              if (_this.ready && _this._lastTelephonyStatus !== _this.telephonyStatus) {
-                _this._lastTelephonyStatus = _this.telephonyStatus;
-                if (_this._lastTelephonyStatus === _telephonyStatuses2.default.ringing && typeof _this._onRinging === 'function') {
-                  _this._onRinging();
-                }
-              }
-
-            case 12:
             case 'end':
               return _context.stop();
           }
@@ -203,10 +156,6 @@ var DetailedPresence = function (_Presence) {
     _this._client = client;
     _this._subscription = subscription;
     _this._connectivityMonitor = connectivityMonitor;
-    _this._onRinging = onRinging;
-    _this._onNewCall = onNewCall;
-    _this._onCallUpdated = onCallUpdated;
-    _this._onCallEnded = onCallEnded;
 
     _this._reducer = (0, _getDetailedPresenceReducer2.default)(_this.actionTypes);
     _this._lastMessage = null;
@@ -217,7 +166,15 @@ var DetailedPresence = function (_Presence) {
         return call.sessionId;
       });
     });
-    _this._lastProcessedCalls = [];
+
+    _this.addSelector('calls', function () {
+      return _this.state.data;
+    }, function (data) {
+      return (0, _callLogHelpers.removeInboundRingOutLegs)(data).filter(function (call) {
+        return !(0, _callLogHelpers.isEnded)(call);
+      });
+    });
+
     _this._lastTelephonyStatus = null;
     return _this;
   }
@@ -291,9 +248,14 @@ var DetailedPresence = function (_Presence) {
       return _fetch;
     }()
   }, {
+    key: 'data',
+    get: function get() {
+      return this.state.data;
+    }
+  }, {
     key: 'calls',
     get: function get() {
-      return this.state.calls;
+      return this._selectors.calls();
     }
   }, {
     key: 'telephonyStatus',

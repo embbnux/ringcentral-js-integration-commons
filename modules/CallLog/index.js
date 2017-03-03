@@ -83,6 +83,10 @@ var _syncTypes2 = _interopRequireDefault(_syncTypes);
 
 var _callLogHelpers = require('../../lib/callLogHelpers');
 
+var _callResults = require('../../enums/callResults');
+
+var _callResults2 = _interopRequireDefault(_callResults);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var DEFAULT_TTL = 5 * 60 * 1000;
@@ -90,7 +94,7 @@ var DEFAULT_TOKEN_EXPIRES_IN = 60 * 60 * 1000;
 var DEFAULT_DAY_SPAN = 7;
 var RECORD_COUNT = 250;
 var DEFAULT_TIME_TO_RETRY = 62 * 1000;
-var SYNC_DELAY = 20 * 1000;
+var SYNC_DELAY = 30 * 1000;
 
 function processData(data) {
   return {
@@ -260,6 +264,21 @@ var CallLog = function (_Pollable) {
     });
 
     _this._reducer = (0, _getCallLogReducer2.default)(_this.actionTypes);
+
+    _this.addSelector('calls', function () {
+      return _this.data;
+    }, function (data) {
+      return (
+        // TODO make sure removeDuplicateIntermediateCalls is necessary here
+        (0, _callLogHelpers.removeInboundRingOutLegs)((0, _callLogHelpers.removeDuplicateIntermediateCalls)(data.filter(function (call) {
+          return (
+            // [RCINT-3472] calls with result === 'stopped' seems to be useless
+            call.result !== _callResults2.default.stopped
+          );
+        })))
+      );
+    });
+
     _this._promise = null;
     _this._lastMessage = null;
     return _this;
@@ -577,9 +596,14 @@ var CallLog = function (_Pollable) {
       return this.state.status === _moduleStatus2.default.ready;
     }
   }, {
-    key: 'calls',
+    key: 'data',
     get: function get() {
       return this._storage.getItem(this._dataStorageKey);
+    }
+  }, {
+    key: 'calls',
+    get: function get() {
+      return this._selectors.calls();
     }
   }, {
     key: 'token',

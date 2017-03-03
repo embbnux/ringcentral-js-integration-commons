@@ -51,20 +51,22 @@ var _DataFetcher3 = _interopRequireDefault(_DataFetcher2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var DEFAULT_MASK = ['id,mainNumber,status', 'operator(id,extensionNumber)', 'serviceInfo(brand(id,homeCountry(isoCode)))', 'regionalSettings(' + ['timezone(id,name,bias)', 'homeCountry(id)', 'language(localeCode)', 'formattingLocale(localeCode)', 'timeFormat'].join(',') + ')'].join(',');
+var DEFAULT_MASK = 'phoneNumber,hostCode,participantCode,phoneNumbers(country,phoneNumber)';
 
-var AccountInfo = function (_DataFetcher) {
-  (0, _inherits3.default)(AccountInfo, _DataFetcher);
+var Conference = function (_DataFetcher) {
+  (0, _inherits3.default)(Conference, _DataFetcher);
 
-  function AccountInfo(_ref) {
+  function Conference(_ref) {
     var _this2 = this;
 
-    var client = _ref.client,
-        options = (0, _objectWithoutProperties3.default)(_ref, ['client']);
-    (0, _classCallCheck3.default)(this, AccountInfo);
+    var auth = _ref.auth,
+        client = _ref.client,
+        regionSettings = _ref.regionSettings,
+        options = (0, _objectWithoutProperties3.default)(_ref, ['auth', 'client', 'regionSettings']);
+    (0, _classCallCheck3.default)(this, Conference);
 
-    var _this = (0, _possibleConstructorReturn3.default)(this, (AccountInfo.__proto__ || (0, _getPrototypeOf2.default)(AccountInfo)).call(this, (0, _extends3.default)({
-      name: 'accountInfo',
+    var _this = (0, _possibleConstructorReturn3.default)(this, (Conference.__proto__ || (0, _getPrototypeOf2.default)(Conference)).call(this, (0, _extends3.default)({
+      name: 'conference',
       client: client,
       fetchFunction: function () {
         var _ref2 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
@@ -73,7 +75,7 @@ var AccountInfo = function (_DataFetcher) {
               switch (_context.prev = _context.next) {
                 case 0:
                   _context.next = 2;
-                  return client.account().get();
+                  return client.account().extension().conferencing().get();
 
                 case 2:
                   _context.t0 = _context.sent;
@@ -94,42 +96,50 @@ var AccountInfo = function (_DataFetcher) {
       }()
     }, options)));
 
-    _this.addSelector('info', function () {
+    _this._auth = auth;
+    _this._client = client;
+    _this.addSelector('conferenceNumbers', function () {
+      return regionSettings.countryCode;
+    }, function () {
       return _this.data;
-    }, function (data) {
-      return data || {};
+    }, function (isoCode, data) {
+      if (!data) {
+        return data;
+      }
+      var countrys = data.phoneNumbers.find(function (value) {
+        return value.country.isoCode === isoCode;
+      });
+      if (typeof countrys === 'undefined') {
+        return data;
+      }
+      return (0, _extends3.default)({}, data, {
+        phoneNumber: countrys.phoneNumber,
+        phoneNumbers: data.phoneNumbers.filter(function (value) {
+          return value.phoneNumber !== countrys.phoneNumber;
+        })
+      });
     });
     return _this;
   }
 
-  (0, _createClass3.default)(AccountInfo, [{
-    key: 'info',
+  // inviteWithText() {
+  //   let text = 'Please join the RingCentral conference.';
+  //   text += `Dial-In Numbers:${this.phoneNumber}`;
+  //   text += `Participant Access: ${this.participantCode}`;
+  //   text += 'Need an international dial-in phone number? Please visit http://www.ringcentral.com/conferencing';
+  //   text += 'This conference call is brought to you by RingCentral Conferencing.';
+  //   return text;
+  // }
+
+
+  (0, _createClass3.default)(Conference, [{
+    key: 'conferenceNumbers',
     get: function get() {
-      return this._selectors.info();
-    }
-  }, {
-    key: 'id',
-    get: function get() {
-      return this.info.id;
-    }
-  }, {
-    key: 'country',
-    get: function get() {
-      return this.info.serviceInfo && this.info.serviceInfo.brand.homeCountry;
-    }
-  }, {
-    key: 'countryCode',
-    get: function get() {
-      return this.country && this.country.isoCode || 'US';
-    }
-  }, {
-    key: 'mainCompanyNumber',
-    get: function get() {
-      return this.info.mainNumber;
+      return this._selectors.conferenceNumbers();
     }
   }]);
-  return AccountInfo;
+  return Conference;
 }(_DataFetcher3.default);
 
-exports.default = AccountInfo;
+exports.default = Conference;
 //# sourceMappingURL=index.js.map

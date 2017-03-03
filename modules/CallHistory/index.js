@@ -75,13 +75,12 @@ var CallHistory = function (_RcModule) {
   function CallHistory(_ref) {
     var _this2 = this;
 
-    var detailedPresence = _ref.detailedPresence,
+    var accountInfo = _ref.accountInfo,
         callLog = _ref.callLog,
-        activeCalls = _ref.activeCalls,
+        callMonitor = _ref.callMonitor,
         activityMatcher = _ref.activityMatcher,
         contactMatcher = _ref.contactMatcher,
-        regionSettings = _ref.regionSettings,
-        options = (0, _objectWithoutProperties3.default)(_ref, ['detailedPresence', 'callLog', 'activeCalls', 'activityMatcher', 'contactMatcher', 'regionSettings']);
+        options = (0, _objectWithoutProperties3.default)(_ref, ['accountInfo', 'callLog', 'callMonitor', 'activityMatcher', 'contactMatcher']);
     (0, _classCallCheck3.default)(this, CallHistory);
 
     var _this = (0, _possibleConstructorReturn3.default)(this, (CallHistory.__proto__ || (0, _getPrototypeOf2.default)(CallHistory)).call(this, (0, _extends3.default)({}, options, {
@@ -89,22 +88,26 @@ var CallHistory = function (_RcModule) {
     })));
 
     _this._onStateChange = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
-      var uniqueNumbers, sessionIds;
+      var uniqueNumbers, sessionIds, currentCalls;
       return _regenerator2.default.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              if (_this._callLog.ready && _this._activeCalls.ready && _this._detailedPresence.ready && _this._regionSettings.ready && (!_this._contactMatcher || _this._contactMatcher.ready) && (!_this._activityMatcher || _this._activityMatcher.ready) && _this.pending) {
+              if (_this._callLog.ready && (!_this._callMonitor || _this._callMonitor.ready) && _this._accountInfo.ready && (!_this._contactMatcher || _this._contactMatcher.ready) && (!_this._activityMatcher || _this._activityMatcher.ready) && _this.pending) {
                 _this.store.dispatch({
                   type: _this.actionTypes.init
                 });
                 _this.store.dispatch({
                   type: _this.actionTypes.initSuccess
                 });
-              } else if ((!_this._callLog.ready || !_this._activeCalls.ready || !_this._detailedPresence.ready || !_this._regionSettings.ready || _this._contactMatcher && !_this._contactMatcher.ready || _this._activityMatcher && !_this._activityMatcher.ready) && _this.ready) {
+              } else if ((!_this._callLog.ready || _this._callMonitor && !_this._callMonitor.ready || !_this._accountInfo.ready || _this._contactMatcher && !_this._contactMatcher.ready || _this._activityMatcher && !_this._activityMatcher.ready) && _this.ready) {
                 _this.store.dispatch({
                   type: _this.actionTypes.reset
                 });
+                _this._lastProcessedCalls = null;
+                _this._lastProcessedIds = null;
+                _this._lastProcessedMonitorCalls = null;
+                _this._lastProcessedNumbers = null;
                 _this.store.dispatch({
                   type: _this.actionTypes.resetSuccess
                 });
@@ -125,6 +128,46 @@ var CallHistory = function (_RcModule) {
                     _this._activityMatcher.triggerMatch();
                   }
                 }
+                if (_this._callMonitor) {
+                  (function () {
+                    var monitorCalls = _this._callMonitor.calls;
+                    if (_this._lastProcessedMonitorCalls !== monitorCalls) {
+                      var endedCalls = (_this._lastProcessedMonitorCalls || []).filter(function (call) {
+                        return !monitorCalls.find(function (currentCall) {
+                          return call.sessionId === currentCall.sessionId;
+                        });
+                      });
+                      _this._lastProcessedMonitorCalls = monitorCalls;
+                      if (endedCalls.length) {
+                        _this.store.dispatch({
+                          type: _this.actionTypes.addEndedCalls,
+                          endedCalls: endedCalls,
+                          timestamp: Date.now()
+                        });
+                      }
+                    }
+                  })();
+                }
+                currentCalls = _this._callLog.calls;
+
+                if (currentCalls !== _this._lastProcessedCalls) {
+                  (function () {
+                    _this._lastProcessedCalls = currentCalls;
+                    var ids = {};
+                    currentCalls.forEach(function (call) {
+                      ids[call.sessionId] = true;
+                    });
+                    var shouldRemove = _this.state.endedCalls.filter(function (call) {
+                      return ids[call.sessionId];
+                    });
+                    if (shouldRemove.length) {
+                      _this.store.dispatch({
+                        type: _this.actionTypes.removeEndedCalls,
+                        endedCalls: shouldRemove
+                      });
+                    }
+                  })();
+                }
               }
 
             case 1:
@@ -135,55 +178,31 @@ var CallHistory = function (_RcModule) {
       }, _callee, _this2);
     }));
 
-    _this._activeCalls = _ensureExist2.default.call(_this, activeCalls, 'activeCalls');
+    _this._accountInfo = _ensureExist2.default.call(_this, accountInfo, 'accountInfo');
     _this._callLog = _ensureExist2.default.call(_this, callLog, 'callLog');
-    _this._detailedPresence = _ensureExist2.default.call(_this, detailedPresence, 'detailedPresence');
-    // this._activityMatcher = this::ensureExist(activityMatcher, 'activityMatcher');
-    // this._contactMatcher = this::ensureExist(contactMatcher, 'contactMatcher');
-    _this._regionSettings = _ensureExist2.default.call(_this, regionSettings, 'regionSettings');
     _this._activityMatcher = activityMatcher;
     _this._contactMatcher = contactMatcher;
+    _this._callMonitor = callMonitor;
     _this._reducer = (0, _getCallHistoryReducer2.default)(_this.actionTypes);
 
-    _this.addSelector('filteredCalls', function () {
+    _this.addSelector('normalizedCalls', function () {
       return _this._callLog.calls;
     }, function () {
-      return _this._activeCalls.calls;
-    }, function () {
-      return _this._detailedPresence.calls;
-    }, function (callsFromCallLog, callsFromActiveCalls, callsFromPresence) {
-      var indexMap = {};
-      callsFromCallLog.forEach(function (call) {
-        indexMap[call.sessionId] = true;
-      });
-      var presentInPresenceCalls = {};
-      callsFromPresence.forEach(function (call) {
-        presentInPresenceCalls[call.sessionId] = true;
-      });
-      return callsFromActiveCalls.filter(function (call) {
-        return !indexMap[call.sessionId] && !presentInPresenceCalls[call.sessionId];
-      }).concat(callsFromCallLog);
-    });
-    _this.addSelector('normalizedCalls', _this._selectors.filteredCalls, function () {
-      return _this._regionSettings.countryCode;
-    }, function () {
-      return _this._regionSettings.areaCode;
-    }, function (filteredCalls, countryCode, areaCode) {
-      return filteredCalls.map(function (call) {
+      return _this._accountInfo.countryCode;
+    }, function (calls, countryCode) {
+      return calls.map(function (call) {
         var callFrom = (0, _extends3.default)({}, call.from);
         if (callFrom.phoneNumber) {
           callFrom.phoneNumber = (0, _normalizeNumber2.default)({
             phoneNumber: callFrom.phoneNumber,
-            countryCode: countryCode,
-            areaCode: areaCode
+            countryCode: countryCode
           });
         }
         var callTo = (0, _extends3.default)({}, call.to);
         if (callTo.phoneNumber) {
           callTo.phoneNumber = (0, _normalizeNumber2.default)({
             phoneNumber: callTo.phoneNumber,
-            countryCode: countryCode,
-            areaCode: areaCode
+            countryCode: countryCode
           });
         }
         return (0, _extends3.default)({}, call, {
@@ -194,11 +213,15 @@ var CallHistory = function (_RcModule) {
     });
 
     _this.addSelector('calls', _this._selectors.normalizedCalls, function () {
+      return _this.state.endedCalls;
+    }, function () {
       return _this._contactMatcher && _this._contactMatcher.ready ? _this._contactMatcher.cache : null;
     }, function () {
       return _this._activityMatcher && _this._activityMatcher.ready ? _this._activityMatcher.cache : null;
-    }, function (normalizedCalls, contactCache, activityCache) {
+    }, function (normalizedCalls, endedCalls, contactCache, activityCache) {
+      var sessionIds = {};
       return normalizedCalls.map(function (call) {
+        sessionIds[call.sessionId] = true;
         var fromNumber = call.from && (call.from.phoneNumber || call.from.extensionNumber);
         var toNumber = call.to && (call.to.phoneNumber || call.to.extensionNumber);
         return (0, _extends3.default)({}, call, {
@@ -206,10 +229,14 @@ var CallHistory = function (_RcModule) {
           toMatches: toNumber && contactCache && contactCache.dataMap[toNumber] || [],
           activityMatches: activityCache && activityCache.dataMap[call.sessionId] || []
         });
-      }).sort(_callLogHelpers.sortByStartTime);
+      }).concat(endedCalls.filter(function (call) {
+        return !sessionIds[call.sessionId];
+      })).sort(_callLogHelpers.sortByStartTime);
     });
 
-    _this.addSelector('uniqueNumbers', _this._selectors.normalizedCalls, function (normalizedCalls) {
+    _this.addSelector('uniqueNumbers', _this._selectors.normalizedCalls, function () {
+      return _this.state.endedCalls;
+    }, function (normalizedCalls, endedCalls) {
       var output = [];
       var numberMap = {};
       function addIfNotExist(number) {
@@ -218,7 +245,7 @@ var CallHistory = function (_RcModule) {
           numberMap[number] = true;
         }
       }
-      normalizedCalls.forEach(function (call) {
+      function addNumbersFromCall(call) {
         if (call.from && call.from.phoneNumber) {
           addIfNotExist(call.from.phoneNumber);
         } else if (call.from && call.from.extensionNumber) {
@@ -229,7 +256,9 @@ var CallHistory = function (_RcModule) {
         } else if (call.to && call.to.extensionNumber) {
           addIfNotExist(call.to.extensionNumber);
         }
-      });
+      }
+      normalizedCalls.forEach(addNumbersFromCall);
+      endedCalls.forEach(addNumbersFromCall);
       return output;
     });
 
@@ -237,22 +266,32 @@ var CallHistory = function (_RcModule) {
       _this._contactMatcher.addQuerySource({
         getQueriesFn: _this._selectors.uniqueNumbers,
         readyCheckFn: function readyCheckFn() {
-          return _this._activeCalls.ready && _this._detailedPresence.ready && _this._callLog.ready && _this._regionSettings.ready;
+          return (!_this._callMonitor || _this._callMonitor.ready) && _this._callLog.ready && _this._accountInfo.ready;
         }
       });
     }
 
-    _this.addSelector('sessionIds', _this._selectors.filteredCalls, function (filteredCalls) {
-      return filteredCalls.map(function (call) {
+    _this.addSelector('sessionIds', function () {
+      return _this._callLog.calls;
+    }, function () {
+      return _this.state.endedCalls;
+    }, function (calls, endedCalls) {
+      var sessionIds = {};
+      return calls.map(function (call) {
+        sessionIds[call.sessionId] = true;
         return call.sessionId;
-      });
+      }).concat(endedCalls.filter(function (call) {
+        return !sessionIds[call.sessionId];
+      }).map(function (call) {
+        return call.sessionId;
+      }));
     });
 
     if (_this._activityMatcher) {
       _this._activityMatcher.addQuerySource({
         getQueriesFn: _this._selectors.sessionIds,
         readyCheckFn: function readyCheckFn() {
-          return _this._activeCalls.ready && _this._detailedPresence.ready && _this._callLog.ready;
+          return (!_this._callMonitor || _this._callMonitor.ready) && _this._callLog.ready;
         }
       });
     }
