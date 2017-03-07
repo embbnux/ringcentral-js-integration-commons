@@ -43,13 +43,13 @@ var _ClientHistoryRequest2 = _interopRequireDefault(_ClientHistoryRequest);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = function (auth, client, account, alert, regionSettings, composeText, messageSender) {
-  describe('ComposeText', (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee40() {
+  describe('ComposeText', (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee39() {
     var _this = this;
 
     var conditionalDescribe, clientHistoryRequest;
-    return _regenerator2.default.wrap(function _callee40$(_context40) {
+    return _regenerator2.default.wrap(function _callee39$(_context39) {
       while (1) {
-        switch (_context40.prev = _context40.next) {
+        switch (_context39.prev = _context39.next) {
           case 0:
             this.timeout(20000);
             conditionalDescribe = describe;
@@ -91,7 +91,7 @@ exports.default = function (auth, client, account, alert, regionSettings, compos
               }, _callee, _this);
             })));
 
-            conditionalDescribe('Should Init Successfully with Deafult Setting', function () {
+            conditionalDescribe('Should Init Successfully with Default Setting', function () {
               _this.timeout(20000);
               it('Should Set Sender Number with First SmsSender Phone Number by Default', function () {
                 expect(composeText.senderNumber).to.equals(messageSender.senderNumbersList[0]);
@@ -571,7 +571,7 @@ exports.default = function (auth, client, account, alert, regionSettings, compos
                   });
 
                   it('Should Not Alert Anything - To Number in (xxx)xxx-xxxx Format', (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee16() {
-                    var response, rawRequest;
+                    var response;
                     return _regenerator2.default.wrap(function _callee16$(_context16) {
                       while (1) {
                         switch (_context16.prev = _context16.next) {
@@ -585,13 +585,13 @@ exports.default = function (auth, client, account, alert, regionSettings, compos
                             response = _context16.sent;
 
                             expect(response).to.include.keys('id', 'conversation');
-                            expect(response.type).to.equals('SMS');
-                            expect(response.subject).to.equals('test');
-                            rawRequest = clientHistoryRequest.getRawResponse(_ClientHistoryRequest2.default.endPoints.sms);
+                            expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.noAreaCode)).to.equal(undefined);
+                            expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.specialNumber)).to.equal(undefined);
+                            expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.notAnExtension)).to.equal(undefined);
+                            expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.noToNumber)).to.equal(undefined);
+                            expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.notSmsToExtension)).to.equal(undefined);
 
-                            expect((0, _stringify2.default)(response)).to.equal((0, _stringify2.default)(rawRequest));
-
-                          case 10:
+                          case 11:
                           case 'end':
                             return _context16.stop();
                         }
@@ -600,7 +600,7 @@ exports.default = function (auth, client, account, alert, regionSettings, compos
                   })));
 
                   it('Should Not Alert Anything - to Number in (xxx) xxx-xxxx Format', (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee17() {
-                    var response, rawRequest;
+                    var response;
                     return _regenerator2.default.wrap(function _callee17$(_context17) {
                       while (1) {
                         switch (_context17.prev = _context17.next) {
@@ -614,13 +614,13 @@ exports.default = function (auth, client, account, alert, regionSettings, compos
                             response = _context17.sent;
 
                             expect(response).to.include.keys('id', 'conversation');
-                            expect(response.type).to.equals('SMS');
-                            expect(response.subject).to.equals('test');
-                            rawRequest = clientHistoryRequest.getRawResponse(_ClientHistoryRequest2.default.endPoints.sms);
+                            expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.noAreaCode)).to.equal(undefined);
+                            expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.specialNumber)).to.equal(undefined);
+                            expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.notAnExtension)).to.equal(undefined);
+                            expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.noToNumber)).to.equal(undefined);
+                            expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.notSmsToExtension)).to.equal(undefined);
 
-                            expect((0, _stringify2.default)(response)).to.equal((0, _stringify2.default)(rawRequest));
-
-                          case 10:
+                          case 11:
                           case 'end':
                             return _context17.stop();
                         }
@@ -628,80 +628,66 @@ exports.default = function (auth, client, account, alert, regionSettings, compos
                     }, _callee17, _this);
                   })));
 
-                  it('Should Alert notSmsToExtension - to Number in (xxx)xxx-xxxx*xxx Format', (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee18() {
+                  it('Should Not Alert Anything - to Number in (xxx)xxx-xxxx*xxx Format', (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee18() {
+                    var response;
                     return _regenerator2.default.wrap(function _callee18$(_context18) {
                       while (1) {
                         switch (_context18.prev = _context18.next) {
                           case 0:
-                            composeText.updateTypingToNumber('(855) 899-0011*101');
+                            composeText.updateTypingToNumber('(855)899-0011*101');
                             composeText.updateMessageText('test');
-                            _context18.prev = 2;
-                            _context18.next = 5;
+                            _context18.next = 4;
                             return composeText.send();
 
-                          case 5:
-                            _context18.next = 10;
-                            break;
+                          case 4:
+                            response = _context18.sent;
 
-                          case 7:
-                            _context18.prev = 7;
-                            _context18.t0 = _context18['catch'](2);
-
-                            console.debug('message sender e:', _context18.t0);
-
-                          case 10:
-                            expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.notSmsToExtension)).to.not.equal(undefined);
+                            expect(response).to.include.keys('id', 'conversation');
                             expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.noAreaCode)).to.equal(undefined);
                             expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.specialNumber)).to.equal(undefined);
                             expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.notAnExtension)).to.equal(undefined);
                             expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.noToNumber)).to.equal(undefined);
+                            expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.notSmsToExtension)).to.equal(undefined);
 
-                          case 15:
+                          case 11:
                           case 'end':
                             return _context18.stop();
                         }
                       }
-                    }, _callee18, _this, [[2, 7]]);
+                    }, _callee18, _this);
                   })));
 
-                  it('Should Alert notSmsToExtension - to Number in (xxx) xxx-xxxx*xxx Format', (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee19() {
+                  it('Should Not Alert Anything - to Number in (xxx) xxx-xxxx*xxx Format', (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee19() {
+                    var response;
                     return _regenerator2.default.wrap(function _callee19$(_context19) {
                       while (1) {
                         switch (_context19.prev = _context19.next) {
                           case 0:
                             composeText.updateTypingToNumber('(855) 899-0011*101');
                             composeText.updateMessageText('test');
-                            _context19.prev = 2;
-                            _context19.next = 5;
+                            _context19.next = 4;
                             return composeText.send();
 
-                          case 5:
-                            _context19.next = 10;
-                            break;
+                          case 4:
+                            response = _context19.sent;
 
-                          case 7:
-                            _context19.prev = 7;
-                            _context19.t0 = _context19['catch'](2);
-
-                            console.debug('message sender e:', _context19.t0);
-
-                          case 10:
-                            expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.notSmsToExtension)).to.not.equal(undefined);
+                            expect(response).to.include.keys('id', 'conversation');
                             expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.noAreaCode)).to.equal(undefined);
                             expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.specialNumber)).to.equal(undefined);
                             expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.notAnExtension)).to.equal(undefined);
                             expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.noToNumber)).to.equal(undefined);
+                            expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.notSmsToExtension)).to.equal(undefined);
 
-                          case 15:
+                          case 11:
                           case 'end':
                             return _context19.stop();
                         }
                       }
-                    }, _callee19, _this, [[2, 7]]);
+                    }, _callee19, _this);
                   })));
 
                   it('Should Not Alert Anything - to Number in xxx-xxx-xxxx Format', (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee20() {
-                    var response, rawRequest;
+                    var response;
                     return _regenerator2.default.wrap(function _callee20$(_context20) {
                       while (1) {
                         switch (_context20.prev = _context20.next) {
@@ -715,13 +701,13 @@ exports.default = function (auth, client, account, alert, regionSettings, compos
                             response = _context20.sent;
 
                             expect(response).to.include.keys('id', 'conversation');
-                            expect(response.type).to.equals('SMS');
-                            expect(response.subject).to.equals('test');
-                            rawRequest = clientHistoryRequest.getRawResponse(_ClientHistoryRequest2.default.endPoints.sms);
+                            expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.noAreaCode)).to.equal(undefined);
+                            expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.specialNumber)).to.equal(undefined);
+                            expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.notAnExtension)).to.equal(undefined);
+                            expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.noToNumber)).to.equal(undefined);
+                            expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.notSmsToExtension)).to.equal(undefined);
 
-                            expect((0, _stringify2.default)(response)).to.equal((0, _stringify2.default)(rawRequest));
-
-                          case 10:
+                          case 11:
                           case 'end':
                             return _context20.stop();
                         }
@@ -729,40 +715,33 @@ exports.default = function (auth, client, account, alert, regionSettings, compos
                     }, _callee20, _this);
                   })));
 
-                  it('Should Alert notSmsToExtension - to Number in xxx-xxx-xxxx*xxx Format', (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee21() {
+                  it('Should Not Alert Anything - to Number in xxx-xxx-xxxx*xxx Format', (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee21() {
+                    var response;
                     return _regenerator2.default.wrap(function _callee21$(_context21) {
                       while (1) {
                         switch (_context21.prev = _context21.next) {
                           case 0:
                             composeText.updateTypingToNumber('855-899-0011*101');
                             composeText.updateMessageText('test');
-                            _context21.prev = 2;
-                            _context21.next = 5;
+                            _context21.next = 4;
                             return composeText.send();
 
-                          case 5:
-                            _context21.next = 10;
-                            break;
+                          case 4:
+                            response = _context21.sent;
 
-                          case 7:
-                            _context21.prev = 7;
-                            _context21.t0 = _context21['catch'](2);
-
-                            console.debug('message sender e:', _context21.t0);
-
-                          case 10:
-                            expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.notSmsToExtension)).to.not.equal(undefined);
+                            expect(response).to.include.keys('id', 'conversation');
                             expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.noAreaCode)).to.equal(undefined);
                             expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.specialNumber)).to.equal(undefined);
                             expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.notAnExtension)).to.equal(undefined);
                             expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.noToNumber)).to.equal(undefined);
+                            expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.notSmsToExtension)).to.equal(undefined);
 
-                          case 15:
+                          case 11:
                           case 'end':
                             return _context21.stop();
                         }
                       }
-                    }, _callee21, _this, [[2, 7]]);
+                    }, _callee21, _this);
                   })));
                 });
 
@@ -1241,51 +1220,15 @@ exports.default = function (auth, client, account, alert, regionSettings, compos
                     }
                   }, _callee38, _this, [[2, 7]]);
                 })));
-
-                it('Should Alert of notSmsToExtension - toNumber is phoneNumber with extensionNumber', (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee39() {
-                  return _regenerator2.default.wrap(function _callee39$(_context39) {
-                    while (1) {
-                      switch (_context39.prev = _context39.next) {
-                        case 0:
-                          composeText.addToNumber({ phoneNumber: '18558990011*101' });
-                          composeText.updateMessageText('test sender');
-                          _context39.prev = 2;
-                          _context39.next = 5;
-                          return composeText.send();
-
-                        case 5:
-                          _context39.next = 10;
-                          break;
-
-                        case 7:
-                          _context39.prev = 7;
-                          _context39.t0 = _context39['catch'](2);
-
-                          console.debug('message sender e:', _context39.t0);
-
-                        case 10:
-                          expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.notSmsToExtension)).to.not.equal(undefined);
-                          expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.noAreaCode)).to.equal(undefined);
-                          expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.specialNumber)).to.equal(undefined);
-                          expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.notAnExtension)).to.equal(undefined);
-                          expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.noToNumber)).to.equal(undefined);
-
-                        case 15:
-                        case 'end':
-                          return _context39.stop();
-                      }
-                    }
-                  }, _callee39, _this, [[2, 7]]);
-                })));
               });
             });
 
           case 12:
           case 'end':
-            return _context40.stop();
+            return _context39.stop();
         }
       }
-    }, _callee40, this);
+    }, _callee39, this);
   })));
 };
 //# sourceMappingURL=composeText.js.map
