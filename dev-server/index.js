@@ -234,6 +234,7 @@ class DemoPhone extends RcModule {
       client: this.client,
       accountExtension: this.accountExtension,
       regionSettings: this.regionSettings,
+      accountInfo: this.accountInfo,
       getState: () => this.state.numberValidate,
     }));
     this.addModule('call', new Call({
