@@ -496,6 +496,7 @@ var Phone = function (_RcModule) {
       client: _this.client,
       accountExtension: _this.accountExtension,
       regionSettings: _this.regionSettings,
+      accountInfo: _this.accountInfo,
       getState: function getState() {
         return _this.state.numberValidate;
       }
