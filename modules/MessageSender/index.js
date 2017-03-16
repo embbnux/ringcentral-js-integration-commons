@@ -264,83 +264,84 @@ var MessageSender = function (_RcModule) {
 
               case 18:
                 if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
-                  _context.next = 31;
+                  _context.next = 32;
                   break;
                 }
 
                 number = _step.value;
 
                 if (!(number.subAddress && number.subAddress.length > 0)) {
-                  _context.next = 27;
+                  _context.next = 28;
                   break;
                 }
 
                 if (this._numberValidate.isCompanyExtension(number.e164, number.subAddress)) {
-                  _context.next = 24;
+                  _context.next = 25;
                   break;
                 }
 
                 this._alertWarning(_messageSenderMessages2.default.notAnExtension);
+                this.store.dispatch({ type: this.actionTypes.validateError });
                 return _context.abrupt('return', result);
 
-              case 24:
+              case 25:
                 numbers.push(number.subAddress);
-                _context.next = 28;
+                _context.next = 29;
                 break;
 
-              case 27:
+              case 28:
                 numbers.push(number.e164);
 
-              case 28:
+              case 29:
                 _iteratorNormalCompletion = true;
                 _context.next = 18;
                 break;
 
-              case 31:
-                _context.next = 37;
+              case 32:
+                _context.next = 38;
                 break;
 
-              case 33:
-                _context.prev = 33;
+              case 34:
+                _context.prev = 34;
                 _context.t0 = _context['catch'](16);
                 _didIteratorError = true;
                 _iteratorError = _context.t0;
 
-              case 37:
-                _context.prev = 37;
+              case 38:
                 _context.prev = 38;
+                _context.prev = 39;
 
                 if (!_iteratorNormalCompletion && _iterator.return) {
                   _iterator.return();
                 }
 
-              case 40:
-                _context.prev = 40;
+              case 41:
+                _context.prev = 41;
 
                 if (!_didIteratorError) {
-                  _context.next = 43;
+                  _context.next = 44;
                   break;
                 }
 
                 throw _iteratorError;
 
-              case 43:
-                return _context.finish(40);
-
               case 44:
-                return _context.finish(37);
+                return _context.finish(41);
 
               case 45:
+                return _context.finish(38);
+
+              case 46:
                 result.result = true;
                 result.numbers = numbers;
                 return _context.abrupt('return', result);
 
-              case 48:
+              case 49:
               case 'end':
                 return _context.stop();
             }
           }
-        }, _callee, this, [[16, 33, 37, 45], [38,, 40, 44]]);
+        }, _callee, this, [[16, 34, 38, 46], [39,, 41, 45]]);
       }));
 
       function _validateToNumbers(_x) {
