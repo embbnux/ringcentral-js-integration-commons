@@ -175,8 +175,11 @@ var NumberValidate = function (_RcModule) {
     }
   }, {
     key: '_isNotAnExtension',
-    value: function _isNotAnExtension(extensionNumber) {
-      if (extensionNumber && extensionNumber.length <= 5 && !this._accountExtension.isAvailableExtension(extensionNumber)) {
+    value: function _isNotAnExtension(originalString, subAddress) {
+      if (originalString && originalString.length <= 5 && !this._accountExtension.isAvailableExtension(originalString)) {
+        return true;
+      }
+      if (subAddress && subAddress.length > 0 && !this._accountExtension.isAvailableExtension(subAddress)) {
         return true;
       }
       return false;
@@ -266,7 +269,7 @@ var NumberValidate = function (_RcModule) {
                     errors.push({ phoneNumber: phoneNumber.originalString, type: 'specialNumber' });
                     return null;
                   }
-                  if (_this4._isNotAnExtension(phoneNumber.originalString)) {
+                  if (_this4._isNotAnExtension(phoneNumber.originalString, phoneNumber.subAddress)) {
                     errors.push({ phoneNumber: phoneNumber.originalString, type: 'notAnExtension' });
                     return null;
                   }

@@ -256,6 +256,9 @@ var MessageSender = function (_RcModule) {
               case 12:
 
                 recipientNumbers = numberValidateResult.numbers.map(function (number) {
+                  if (number.subAddress && number.subAddress.length > 0) {
+                    return number.subAddress;
+                  }
                   return number.e164;
                 });
                 result.result = true;

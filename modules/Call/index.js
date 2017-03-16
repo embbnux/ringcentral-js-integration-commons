@@ -53,14 +53,6 @@ var _moduleStatus = require('../../enums/moduleStatus');
 
 var _moduleStatus2 = _interopRequireDefault(_moduleStatus);
 
-var _normalizeNumber = require('../../lib/normalizeNumber');
-
-var _normalizeNumber2 = _interopRequireDefault(_normalizeNumber);
-
-var _parseNumber2 = require('../../lib/parseNumber');
-
-var _parseNumber3 = _interopRequireDefault(_parseNumber2);
-
 var _actionTypes = require('./actionTypes');
 
 var _actionTypes2 = _interopRequireDefault(_actionTypes);
@@ -92,13 +84,11 @@ var Call = function (_RcModule) {
     var alert = _ref.alert,
         client = _ref.client,
         storage = _ref.storage,
-        regionSettings = _ref.regionSettings,
         callingSettings = _ref.callingSettings,
         softphone = _ref.softphone,
         ringout = _ref.ringout,
-        accountExtension = _ref.accountExtension,
         numberValidate = _ref.numberValidate,
-        options = (0, _objectWithoutProperties3.default)(_ref, ['alert', 'client', 'storage', 'regionSettings', 'callingSettings', 'softphone', 'ringout', 'accountExtension', 'numberValidate']);
+        options = (0, _objectWithoutProperties3.default)(_ref, ['alert', 'client', 'storage', 'callingSettings', 'softphone', 'ringout', 'numberValidate']);
     (0, _classCallCheck3.default)(this, Call);
 
     var _this = (0, _possibleConstructorReturn3.default)(this, (Call.__proto__ || (0, _getPrototypeOf2.default)(Call)).call(this, (0, _extends3.default)({}, options, {
@@ -177,6 +167,7 @@ var Call = function (_RcModule) {
                   payroll: _context.t0
                 });
               } else if (_context.t0.message === 'Failed to fetch') {
+                console.log(_context.t0);
                 _this._alert.danger({
                   message: _callErrors2.default.networkError,
                   payroll: _context.t0
@@ -205,11 +196,9 @@ var Call = function (_RcModule) {
     _this._storage = storage;
     _this._storageKey = 'lastCallNumber';
     _this._reducer = (0, _getCallReducer2.default)(_this.actionTypes);
-    _this._regionSettings = regionSettings;
     _this._callingSettings = callingSettings;
     _this._ringout = ringout;
     _this._softphone = softphone;
-    _this._accountExtension = accountExtension;
     _this._numberValidate = numberValidate;
 
     _this._storage.registerReducer({
@@ -225,11 +214,11 @@ var Call = function (_RcModule) {
       var _this3 = this;
 
       this.store.subscribe(function () {
-        if (_this3._regionSettings.ready && _this3._callingSettings.ready && _this3._storage.ready && _this3.status === _moduleStatus2.default.pending) {
+        if (_this3._numberValidate.ready && _this3._callingSettings.ready && _this3._storage.ready && _this3.status === _moduleStatus2.default.pending) {
           _this3.store.dispatch({
             type: _this3.actionTypes.initSuccess
           });
-        } else if ((!_this3._regionSettings.ready || !_this3._callingSettings.ready || !_this3._storage.ready) && _this3.status === _moduleStatus2.default.ready) {
+        } else if ((!_this3._numberValidate.ready || !_this3._callingSettings.ready || !_this3._storage.ready) && _this3.status === _moduleStatus2.default.ready) {
           _this3.store.dispatch({
             type: _this3.actionTypes.resetSuccess
           });
@@ -250,16 +239,25 @@ var Call = function (_RcModule) {
       var _ref3 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2() {
         var _this4 = this;
 
-        var fromNumber, validatedResult, parsedNumbers, parsedFromNumber;
+        var fromNumber, waitingValidateNumbers, validatedResult, parsedNumbers, parsedFromNumber;
         return _regenerator2.default.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 fromNumber = this._callingSettings.myLocation;
-                validatedResult = this._numberValidate.validateNumbers([this.toNumber, fromNumber]);
+                waitingValidateNumbers = [this.toNumber];
+
+                if (fromNumber && fromNumber.length > 0) {
+                  waitingValidateNumbers.push(fromNumber);
+                }
+                _context2.next = 5;
+                return this._numberValidate.validateNumbers(waitingValidateNumbers);
+
+              case 5:
+                validatedResult = _context2.sent;
 
                 if (validatedResult.result) {
-                  _context2.next = 5;
+                  _context2.next = 9;
                   break;
                 }
 
@@ -270,7 +268,7 @@ var Call = function (_RcModule) {
                 });
                 return _context2.abrupt('return', null);
 
-              case 5:
+              case 9:
                 parsedNumbers = validatedResult.numbers;
                 // using e164 in response to call
 
@@ -285,7 +283,7 @@ var Call = function (_RcModule) {
                   fromNumber: parsedFromNumber
                 });
 
-              case 9:
+              case 13:
               case 'end':
                 return _context2.stop();
             }
@@ -300,138 +298,27 @@ var Call = function (_RcModule) {
       return _getValidatedNumbers;
     }()
   }, {
-    key: '_getValidatedNumbersOld',
+    key: '_makeCall',
     value: function () {
-      var _ref4 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3() {
-        var fromNumber, countryCode, areaCode, _parseNumber, hasPlus, number, isServiceNumber, hasInvalidChars, normalized, homeCountry, resp, parsedFromNumber;
-
+      var _ref4 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3(_ref5) {
+        var toNumber = _ref5.toNumber,
+            fromNumber = _ref5.fromNumber;
+        var callingMode;
         return _regenerator2.default.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
-                fromNumber = this._callingSettings.myLocation;
-                countryCode = this._regionSettings.countryCode;
-                areaCode = this._regionSettings.areaCode;
-                _parseNumber = (0, _parseNumber3.default)(this.toNumber), hasPlus = _parseNumber.hasPlus, number = _parseNumber.number, isServiceNumber = _parseNumber.isServiceNumber, hasInvalidChars = _parseNumber.hasInvalidChars;
-                // include special char or cleaned has no digit (only #*+)
-
-                if (!(hasInvalidChars || number === '')) {
-                  _context3.next = 8;
-                  break;
-                }
-
-                this._alert.warning({
-                  message: _callErrors2.default.noToNumber
-                });
-                _context3.next = 28;
-                break;
-
-              case 8:
-                if (!(!isServiceNumber && !hasPlus && number.length === 7 && (countryCode === 'CA' || countryCode === 'US') && areaCode === '')) {
-                  _context3.next = 12;
-                  break;
-                }
-
-                this._alert.warning({
-                  message: _callErrors2.default.noAreaCode
-                });
-                _context3.next = 28;
-                break;
-
-              case 12:
-                // to e164 normalize
-                normalized = (0, _normalizeNumber2.default)({
-                  phoneNumber: this.toNumber,
-                  countryCode: countryCode,
-                  areaCode: areaCode
-                });
-                // phoneParser
-
-                homeCountry = countryCode ? { homeCountry: countryCode } : {};
-                _context3.next = 16;
-                return this._client.numberParser().parse().post({
-                  originalStrings: [normalized, fromNumber]
-                }, homeCountry);
-
-              case 16:
-                resp = _context3.sent;
-
-                if (!(resp.phoneNumbers[0] && resp.phoneNumbers[0].special)) {
-                  _context3.next = 21;
-                  break;
-                }
-
-                this._alert.warning({
-                  message: _callErrors2.default.specialNumber
-                });
-                _context3.next = 28;
-                break;
-
-              case 21:
-                if (!(resp.phoneNumbers[0] && resp.phoneNumbers[0].originalString.length <= 5 && !this._accountExtension.isAvailableExtension(resp.phoneNumbers[0].originalString))) {
-                  _context3.next = 25;
-                  break;
-                }
-
-                // not a service code but short number, confirm if it is an extension
-                this._alert.warning({
-                  message: _callErrors2.default.notAnExtension
-                });
-                _context3.next = 28;
-                break;
-
-              case 25:
-                // using e164 in response to call
-                parsedFromNumber = resp.phoneNumbers[1] ? resp.phoneNumbers[1].e164 : '';
-                // add ext back if any
-
-                if (parsedFromNumber !== '') {
-                  parsedFromNumber = resp.phoneNumbers[1].subAddress ? [resp.phoneNumbers[1].e164, resp.phoneNumbers[1].subAddress].join('*') : resp.phoneNumbers[1].e164;
-                }
-                return _context3.abrupt('return', {
-                  toNumber: resp.phoneNumbers[0].e164,
-                  fromNumber: parsedFromNumber
-                });
-
-              case 28:
-                return _context3.abrupt('return', null);
-
-              case 29:
-              case 'end':
-                return _context3.stop();
-            }
-          }
-        }, _callee3, this);
-      }));
-
-      function _getValidatedNumbersOld() {
-        return _ref4.apply(this, arguments);
-      }
-
-      return _getValidatedNumbersOld;
-    }()
-  }, {
-    key: '_makeCall',
-    value: function () {
-      var _ref5 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee4(_ref6) {
-        var toNumber = _ref6.toNumber,
-            fromNumber = _ref6.fromNumber;
-        var callingMode;
-        return _regenerator2.default.wrap(function _callee4$(_context4) {
-          while (1) {
-            switch (_context4.prev = _context4.next) {
-              case 0:
                 callingMode = this._callingSettings.callingMode;
-                _context4.t0 = callingMode;
-                _context4.next = _context4.t0 === _callingModes2.default.softphone ? 4 : _context4.t0 === _callingModes2.default.ringout ? 6 : 9;
+                _context3.t0 = callingMode;
+                _context3.next = _context3.t0 === _callingModes2.default.softphone ? 4 : _context3.t0 === _callingModes2.default.ringout ? 6 : 9;
                 break;
 
               case 4:
                 this._softphone.makeCall(toNumber);
-                return _context4.abrupt('break', 10);
+                return _context3.abrupt('break', 10);
 
               case 6:
-                _context4.next = 8;
+                _context3.next = 8;
                 return this._ringout.makeCall({
                   fromNumber: fromNumber,
                   toNumber: toNumber,
@@ -439,21 +326,21 @@ var Call = function (_RcModule) {
                 });
 
               case 8:
-                return _context4.abrupt('break', 10);
+                return _context3.abrupt('break', 10);
 
               case 9:
-                return _context4.abrupt('break', 10);
+                return _context3.abrupt('break', 10);
 
               case 10:
               case 'end':
-                return _context4.stop();
+                return _context3.stop();
             }
           }
-        }, _callee4, this);
+        }, _callee3, this);
       }));
 
       function _makeCall(_x) {
-        return _ref5.apply(this, arguments);
+        return _ref4.apply(this, arguments);
       }
 
       return _makeCall;
