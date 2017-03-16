@@ -115,7 +115,7 @@ var NumberValidate = function (_RcModule) {
   }, {
     key: '_shouldInit',
     value: function _shouldInit() {
-      return this._regionSettings.ready && this._accountExtension.ready && this.accountInfo.ready && !this.ready;
+      return this._regionSettings.ready && this._accountExtension.ready && this._accountInfo.ready && !this.ready;
     }
   }, {
     key: '_initModuleStatus',
@@ -127,7 +127,7 @@ var NumberValidate = function (_RcModule) {
   }, {
     key: '_shouldReset',
     value: function _shouldReset() {
-      return (!this.accountInfo.ready || !this._regionSettings.ready || !this._accountExtension.ready) && this.ready;
+      return (!this._accountInfo.ready || !this._regionSettings.ready || !this._accountExtension.ready) && this.ready;
     }
   }, {
     key: '_resetModuleStatus',
