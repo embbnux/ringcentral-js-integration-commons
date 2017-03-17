@@ -90,7 +90,8 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldInit()).to.equal(true);
         });
 
-        it('Should return false when _regionSettings is not ready, _accountExtension is ready', () => {
+        it(`Should return false when _regionSettings is not ready and
+            _accountExtension is ready`, () => {
           numberValidate._regionSettings = {
             ready: false
           };
@@ -100,7 +101,8 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldInit()).to.equal(false);
         });
 
-        it('Should return false when _regionSettings is ready, _accountExtension is not ready', () => {
+        it(`Should return false when _regionSettings is ready and
+            _accountExtension is not ready`, () => {
           numberValidate._regionSettings = {
             ready: true
           };
@@ -110,7 +112,8 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldInit()).to.equal(false);
         });
 
-        it('Should return false when _regionSettings is not ready, _accountExtension is not ready', () => {
+        it(`Should return false when _regionSettings is not ready and
+            _accountExtension is not ready`, () => {
           numberValidate._regionSettings = {
             ready: false
           };
@@ -138,7 +141,8 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldInit()).to.equal(false);
         });
 
-        it('Should return false when _regionSettings is not ready, _accountExtension is ready', () => {
+        it(`Should return false when _regionSettings is not ready and
+            _accountExtension is ready`, () => {
           numberValidate._regionSettings = {
             ready: false
           };
@@ -148,7 +152,8 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldInit()).to.equal(false);
         });
 
-        it('Should return false when _regionSettings is ready, _accountExtension is not ready', () => {
+        it(`Should return false when _regionSettings is ready and
+            _accountExtension is not ready`, () => {
           numberValidate._regionSettings = {
             ready: true
           };
@@ -158,7 +163,8 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldInit()).to.equal(false);
         });
 
-        it('Should return false when _regionSettings is not ready, _accountExtension is not ready', () => {
+        it(`Should return false when _regionSettings is not ready and
+            _accountExtension is not ready`, () => {
           numberValidate._regionSettings = {
             ready: false
           };
@@ -192,7 +198,8 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldInit()).to.equal(false);
         });
 
-        it('Should return false when _regionSettings is not ready, _accountExtension is ready ', () => {
+        it(`Should return false when _regionSettings is not ready and
+            _accountExtension is ready`, () => {
           numberValidate._regionSettings = {
             ready: false
           };
@@ -202,7 +209,8 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldInit()).to.equal(false);
         });
 
-        it('Should return false when _regionSettings is ready, _accountExtension is not ready', () => {
+        it(`Should return false when _regionSettings is ready and
+            _accountExtension is not ready`, () => {
           numberValidate._regionSettings = {
             ready: true
           };
@@ -212,7 +220,7 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldInit()).to.equal(false);
         });
 
-        it('Should return false when _regionSettings and _accountExtension is all not ready', () => {
+        it('Should return false when _regionSettings and _accountExtension is not ready', () => {
           numberValidate._regionSettings = {
             ready: false
           };
@@ -240,7 +248,8 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldInit()).to.equal(false);
         });
 
-        it('Should return false when _regionSettings is not ready, _accountExtension is ready ', () => {
+        it(`Should return false when _regionSettings is not ready and
+            _accountExtension is ready`, () => {
           numberValidate._regionSettings = {
             ready: false
           };
@@ -250,7 +259,8 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldInit()).to.equal(false);
         });
 
-        it('Should return false when _regionSettings is ready, _accountExtension is not ready', () => {
+        it(`Should return false when _regionSettings is ready and
+            _accountExtension is not ready`, () => {
           numberValidate._regionSettings = {
             ready: true
           };
@@ -260,7 +270,8 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldInit()).to.equal(false);
         });
 
-        it('Should return false when _regionSettings and _accountExtension is all not ready', () => {
+        it(`Should return false when _regionSettings and
+            _accountExtension is all not ready`, () => {
           numberValidate._regionSettings = {
             ready: false
           };
@@ -296,7 +307,8 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldReset()).to.equal(false);
         });
 
-        it('Should return false when _regionSettings is not ready, _accountExtension is ready ', () => {
+        it(`Should return false when _regionSettings is not ready,
+            _accountExtension is ready`, () => {
           numberValidate._regionSettings = {
             ready: false
           };
@@ -306,7 +318,8 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldReset()).to.equal(false);
         });
 
-        it('Should return false when _regionSettings is ready, _accountExtension is not ready', () => {
+        it(`Should return false when _regionSettings is ready,
+            _accountExtension is not ready`, () => {
           numberValidate._regionSettings = {
             ready: true
           };
@@ -316,7 +329,7 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldReset()).to.equal(false);
         });
 
-        it('Should return false when _regionSettings and _accountExtension is all not ready', () => {
+        it('Should return false when _regionSettings and _accountExtension is not ready', () => {
           numberValidate._regionSettings = {
             ready: false
           };
@@ -344,7 +357,8 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldReset()).to.equal(false);
         });
 
-        it('Should return false when _regionSettings is not ready, _accountExtension is ready ', () => {
+        it(`Should return false when _regionSettings is not ready and
+            _accountExtension is ready`, () => {
           numberValidate._regionSettings = {
             ready: false
           };
@@ -354,7 +368,8 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldReset()).to.equal(false);
         });
 
-        it('Should return false when _regionSettings is ready, _accountExtension is not ready', () => {
+        it(`Should return false when _regionSettings is ready,
+            _accountExtension is not ready`, () => {
           numberValidate._regionSettings = {
             ready: true
           };
@@ -364,7 +379,7 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldReset()).to.equal(false);
         });
 
-        it('Should return false when _regionSettings and _accountExtension is all not ready', () => {
+        it('Should return false when _regionSettings and _accountExtension is not ready', () => {
           numberValidate._regionSettings = {
             ready: false
           };
@@ -398,7 +413,8 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldReset()).to.equal(true);
         });
 
-        it('Should return true when _regionSettings is not ready, _accountExtension is ready', () => {
+        it(`Should return true when _regionSettings is not ready and
+            _accountExtension is ready`, () => {
           numberValidate._regionSettings = {
             ready: false
           };
@@ -408,7 +424,8 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldReset()).to.equal(true);
         });
 
-        it('Should return true when _regionSettings is ready, _accountExtension is not ready', () => {
+        it(`Should return true when _regionSettings is ready,
+            _accountExtension is not ready`, () => {
           numberValidate._regionSettings = {
             ready: true
           };
@@ -418,7 +435,8 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldReset()).to.equal(true);
         });
 
-        it('Should return true when _regionSettings is not ready, _accountExtension is not ready', () => {
+        it(`Should return true when _regionSettings is not ready,
+            _accountExtension is not ready`, () => {
           numberValidate._regionSettings = {
             ready: false
           };
@@ -446,7 +464,8 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldReset()).to.equal(false);
         });
 
-        it('Should return true when _regionSettings is not ready, _accountExtension is ready', () => {
+        it(`Should return true when _regionSettings is not ready and
+            _accountExtension is ready`, () => {
           numberValidate._regionSettings = {
             ready: false
           };
@@ -456,7 +475,8 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldReset()).to.equal(true);
         });
 
-        it('Should return true when _regionSettings is ready, _accountExtension is not ready', () => {
+        it(`Should return true when _regionSettings is ready and
+            _accountExtension is not ready`, () => {
           numberValidate._regionSettings = {
             ready: true
           };
@@ -466,7 +486,8 @@ describe('NumberValidate Unit Test', () => {
           expect(numberValidate._shouldReset()).to.equal(true);
         });
 
-        it('Should return true when _regionSettings is not ready, _accountExtension is not ready', () => {
+        it(`Should return true when _regionSettings is not ready and
+            _accountExtension is not ready`, () => {
           numberValidate._regionSettings = {
             ready: false
           };
