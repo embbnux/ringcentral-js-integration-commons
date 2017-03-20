@@ -45,9 +45,9 @@ var _DataFetcher2 = require('../../lib/DataFetcher');
 
 var _DataFetcher3 = _interopRequireDefault(_DataFetcher2);
 
-var _moduleStatus = require('../../enums/moduleStatus');
+var _moduleStatuses = require('../../enums/moduleStatuses');
 
-var _moduleStatus2 = _interopRequireDefault(_moduleStatus);
+var _moduleStatuses2 = _interopRequireDefault(_moduleStatuses);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -84,14 +84,15 @@ var RolesAndPermissions = function (_DataFetcher) {
             while (1) {
               switch (_context.prev = _context.next) {
                 case 0:
-                  _context.next = 2;
+                  _context.t0 = extractData;
+                  _context.next = 3;
                   return _this._client.account().extension().authzProfile().get();
 
-                case 2:
-                  _context.t0 = _context.sent;
-                  return _context.abrupt('return', extractData(_context.t0));
+                case 3:
+                  _context.t1 = _context.sent;
+                  return _context.abrupt('return', (0, _context.t0)(_context.t1));
 
-                case 4:
+                case 5:
                 case 'end':
                   return _context.stop();
               }

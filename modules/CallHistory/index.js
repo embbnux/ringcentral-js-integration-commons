@@ -45,9 +45,9 @@ var _RcModule2 = require('../../lib/RcModule');
 
 var _RcModule3 = _interopRequireDefault(_RcModule2);
 
-var _moduleStatus = require('../../enums/moduleStatus');
+var _moduleStatuses = require('../../enums/moduleStatuses');
 
-var _moduleStatus2 = _interopRequireDefault(_moduleStatus);
+var _moduleStatuses2 = _interopRequireDefault(_moduleStatuses);
 
 var _callLogHelpers = require('../../lib/callLogHelpers');
 
@@ -88,7 +88,7 @@ var CallHistory = function (_RcModule) {
     })));
 
     _this._onStateChange = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
-      var uniqueNumbers, sessionIds, currentCalls;
+      var uniqueNumbers, sessionIds, monitorCalls, endedCalls, currentCalls, ids, shouldRemove;
       return _regenerator2.default.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
@@ -129,44 +129,44 @@ var CallHistory = function (_RcModule) {
                   }
                 }
                 if (_this._callMonitor) {
-                  (function () {
-                    var monitorCalls = _this._callMonitor.calls;
-                    if (_this._lastProcessedMonitorCalls !== monitorCalls) {
-                      var endedCalls = (_this._lastProcessedMonitorCalls || []).filter(function (call) {
-                        return !monitorCalls.find(function (currentCall) {
-                          return call.sessionId === currentCall.sessionId;
-                        });
+                  monitorCalls = _this._callMonitor.calls;
+
+                  if (_this._lastProcessedMonitorCalls !== monitorCalls) {
+                    endedCalls = (_this._lastProcessedMonitorCalls || []).filter(function (call) {
+                      return !monitorCalls.find(function (currentCall) {
+                        return call.sessionId === currentCall.sessionId;
                       });
-                      _this._lastProcessedMonitorCalls = monitorCalls;
-                      if (endedCalls.length) {
-                        _this.store.dispatch({
-                          type: _this.actionTypes.addEndedCalls,
-                          endedCalls: endedCalls,
-                          timestamp: Date.now()
-                        });
-                      }
+                    });
+
+                    _this._lastProcessedMonitorCalls = monitorCalls;
+                    if (endedCalls.length) {
+                      _this.store.dispatch({
+                        type: _this.actionTypes.addEndedCalls,
+                        endedCalls: endedCalls,
+                        timestamp: Date.now()
+                      });
                     }
-                  })();
+                  }
                 }
                 currentCalls = _this._callLog.calls;
 
                 if (currentCalls !== _this._lastProcessedCalls) {
-                  (function () {
-                    _this._lastProcessedCalls = currentCalls;
-                    var ids = {};
-                    currentCalls.forEach(function (call) {
-                      ids[call.sessionId] = true;
+                  _this._lastProcessedCalls = currentCalls;
+                  ids = {};
+
+                  currentCalls.forEach(function (call) {
+                    ids[call.sessionId] = true;
+                  });
+                  shouldRemove = _this.state.endedCalls.filter(function (call) {
+                    return ids[call.sessionId];
+                  });
+
+                  if (shouldRemove.length) {
+                    _this.store.dispatch({
+                      type: _this.actionTypes.removeEndedCalls,
+                      endedCalls: shouldRemove
                     });
-                    var shouldRemove = _this.state.endedCalls.filter(function (call) {
-                      return ids[call.sessionId];
-                    });
-                    if (shouldRemove.length) {
-                      _this.store.dispatch({
-                        type: _this.actionTypes.removeEndedCalls,
-                        endedCalls: shouldRemove
-                      });
-                    }
-                  })();
+                  }
                 }
               }
 
@@ -311,12 +311,12 @@ var CallHistory = function (_RcModule) {
   }, {
     key: 'ready',
     get: function get() {
-      return this.state.status === _moduleStatus2.default.ready;
+      return this.state.status === _moduleStatuses2.default.ready;
     }
   }, {
     key: 'pending',
     get: function get() {
-      return this.state.status === _moduleStatus2.default.pending;
+      return this.state.status === _moduleStatuses2.default.pending;
     }
   }, {
     key: 'calls',

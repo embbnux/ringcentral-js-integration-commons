@@ -47,9 +47,9 @@ var _RcModule2 = require('../../lib/RcModule');
 
 var _RcModule3 = _interopRequireDefault(_RcModule2);
 
-var _moduleStatus = require('../../enums/moduleStatus');
+var _moduleStatuses = require('../../enums/moduleStatuses');
 
-var _moduleStatus2 = _interopRequireDefault(_moduleStatus);
+var _moduleStatuses2 = _interopRequireDefault(_moduleStatuses);
 
 var _actionTypes = require('./actionTypes');
 
@@ -94,7 +94,7 @@ var CallMonitor = function (_RcModule) {
     })));
 
     _this._onStateChange = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
-      var uniqueNumbers, sessionIds;
+      var uniqueNumbers, sessionIds, oldCalls;
       return _regenerator2.default.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
@@ -135,35 +135,34 @@ var CallMonitor = function (_RcModule) {
                 }
 
                 if (_this._lastProcessedCalls !== _this.calls) {
-                  (function () {
-                    var oldCalls = _this._lastProcessedCalls && _this._lastProcessedCalls.slice() || [];
-                    _this._lastProcessedCalls = _this.calls;
+                  oldCalls = _this._lastProcessedCalls && _this._lastProcessedCalls.slice() || [];
 
-                    _this.calls.forEach(function (call) {
-                      var oldCallIndex = oldCalls.findIndex(function (item) {
-                        return item.sessionId === call.sessionId;
-                      });
-                      if (oldCallIndex === -1) {
-                        if (typeof _this._onNewCall === 'function') {
-                          _this._onNewCall(call);
-                        }
-                        if (typeof _this._onRinging === 'function' && (0, _callLogHelpers.isRinging)(call)) {
-                          _this._onRinging(call);
-                        }
-                      } else {
-                        var oldCall = oldCalls[oldCallIndex];
-                        oldCalls.splice(oldCallIndex, 1);
-                        if (call.telephonyStatus !== oldCall.telephonyStatus && typeof _this._onCallUpdated === 'function') {
-                          _this._onCallUpdated(call);
-                        }
-                      }
+                  _this._lastProcessedCalls = _this.calls;
+
+                  _this.calls.forEach(function (call) {
+                    var oldCallIndex = oldCalls.findIndex(function (item) {
+                      return item.sessionId === call.sessionId;
                     });
-                    oldCalls.forEach(function (call) {
-                      if (typeof _this._onCallEnded === 'function') {
-                        _this._onCallEnded(call);
+                    if (oldCallIndex === -1) {
+                      if (typeof _this._onNewCall === 'function') {
+                        _this._onNewCall(call);
                       }
-                    });
-                  })();
+                      if (typeof _this._onRinging === 'function' && (0, _callLogHelpers.isRinging)(call)) {
+                        _this._onRinging(call);
+                      }
+                    } else {
+                      var oldCall = oldCalls[oldCallIndex];
+                      oldCalls.splice(oldCallIndex, 1);
+                      if (call.telephonyStatus !== oldCall.telephonyStatus && typeof _this._onCallUpdated === 'function') {
+                        _this._onCallUpdated(call);
+                      }
+                    }
+                  });
+                  oldCalls.forEach(function (call) {
+                    if (typeof _this._onCallEnded === 'function') {
+                      _this._onCallEnded(call);
+                    }
+                  });
                 }
               }
 
@@ -298,12 +297,12 @@ var CallMonitor = function (_RcModule) {
   }, {
     key: 'ready',
     get: function get() {
-      return this.state.status === _moduleStatus2.default.ready;
+      return this.state.status === _moduleStatuses2.default.ready;
     }
   }, {
     key: 'pending',
     get: function get() {
-      return this.state.status === _moduleStatus2.default.pending;
+      return this.state.status === _moduleStatuses2.default.pending;
     }
   }, {
     key: 'calls',

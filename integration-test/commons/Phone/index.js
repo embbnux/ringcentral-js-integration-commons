@@ -205,8 +205,9 @@ var Phone = function (_RcModule) {
   (0, _inherits3.default)(Phone, _RcModule);
 
   function Phone() {
-    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-        history = _ref.history,
+    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+    var history = _ref.history,
         appKey = _ref.appKey,
         appSecret = _ref.appSecret,
         server = _ref.server,
@@ -218,7 +219,6 @@ var Phone = function (_RcModule) {
         redirectUri = _ref.redirectUri,
         proxyUri = _ref.proxyUri,
         options = (0, _objectWithoutProperties3.default)(_ref, ['history', 'appKey', 'appSecret', 'server', 'appName', 'appVersion', 'brandId', 'brandName', 'brandFullName', 'redirectUri', 'proxyUri']);
-
     (0, _classCallCheck3.default)(this, Phone);
 
     var _this = (0, _possibleConstructorReturn3.default)(this, (Phone.__proto__ || (0, _getPrototypeOf2.default)(Phone)).call(this, (0, _extends3.default)({}, options)));

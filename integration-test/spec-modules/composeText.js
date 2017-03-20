@@ -43,13 +43,13 @@ var _ClientHistoryRequest2 = _interopRequireDefault(_ClientHistoryRequest);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = function (auth, client, account, alert, regionSettings, composeText, messageSender) {
-  describe('ComposeText', (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee40() {
+  describe('ComposeText', (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee41() {
     var _this = this;
 
     var conditionalDescribe, clientHistoryRequest;
-    return _regenerator2.default.wrap(function _callee40$(_context40) {
+    return _regenerator2.default.wrap(function _callee41$(_context41) {
       while (1) {
-        switch (_context40.prev = _context40.next) {
+        switch (_context41.prev = _context41.next) {
           case 0:
             this.timeout(20000);
             conditionalDescribe = describe;
@@ -1245,15 +1245,51 @@ exports.default = function (auth, client, account, alert, regionSettings, compos
                     }
                   }, _callee39, _this, [[2, 7]]);
                 })));
+                it('Should Alert of internationalSMSNotSupported - select international phone number', (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee40() {
+                  return _regenerator2.default.wrap(function _callee40$(_context40) {
+                    while (1) {
+                      switch (_context40.prev = _context40.next) {
+                        case 0:
+                          regionSettings.setData({ countryCode: 'GB', areaCode: '' });
+                          composeText.addToNumber({ phoneNumber: '8558990011' });
+                          composeText.updateMessageText("test sender");
+                          _context40.prev = 3;
+                          _context40.next = 6;
+                          return composeText.send();
+
+                        case 6:
+                          _context40.next = 11;
+                          break;
+
+                        case 8:
+                          _context40.prev = 8;
+                          _context40.t0 = _context40['catch'](3);
+
+                          console.debug('message sender e:', _context40.t0);
+
+                        case 11:
+                          expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.internationalSMSNotSupported)).to.not.equal(undefined);
+                          expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.noAreaCode)).to.equal(undefined);
+                          expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.specialNumber)).to.equal(undefined);
+                          expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.notAnExtension)).to.equal(undefined);
+                          expect((0, _HelpUtil.containsErrorMessage)(alert.state.messages, _messageSenderMessages2.default.noToNumber)).to.equal(undefined);
+
+                        case 16:
+                        case 'end':
+                          return _context40.stop();
+                      }
+                    }
+                  }, _callee40, _this, [[3, 8]]);
+                })));
               });
             });
 
           case 12:
           case 'end':
-            return _context40.stop();
+            return _context41.stop();
         }
       }
-    }, _callee40, this);
+    }, _callee41, this);
   })));
 };
 //# sourceMappingURL=composeText.js.map

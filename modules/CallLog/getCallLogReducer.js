@@ -3,11 +3,6 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _typeof2 = require('babel-runtime/helpers/typeof');
-
-var _typeof3 = _interopRequireDefault(_typeof2);
-
 exports.getDataReducer = getDataReducer;
 exports.getTokenReducer = getTokenReducer;
 exports.getTimestampReducer = getTimestampReducer;
@@ -66,49 +61,37 @@ function getDataReducer(types) {
     switch (type) {
       case types.init:
         {
-          var _ret = function () {
-            var cutOffTime = (0, _getDateFrom2.default)(daySpan).getTime();
-            return {
-              v: state.filter(function (call) {
-                return call.startTime > cutOffTime;
-              })
-            };
-          }();
-
-          if ((typeof _ret === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret)) === "object") return _ret.v;
+          var cutOffTime = (0, _getDateFrom2.default)(daySpan).getTime();
+          return state.filter(function (call) {
+            return call.startTime > cutOffTime;
+          });
         }
       case types.fSyncSuccess:
       case types.iSyncSuccess:
         {
-          var _ret2 = function () {
-            var indexMap = {};
-            var newState = [];
-            var cutOffTime = (0, _getDateFrom2.default)(daySpan).getTime();
-            // filter old calls
-            state.forEach(function (call) {
-              if (call.startTime > cutOffTime) {
+          var indexMap = {};
+          var newState = [];
+          var _cutOffTime = (0, _getDateFrom2.default)(daySpan).getTime();
+          // filter old calls
+          state.forEach(function (call) {
+            if (call.startTime > _cutOffTime) {
+              indexMap[call.id] = newState.length;
+              newState.push(call);
+            }
+          });
+          processRecords(records, supplementRecords).forEach(function (call) {
+            if (call.startTime > _cutOffTime) {
+              if (indexMap[call.id] > -1) {
+                // replace the current data with new data
+                newState[indexMap[call.id]] = call;
+              } else {
                 indexMap[call.id] = newState.length;
                 newState.push(call);
               }
-            });
-            processRecords(records, supplementRecords).forEach(function (call) {
-              if (call.startTime > cutOffTime) {
-                if (indexMap[call.id] > -1) {
-                  // replace the current data with new data
-                  newState[indexMap[call.id]] = call;
-                } else {
-                  indexMap[call.id] = newState.length;
-                  newState.push(call);
-                }
-              }
-            });
-            newState.sort(_callLogHelpers.sortByStartTime);
-            return {
-              v: newState
-            };
-          }();
-
-          if ((typeof _ret2 === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret2)) === "object") return _ret2.v;
+            }
+          });
+          newState.sort(_callLogHelpers.sortByStartTime);
+          return newState;
         }
       case types.resetSuccess:
         return [];

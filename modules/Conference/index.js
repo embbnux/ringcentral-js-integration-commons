@@ -74,15 +74,16 @@ var Conference = function (_DataFetcher) {
             while (1) {
               switch (_context.prev = _context.next) {
                 case 0:
-                  _context.next = 2;
+                  _context.t0 = _jsonMask2.default;
+                  _context.next = 3;
                   return client.account().extension().conferencing().get();
 
-                case 2:
-                  _context.t0 = _context.sent;
-                  _context.t1 = DEFAULT_MASK;
-                  return _context.abrupt('return', (0, _jsonMask2.default)(_context.t0, _context.t1));
+                case 3:
+                  _context.t1 = _context.sent;
+                  _context.t2 = DEFAULT_MASK;
+                  return _context.abrupt('return', (0, _context.t0)(_context.t1, _context.t2));
 
-                case 5:
+                case 6:
                 case 'end':
                   return _context.stop();
               }
@@ -121,16 +122,6 @@ var Conference = function (_DataFetcher) {
     });
     return _this;
   }
-
-  // inviteWithText() {
-  //   let text = 'Please join the RingCentral conference.';
-  //   text += `Dial-In Numbers:${this.phoneNumber}`;
-  //   text += `Participant Access: ${this.participantCode}`;
-  //   text += 'Need an international dial-in phone number? Please visit http://www.ringcentral.com/conferencing';
-  //   text += 'This conference call is brought to you by RingCentral Conferencing.';
-  //   return text;
-  // }
-
 
   (0, _createClass3.default)(Conference, [{
     key: 'conferenceNumbers',

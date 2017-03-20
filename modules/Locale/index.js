@@ -57,9 +57,9 @@ var _I18n = require('../../lib/I18n');
 
 var _I18n2 = _interopRequireDefault(_I18n);
 
-var _moduleStatus = require('../../enums/moduleStatus');
+var _moduleStatuses = require('../../enums/moduleStatuses');
 
-var _moduleStatus2 = _interopRequireDefault(_moduleStatus);
+var _moduleStatuses2 = _interopRequireDefault(_moduleStatuses);
 
 var _actionTypes = require('./actionTypes');
 
@@ -104,11 +104,11 @@ var Locale = function (_RcModule) {
   (0, _inherits3.default)(Locale, _RcModule);
 
   function Locale() {
-    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-        _ref$defaultLocale = _ref.defaultLocale,
+    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+    var _ref$defaultLocale = _ref.defaultLocale,
         defaultLocale = _ref$defaultLocale === undefined ? _I18n.DEFAULT_LOCALE : _ref$defaultLocale,
         options = (0, _objectWithoutProperties3.default)(_ref, ['defaultLocale']);
-
     (0, _classCallCheck3.default)(this, Locale);
 
     var _this = (0, _possibleConstructorReturn3.default)(this, (Locale.__proto__ || (0, _getPrototypeOf2.default)(Locale)).call(this, (0, _extends3.default)({}, options, {
@@ -211,7 +211,7 @@ var Locale = function (_RcModule) {
   }, {
     key: 'ready',
     get: function get() {
-      return this.state.status === _moduleStatus2.default.ready;
+      return this.state.status === _moduleStatuses2.default.ready;
     }
   }]);
   return Locale;

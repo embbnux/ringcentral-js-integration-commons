@@ -53,9 +53,9 @@ var _sliceExecute = require('../../lib/sliceExecute');
 
 var _sliceExecute2 = _interopRequireDefault(_sliceExecute);
 
-var _moduleStatus = require('../../enums/moduleStatus');
+var _moduleStatuses = require('../../enums/moduleStatuses');
 
-var _moduleStatus2 = _interopRequireDefault(_moduleStatus);
+var _moduleStatuses2 = _interopRequireDefault(_moduleStatuses);
 
 var _actionTypes = require('./actionTypes');
 
@@ -380,28 +380,24 @@ var DateTimeIntl = function (_RcModule) {
   }, {
     key: '_addFallbackProvider',
     value: function _addFallbackProvider() {
-      var _this6 = this;
-
       var providerName = FallbackProviderName;
       if (!this._providers[providerName]) {
-        (function () {
-          var provider = new _browserDateTimeIntlProvider2.default({
-            locale: _this6._locale
-          });
-          _this6._fallbackProvider = _this6.addProvider({
-            providerName: providerName,
-            priorityNumber: -1, // the lowest priority
-            readyCheckFn: function readyCheckFn() {
-              return provider.ready;
-            },
-            getSettingsFn: function getSettingsFn(args) {
-              return provider.getSettings(args);
-            },
-            formatDateTimeFn: function formatDateTimeFn(args) {
-              return provider.formatDateTime(args);
-            }
-          });
-        })();
+        var provider = new _browserDateTimeIntlProvider2.default({
+          locale: this._locale
+        });
+        this._fallbackProvider = this.addProvider({
+          providerName: providerName,
+          priorityNumber: -1, // the lowest priority
+          readyCheckFn: function readyCheckFn() {
+            return provider.ready;
+          },
+          getSettingsFn: function getSettingsFn(args) {
+            return provider.getSettings(args);
+          },
+          formatDateTimeFn: function formatDateTimeFn(args) {
+            return provider.formatDateTime(args);
+          }
+        });
       }
     }
   }, {
@@ -487,12 +483,12 @@ var DateTimeIntl = function (_RcModule) {
   }, {
     key: 'ready',
     get: function get() {
-      return this.status === _moduleStatus2.default.ready;
+      return this.status === _moduleStatuses2.default.ready;
     }
   }, {
     key: 'pending',
     get: function get() {
-      return this.status === _moduleStatus2.default.pending;
+      return this.status === _moduleStatuses2.default.pending;
     }
   }, {
     key: 'cache',
