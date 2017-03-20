@@ -32,21 +32,27 @@ export default class Messages extends RcModule {
         if (!dataMapping || !message.from || !message.to) {
           return message;
         }
+        let recipients = message.recipients;
         const fromUser = { ...message.from };
         let toUsers = message.to;
         const fromNumber = fromUser.phoneNumber || fromUser.extensionNumber;
         fromUser.matchedNames = dataMapping[fromNumber];
-        toUsers = toUsers.map((toUser) => {
-          const number = toUser.phoneNumber || toUser.extensionNumber;
+        const addMatchedNamesToRecipients = (recipient) => {
+          const number = recipient.phoneNumber || recipient.extensionNumber;
           return {
-            ...toUser,
+            ...recipient,
             matchedNames: dataMapping[number]
           };
-        });
+        };
+        toUsers = toUsers.map(addMatchedNamesToRecipients);
+        if (recipients) {
+          recipients = recipients.map(addMatchedNamesToRecipients);
+        }
         return {
           ...message,
           from: fromUser,
           to: toUsers,
+          recipients,
         };
       })
     );
