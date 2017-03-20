@@ -83,19 +83,25 @@ var Messages = function (_RcModule) {
         if (!dataMapping || !message.from || !message.to) {
           return message;
         }
+        var recipients = message.recipients;
         var fromUser = (0, _extends3.default)({}, message.from);
         var toUsers = message.to;
         var fromNumber = fromUser.phoneNumber || fromUser.extensionNumber;
         fromUser.matchedNames = dataMapping[fromNumber];
-        toUsers = toUsers.map(function (toUser) {
-          var number = toUser.phoneNumber || toUser.extensionNumber;
-          return (0, _extends3.default)({}, toUser, {
+        var addMatchedNamesToRecipients = function addMatchedNamesToRecipients(recipient) {
+          var number = recipient.phoneNumber || recipient.extensionNumber;
+          return (0, _extends3.default)({}, recipient, {
             matchedNames: dataMapping[number]
           });
-        });
+        };
+        toUsers = toUsers.map(addMatchedNamesToRecipients);
+        if (recipients) {
+          recipients = recipients.map(addMatchedNamesToRecipients);
+        }
         return (0, _extends3.default)({}, message, {
           from: fromUser,
-          to: toUsers
+          to: toUsers,
+          recipients: recipients
         });
       });
     });
