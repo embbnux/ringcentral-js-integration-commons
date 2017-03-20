@@ -84,7 +84,7 @@ var Messages = function (_RcModule) {
           return message;
         }
         var fromUser = (0, _extends3.default)({}, message.from);
-        var toUsers = (0, _extends3.default)({}, message.to);
+        var toUsers = message.to;
         var fromNumber = fromUser.phoneNumber || fromUser.extensionNumber;
         fromUser.matchedNames = dataMapping[fromNumber];
         toUsers = toUsers.map(function (toUser) {
@@ -134,7 +134,7 @@ var Messages = function (_RcModule) {
       _this._contactMatcher.addQuerySource({
         getQueriesFn: _this._selectors.uniqueNumbers,
         readyCheckFn: function readyCheckFn() {
-          return _this.messageStore.ready;
+          return _this._messageStore.ready;
         }
       });
     }
