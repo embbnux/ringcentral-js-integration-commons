@@ -86,7 +86,7 @@ export default class Messages extends RcModule {
       this._contactMatcher.addQuerySource({
         getQueriesFn: this._selectors.uniqueNumbers,
         readyCheckFn: () => (
-          this.messageStore.ready
+          this._messageStore.ready
         ),
       });
     }
