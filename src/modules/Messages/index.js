@@ -7,7 +7,7 @@ import getMessagesReducer from './getMessagesReducer';
 export default class Messages extends RcModule {
   constructor({
     messageStore,
-    perPage = 10,
+    perPage = 20,
     contactMatcher,
     ...options
   }) {
