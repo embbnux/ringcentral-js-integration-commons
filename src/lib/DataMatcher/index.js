@@ -71,7 +71,7 @@ export default class DataMatcher extends RcModule {
     );
 
     this.addSelector('dataMapping',
-      () => this._selectors.data,
+      this._selectors.data,
       (data) => {
         const dataMap = {};
         Object.keys(data).forEach((query) => {
