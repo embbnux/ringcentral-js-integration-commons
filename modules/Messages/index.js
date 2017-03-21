@@ -57,7 +57,7 @@ var Messages = function (_RcModule) {
   function Messages(_ref) {
     var messageStore = _ref.messageStore,
         _ref$perPage = _ref.perPage,
-        perPage = _ref$perPage === undefined ? 10 : _ref$perPage,
+        perPage = _ref$perPage === undefined ? 20 : _ref$perPage,
         contactMatcher = _ref.contactMatcher,
         options = (0, _objectWithoutProperties3.default)(_ref, ['messageStore', 'perPage', 'contactMatcher']);
     (0, _classCallCheck3.default)(this, Messages);
