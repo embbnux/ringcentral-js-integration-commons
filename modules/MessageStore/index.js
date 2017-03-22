@@ -213,7 +213,7 @@ var MessageStore = function (_RcModule) {
                 _context.prev = 6;
                 _context.t0 = _context['catch'](0);
 
-                console.log(_context.t0);
+                console.error(_context.t0);
 
               case 9:
                 this.store.dispatch({
