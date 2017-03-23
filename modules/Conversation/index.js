@@ -156,6 +156,7 @@ var Conversation = function (_RcModule) {
   }, {
     key: 'changeMatchedNames',
     value: function changeMatchedNames(matchedNames) {
+      var recipients = this.recipients.slice();
       if (recipients.length !== 1) {
         return;
       }
@@ -166,7 +167,7 @@ var Conversation = function (_RcModule) {
     }
   }, {
     key: 'changeDefaultRecipient',
-    value: function changeDefaultRecipient(phoneNumber, matchedNames) {
+    value: function changeDefaultRecipient(phoneNumber) {
       if (this.recipients.length < 2) {
         return;
       }
