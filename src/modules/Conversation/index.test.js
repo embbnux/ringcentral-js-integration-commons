@@ -690,7 +690,7 @@ describe('Conversation Unit Test', () => {
       sinon.assert.notCalled(conversation._updateConversationRecipients);
     });
 
-    it(`should call _updateConversationRecipients`, () => {
+    it('should call _updateConversationRecipients', () => {
       sinon.stub(conversation, 'recipients', { get: () => [{ phoneNumber: '1234' }] });
       sinon.stub(conversation, '_updateConversationRecipients');
       conversation.changeMatchedNames(['123']);
