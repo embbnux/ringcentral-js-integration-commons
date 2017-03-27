@@ -76,6 +76,7 @@
     "source-map-support": "^0.4.0",
     "through2": "^2.0.1",
     "watchify": "^3.7.0",
+    "url-loader": "^0.5.7",
     "webpack": "^1.12.14",
     "webpack-dev-server": "^1.14.1",
     "whatwg-fetch": "^2.0.1",
@@ -88,6 +89,7 @@
     "intl": "^1.2.5",
     "ringcentral": "3.0.0",
     "ringcentral-client": "^1.0.0-rc1",
+    "ringcentral-web-phone": "https://github.com/u9520107/ringcentral-web-phone.git#sip-version",
     "whatwg-fetch": "^2.0.1"
   },
   "dependencies": {

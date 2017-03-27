@@ -52,6 +52,7 @@ import DateTimeIntl from '../src/modules/DateTimeIntl';
 import Conference from '../src/modules/Conference';
 
 import DateTimeFormat from '../src/modules/DateTimeFormat';
+import Webphone from '../src/modules/Webphone';
 
 import config from './config';
 
@@ -121,6 +122,7 @@ class DemoPhone extends RcModule {
       globalStorage: this.globalStorage,
       getState: () => this.state.rateLimiter,
     }));
+
     this.addModule('softphone', new Softphone({
       brand: this.brand,
     }));
@@ -196,7 +198,17 @@ class DemoPhone extends RcModule {
       storage: this.storage,
       rolesAndPermissions: this.rolesAndPermissions,
       tabManager: this._tabManager,
+      enableWebphone: true,
       getState: () => this.state.callingSettings,
+    }));
+    this.addModule('webphone', new Webphone({
+      appKey: config.api.appKey,
+      appName: 'RingCentral Integration',
+      appVersion: '0.1.0',
+      auth: this.auth,
+      client: this.client,
+      rolesAndPermissions: this.rolesAndPermissions,
+      getState: () => this.state.webphone,
     }));
     this.addModule('subscription', new Subscription({
       auth: this.auth,
@@ -385,6 +397,7 @@ class DemoPhone extends RcModule {
       messages: this.messages.reducer,
       dateTimeFormat: this.dateTimeFormat.reducer,
       conference: this.conference.reducer,
+      webphone: this.webphone.reducer,
       lastAction: (state = null, action) => {
         console.log(action);
         return action;

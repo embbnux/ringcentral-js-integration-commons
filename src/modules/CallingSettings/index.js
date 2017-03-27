@@ -22,6 +22,7 @@ export default class CallingSettings extends RcModule {
     rolesAndPermissions,
     tabManager,
     onFirstLogin,
+    enableWebphone = false,
     ...options
   }) {
     super({
@@ -36,6 +37,7 @@ export default class CallingSettings extends RcModule {
     this._storage = storage;
     this._rolesAndPermissions = rolesAndPermissions;
     this._tabManager = tabManager;
+    this._enableWebphone = enableWebphone;
 
     this._callWithStorageKey = 'callingSettingsCallWith';
     this._ringoutPromptStorageKey = 'callingSettingsRingoutPrompt';
@@ -96,10 +98,14 @@ export default class CallingSettings extends RcModule {
 
     this.addSelector('callWithOptions',
       () => this._rolesAndPermissions.ringoutEnabled,
+      () => this._rolesAndPermissions.webphoneEnabled,
       () => this.otherPhoneNumbers.length > 0,
-      (ringoutEnabled, hasOtherPhone) => {
+      (ringoutEnabled, webphoneEnabled, hasOtherPhone) => {
         const callWithOptions = [callingOptions.softphone];
         if (ringoutEnabled) {
+          if (this._enableWebphone && webphoneEnabled) {
+            callWithOptions.push(callingOptions.webphone);
+          }
           callWithOptions.push(callingOptions.myphone);
           if (hasOtherPhone) {
             callWithOptions.push(callingOptions.otherphone);
