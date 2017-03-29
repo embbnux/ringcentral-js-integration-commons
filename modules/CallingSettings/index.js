@@ -175,10 +175,11 @@ var CallingSettings = function (_RcModule) {
     }, function () {
       return _this.otherPhoneNumbers.length > 0;
     }, function (ringoutEnabled, webphoneEnabled, hasOtherPhone) {
-      var callWithOptions = [_callingOptions2.default.softphone];
+      var callWithOptions = [];
       if (webphoneEnabled) {
         callWithOptions.push(_callingOptions2.default.browser);
       }
+      callWithOptions.push(_callingOptions2.default.softphone);
       if (ringoutEnabled) {
         callWithOptions.push(_callingOptions2.default.myphone);
         if (hasOtherPhone) {
