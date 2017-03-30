@@ -96,10 +96,7 @@ var ExtensionPhoneNumber = function (_DataFetcher) {
     _this.addSelector('callerIdNumbers', function () {
       return _this.numbers;
     }, function (phoneNumbers) {
-      return phoneNumbers.sort(function (firstItem, lastItem) {
-        if (firstItem.usageType === 'DirectNumber') return -1;else if (lastItem.usageType === 'DirectNumber') return 1;else if (firstItem.usageType === 'MainCompanyNumber') return -1;else if (lastItem.usageType === 'MainCompanyNumber') return 1;else if (firstItem.usageType < lastItem.usageType) return -1;else if (firstItem.usageType > lastItem.usageType) return 1;
-        return 0;
-      }).filter(function (p) {
+      return phoneNumbers.filter(function (p) {
         return p.features && p.features.indexOf('CallerId') !== -1 || p.usageType === 'ForwardedNumber' && p.status === 'PortedIn';
       });
     });

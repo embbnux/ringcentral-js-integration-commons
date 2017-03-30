@@ -87,8 +87,10 @@ var Call = function (_RcModule) {
         callingSettings = _ref.callingSettings,
         softphone = _ref.softphone,
         ringout = _ref.ringout,
+        webphone = _ref.webphone,
+        extensionPhoneNumber = _ref.extensionPhoneNumber,
         numberValidate = _ref.numberValidate,
-        options = (0, _objectWithoutProperties3.default)(_ref, ['alert', 'client', 'storage', 'callingSettings', 'softphone', 'ringout', 'numberValidate']);
+        options = (0, _objectWithoutProperties3.default)(_ref, ['alert', 'client', 'storage', 'callingSettings', 'softphone', 'ringout', 'webphone', 'extensionPhoneNumber', 'numberValidate']);
     (0, _classCallCheck3.default)(this, Call);
 
     var _this = (0, _possibleConstructorReturn3.default)(this, (Call.__proto__ || (0, _getPrototypeOf2.default)(Call)).call(this, (0, _extends3.default)({}, options, {
@@ -195,15 +197,32 @@ var Call = function (_RcModule) {
     _this._client = client;
     _this._storage = storage;
     _this._storageKey = 'lastCallNumber';
+    _this._fromNumberStorageKey = 'fromCallIdNumber';
     _this._reducer = (0, _getCallReducer2.default)(_this.actionTypes);
     _this._callingSettings = callingSettings;
     _this._ringout = ringout;
     _this._softphone = softphone;
+    _this._webphone = webphone;
     _this._numberValidate = numberValidate;
+    _this._extensionPhoneNumber = extensionPhoneNumber;
 
     _this._storage.registerReducer({
       key: _this._storageKey,
       reducer: (0, _getCallReducer.getLastCallNumberReducer)(_this.actionTypes)
+    });
+
+    _this._storage.registerReducer({
+      key: _this._fromNumberStorageKey,
+      reducer: (0, _getCallReducer.getFromNumberReducer)(_this.actionTypes)
+    });
+
+    _this.addSelector('fromNumbers', function () {
+      return _this._extensionPhoneNumber.callerIdNumbers;
+    }, function (phoneNumbers) {
+      return phoneNumbers.sort(function (firstItem, lastItem) {
+        if (firstItem.usageType === 'DirectNumber') return -1;else if (lastItem.usageType === 'DirectNumber') return 1;else if (firstItem.usageType === 'MainCompanyNumber') return -1;else if (lastItem.usageType === 'MainCompanyNumber') return 1;else if (firstItem.usageType < lastItem.usageType) return -1;else if (firstItem.usageType > lastItem.usageType) return 1;
+        return 0;
+      });
     });
     return _this;
   }
@@ -214,16 +233,29 @@ var Call = function (_RcModule) {
       var _this3 = this;
 
       this.store.subscribe(function () {
-        if (_this3._numberValidate.ready && _this3._callingSettings.ready && _this3._storage.ready && _this3.status === _moduleStatuses2.default.pending) {
+        if (_this3._numberValidate.ready && _this3._callingSettings.ready && _this3._storage.ready && _this3._extensionPhoneNumber.ready && _this3.status === _moduleStatuses2.default.pending) {
           _this3.store.dispatch({
             type: _this3.actionTypes.initSuccess
           });
-        } else if ((!_this3._numberValidate.ready || !_this3._callingSettings.ready || !_this3._storage.ready) && _this3.status === _moduleStatuses2.default.ready) {
+          _this3._initFromNumber();
+        } else if ((!_this3._numberValidate.ready || !_this3._callingSettings.ready || !_this3._extensionPhoneNumber.ready || !_this3._storage.ready) && _this3.status === _moduleStatuses2.default.ready) {
           _this3.store.dispatch({
             type: _this3.actionTypes.resetSuccess
           });
         }
       });
+    }
+  }, {
+    key: '_initFromNumber',
+    value: function _initFromNumber() {
+      var fromNumber = this.fromNumber;
+      var fromNumberList = this.fromNumbers;
+      if (!fromNumber) {
+        this.store.dispatch({
+          type: this.actionTypes.updateFromNumber,
+          number: fromNumberList[0]
+        });
+      }
     }
   }, {
     key: 'onToNumberChange',
@@ -369,6 +401,16 @@ var Call = function (_RcModule) {
     key: 'toNumber',
     get: function get() {
       return this.state.toNumber;
+    }
+  }, {
+    key: 'fromNumber',
+    get: function get() {
+      return this._storage.getItem(this._fromNumberStorageKey);
+    }
+  }, {
+    key: 'fromNumbers',
+    get: function get() {
+      return this._selectors.fromNumbers();
     }
   }]);
   return Call;
