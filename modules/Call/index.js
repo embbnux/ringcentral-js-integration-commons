@@ -253,7 +253,7 @@ var Call = function (_RcModule) {
       if (!fromNumber) {
         this.store.dispatch({
           type: this.actionTypes.updateFromNumber,
-          number: fromNumberList[0]
+          number: fromNumberList[0] && fromNumberList[0].phoneNumber
         });
       }
     }
