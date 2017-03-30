@@ -224,6 +224,8 @@ var Call = function (_RcModule) {
         return 0;
       });
     });
+
+    _this.updateFromNumber = _this.updateFromNumber.bind(_this);
     return _this;
   }
 
@@ -249,13 +251,18 @@ var Call = function (_RcModule) {
     key: '_initFromNumber',
     value: function _initFromNumber() {
       var fromNumber = this.fromNumber;
-      var fromNumberList = this.fromNumbers;
       if (!fromNumber) {
-        this.store.dispatch({
-          type: this.actionTypes.updateFromNumber,
-          number: fromNumberList[0] && fromNumberList[0].phoneNumber
-        });
+        var fromNumberList = this.fromNumbers;
+        this.updateFromNumber(fromNumberList[0]);
       }
+    }
+  }, {
+    key: 'updateFromNumber',
+    value: function updateFromNumber(number) {
+      this.store.dispatch({
+        type: this.actionTypes.updateFromNumber,
+        number: number && number.phoneNumber
+      });
     }
   }, {
     key: 'onToNumberChange',
