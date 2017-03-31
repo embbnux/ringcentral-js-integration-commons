@@ -224,8 +224,6 @@ var Call = function (_RcModule) {
         return 0;
       });
     });
-
-    _this.updateFromNumber = _this.updateFromNumber.bind(_this);
     return _this;
   }
 
