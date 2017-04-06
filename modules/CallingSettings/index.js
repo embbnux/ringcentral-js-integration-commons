@@ -73,10 +73,6 @@ var _actionTypes = require('./actionTypes');
 
 var _actionTypes2 = _interopRequireDefault(_actionTypes);
 
-var _callingModes = require('../callingModes');
-
-var _callingModes2 = _interopRequireDefault(_callingModes);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var CallingSettings = function (_RcModule) {
@@ -347,11 +343,6 @@ var CallingSettings = function (_RcModule) {
     key: 'callingMode',
     get: function get() {
       return (0, _mapOptionToMode2.default)(this.callWith);
-    }
-  }, {
-    key: 'isWebphoneMode',
-    get: function get() {
-      return this.callingMode === _callingModes2.default.webphone;
     }
   }, {
     key: 'callWithOptions',
