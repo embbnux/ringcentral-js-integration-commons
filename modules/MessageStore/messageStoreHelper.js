@@ -67,7 +67,9 @@ function getMessageSyncParams(_ref) {
   lastSevenDate.setDate(lastSevenDate.getDate() - 7);
   var params = {
     syncType: _syncTypes2.default.fSync,
-    dateFrom: lastSevenDate.toISOString()
+    dateFrom: lastSevenDate.toISOString(),
+    dateTo: new Date(dateTo).toISOString(),
+    recordCount: recordCount
   };
   if (conversationId) {
     params.conversationId = conversationId;

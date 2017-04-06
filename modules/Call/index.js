@@ -264,58 +264,69 @@ var Call = function (_RcModule) {
                 _this3.store.dispatch({
                   type: _this3.actionTypes.initSuccess
                 });
-                _context2.next = 26;
+                _context2.next = 30;
                 break;
 
               case 10:
                 if (!((!_this3._numberValidate.ready || !_this3._callingSettings.ready || !_this3._extensionPhoneNumber.ready || !_this3._regionSettings.ready || !_this3._webphone.ready || !_this3._ringout.ready || !_this3._softphone.ready || !_this3._storage.ready) && _this3.status === _moduleStatuses2.default.ready)) {
-                  _context2.next = 14;
+                  _context2.next = 18;
                   break;
                 }
 
                 _this3.store.dispatch({
                   type: _this3.actionTypes.resetSuccess
                 });
-                _context2.next = 26;
+                _this3._callSettingMode = _this3._callingSettings.callingMode;
+
+                if (!(_this3._callSettingMode === _callingModes2.default.webphone)) {
+                  _context2.next = 16;
+                  break;
+                }
+
+                _context2.next = 16;
+                return _this3._webphone.disconnect();
+
+              case 16:
+                _context2.next = 30;
                 break;
 
-              case 14:
+              case 18:
                 if (!_this3.ready) {
-                  _context2.next = 26;
+                  _context2.next = 30;
                   break;
                 }
 
                 oldCallSettingMode = _this3._callSettingMode;
 
                 if (!(_this3._callingSettings.callingMode !== oldCallSettingMode)) {
-                  _context2.next = 26;
+                  _context2.next = 30;
                   break;
                 }
 
                 _this3._callSettingMode = _this3._callingSettings.callingMode;
 
                 if (!(oldCallSettingMode === _callingModes2.default.webphone)) {
-                  _context2.next = 23;
+                  _context2.next = 27;
                   break;
                 }
 
-                _context2.next = 21;
+                _context2.next = 25;
                 return _this3._webphone.disconnect();
 
-              case 21:
-                _context2.next = 26;
+              case 25:
+                _context2.next = 30;
                 break;
 
-              case 23:
+              case 27:
                 if (!(_this3._callSettingMode === _callingModes2.default.webphone)) {
-                  _context2.next = 26;
+                  _context2.next = 30;
                   break;
                 }
 
-                _context2.next = 26;
+                _context2.next = 30;
                 return _this3._webphone.connect();
 
-              case 26:
+              case 30:
               case 'end':
                 return _context2.stop();
             }
