@@ -820,7 +820,11 @@ var Webphone = function (_RcModule) {
     }
   }, {
     key: 'makeCall',
-    value: function makeCall(toNumber, fromNumber, homeCountryId) {
+    value: function makeCall(_ref14) {
+      var toNumber = _ref14.toNumber,
+          fromNumber = _ref14.fromNumber,
+          homeCountryId = _ref14.homeCountryId;
+
       var session = this._webphone.userAgent.invite(toNumber, {
         media: this.acceptOptions.media,
         fromNumber: fromNumber,

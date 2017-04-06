@@ -322,17 +322,21 @@ var MessageStore = function (_RcModule) {
 
               case 9:
                 _dateTo = new Date(response.records[response.records.length - 1].creationTime);
-                lastResponse = this._recursiveFSync({
+                _context3.next = 12;
+                return this._recursiveFSync({
                   dateFrom: dateFrom,
                   dateTo: _dateTo,
                   syncToken: syncToken
                 });
+
+              case 12:
+                lastResponse = _context3.sent;
                 return _context3.abrupt('return', {
                   records: records.concat(lastResponse.records),
                   syncInfo: response.syncInfo
                 });
 
-              case 12:
+              case 14:
               case 'end':
                 return _context3.stop();
             }
@@ -363,28 +367,11 @@ var MessageStore = function (_RcModule) {
                 });
                 oldSyncToken = this.syncToken;
                 params = messageStoreHelper.getMessageSyncParams({ syncToken: oldSyncToken });
-
-                if (oldSyncToken) {
-                  _context4.next = 10;
-                  break;
-                }
-
-                _context4.next = 7;
-                return this._recursiveFSync((0, _extends3.default)({}, params));
-
-              case 7:
-                response = _context4.sent;
-                _context4.next = 13;
-                break;
-
-              case 10:
-                _context4.next = 12;
+                _context4.next = 6;
                 return this._messageSyncApi(params);
 
-              case 12:
+              case 6:
                 response = _context4.sent;
-
-              case 13:
                 _processResponseData = processResponseData(response), records = _processResponseData.records, syncTimestamp = _processResponseData.syncTimestamp, syncToken = _processResponseData.syncToken;
 
                 this.store.dispatch({
@@ -394,7 +381,7 @@ var MessageStore = function (_RcModule) {
                   syncToken: syncToken
                 });
 
-              case 15:
+              case 9:
               case 'end':
                 return _context4.stop();
             }
