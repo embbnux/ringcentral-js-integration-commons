@@ -61,7 +61,7 @@ var _getActiveCallsReducer = require('./getActiveCallsReducer');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var presenceRegExp = /\/presence\?detailedTelephonyState=true&sipData=true$/;
+var presenceRegExp = /\/presence\?detailedTelephonyState=true$/;
 var FETCH_DELAY = 1000;
 var DEFAULT_TTL = 5 * 60 * 1000;
 
@@ -83,7 +83,7 @@ var ActiveCalls = function (_DataFetcher) {
       client: client,
       ttl: ttl,
       getDataReducer: _getActiveCallsReducer.getDataReducer,
-      subscriptionFilters: [_subscriptionFilters2.default.detailedPresenceWithSip],
+      subscriptionFilters: [_subscriptionFilters2.default.detailedPresence],
       subscriptionHandler: function () {
         var _ref2 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee(message) {
           var ownerId;
