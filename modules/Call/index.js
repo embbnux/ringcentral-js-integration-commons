@@ -240,7 +240,7 @@ var Call = function (_RcModule) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                if (!(_this3._numberValidate.ready && _this3._callingSettings.ready && _this3._storage.ready && _this3._extensionPhoneNumber.ready && _this3._regionSettings.ready && _this3._webphone.ready && _this3._ringout.ready && _this3._softphone.ready && _this3.status === _moduleStatuses2.default.pending)) {
+                if (!(_this3._numberValidate.ready && _this3._callingSettings.ready && _this3._storage.ready && _this3._extensionPhoneNumber.ready && _this3._regionSettings.ready && (!_this3._webphone || _this3._webphone.ready) && _this3._ringout.ready && _this3._softphone.ready && _this3.status === _moduleStatuses2.default.pending)) {
                   _context2.next = 10;
                   break;
                 }
@@ -268,7 +268,7 @@ var Call = function (_RcModule) {
                 break;
 
               case 10:
-                if (!((!_this3._numberValidate.ready || !_this3._callingSettings.ready || !_this3._extensionPhoneNumber.ready || !_this3._regionSettings.ready || !_this3._webphone.ready || !_this3._ringout.ready || !_this3._softphone.ready || !_this3._storage.ready) && _this3.ready)) {
+                if (!((!_this3._numberValidate.ready || !_this3._callingSettings.ready || !_this3._extensionPhoneNumber.ready || !_this3._regionSettings.ready || !!_this3._webphone && !_this3._webphone.ready || !_this3._ringout.ready || !_this3._softphone.ready || !_this3._storage.ready) && _this3.ready)) {
                   _context2.next = 18;
                   break;
                 }
@@ -278,7 +278,7 @@ var Call = function (_RcModule) {
                 });
                 _this3._callSettingMode = _this3._callingSettings.callingMode;
 
-                if (!(_this3._callSettingMode === _callingModes2.default.webphone)) {
+                if (!(_this3._callSettingMode === _callingModes2.default.webphone && _this3._webphone)) {
                   _context2.next = 16;
                   break;
                 }
@@ -298,7 +298,7 @@ var Call = function (_RcModule) {
 
                 oldCallSettingMode = _this3._callSettingMode;
 
-                if (!(_this3._callingSettings.callingMode !== oldCallSettingMode)) {
+                if (!(_this3._callingSettings.callingMode !== oldCallSettingMode && _this3._webphone)) {
                   _context2.next = 30;
                   break;
                 }
@@ -465,12 +465,12 @@ var Call = function (_RcModule) {
                 });
                 homeCountryId = homeCountry && homeCountry.callingCode || '1';
                 _context4.t0 = callingMode;
-                _context4.next = _context4.t0 === _callingModes2.default.softphone ? 7 : _context4.t0 === _callingModes2.default.ringout ? 9 : _context4.t0 === _callingModes2.default.webphone ? 12 : 15;
+                _context4.next = _context4.t0 === _callingModes2.default.softphone ? 7 : _context4.t0 === _callingModes2.default.ringout ? 9 : _context4.t0 === _callingModes2.default.webphone ? 12 : 16;
                 break;
 
               case 7:
                 this._softphone.makeCall(toNumber);
-                return _context4.abrupt('break', 16);
+                return _context4.abrupt('break', 17);
 
               case 9:
                 _context4.next = 11;
@@ -481,23 +481,28 @@ var Call = function (_RcModule) {
                 });
 
               case 11:
-                return _context4.abrupt('break', 16);
+                return _context4.abrupt('break', 17);
 
               case 12:
-                _context4.next = 14;
+                if (!this._webphone) {
+                  _context4.next = 15;
+                  break;
+                }
+
+                _context4.next = 15;
                 return this._webphone.makeCall({
                   fromNumber: fromNumber,
                   toNumber: toNumber,
                   homeCountryId: homeCountryId
                 });
 
-              case 14:
-                return _context4.abrupt('break', 16);
-
               case 15:
-                return _context4.abrupt('break', 16);
+                return _context4.abrupt('break', 17);
 
               case 16:
+                return _context4.abrupt('break', 17);
+
+              case 17:
               case 'end':
                 return _context4.stop();
             }
