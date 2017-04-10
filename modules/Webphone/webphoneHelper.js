@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.isBrowerSupport = isBrowerSupport;
 function isBrowerSupport() {
-  var isChrome = !!navigator.userAgent.match(/Chrim(e|ium)/);
+  var isChrome = !!navigator.userAgent.match(/Chrom(e|ium)/);
   if (!isChrome) {
     return false;
   }

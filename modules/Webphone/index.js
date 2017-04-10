@@ -73,6 +73,12 @@ var _actionTypes = require('./actionTypes');
 
 var _actionTypes2 = _interopRequireDefault(_actionTypes);
 
+var _webphoneErrors = require('./webphoneErrors');
+
+var _webphoneErrors2 = _interopRequireDefault(_webphoneErrors);
+
+var _webphoneHelper = require('./webphoneHelper');
+
 var _getWebphoneReducer = require('./getWebphoneReducer');
 
 var _getWebphoneReducer2 = _interopRequireDefault(_getWebphoneReducer);
@@ -90,13 +96,14 @@ var Webphone = function (_RcModule) {
     var appKey = _ref.appKey,
         appName = _ref.appName,
         appVersion = _ref.appVersion,
+        alert = _ref.alert,
         auth = _ref.auth,
         client = _ref.client,
         rolesAndPermissions = _ref.rolesAndPermissions,
         _ref$webphoneLogLevel = _ref.webphoneLogLevel,
         webphoneLogLevel = _ref$webphoneLogLevel === undefined ? 3 : _ref$webphoneLogLevel,
         storage = _ref.storage,
-        options = (0, _objectWithoutProperties3.default)(_ref, ['appKey', 'appName', 'appVersion', 'auth', 'client', 'rolesAndPermissions', 'webphoneLogLevel', 'storage']);
+        options = (0, _objectWithoutProperties3.default)(_ref, ['appKey', 'appName', 'appVersion', 'alert', 'auth', 'client', 'rolesAndPermissions', 'webphoneLogLevel', 'storage']);
     (0, _classCallCheck3.default)(this, Webphone);
 
     var _this = (0, _possibleConstructorReturn3.default)(this, (Webphone.__proto__ || (0, _getPrototypeOf2.default)(Webphone)).call(this, (0, _extends3.default)({}, options, {
@@ -106,6 +113,7 @@ var Webphone = function (_RcModule) {
     _this._appKey = appKey;
     _this._appName = appName;
     _this._appVersion = appVersion;
+    _this._alert = alert;
     _this._webphoneLogLevel = webphoneLogLevel;
     _this._auth = auth;
     _this._client = client;
@@ -139,6 +147,11 @@ var Webphone = function (_RcModule) {
         this._localVideo.setAttribute('muted', 'muted');
         document.body.appendChild(this._remoteVideo);
         document.body.appendChild(this._localVideo);
+        window.onbeforeunload = function () {
+          _this2.disconnect().then(function () {
+            console.log('closed webrtc');
+          });
+        };
         this.store.dispatch({
           type: this.actionTypes.init,
           videoElementPrepared: true
@@ -253,7 +266,7 @@ var Webphone = function (_RcModule) {
   }, {
     key: 'connect',
     value: function () {
-      var _ref3 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2() {
+      var _ref3 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2(fromNumbers) {
         return _regenerator2.default.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
@@ -283,45 +296,81 @@ var Webphone = function (_RcModule) {
 
               case 8:
                 if (!_context2.t0) {
-                  _context2.next = 21;
+                  _context2.next = 31;
                   break;
                 }
 
                 _context2.prev = 9;
 
+                if ((0, _webphoneHelper.isBrowerSupport)()) {
+                  _context2.next = 13;
+                  break;
+                }
+
+                this._alert.warning({
+                  message: _webphoneErrors2.default.browserNotSupported
+                });
+                return _context2.abrupt('return');
+
+              case 13:
+                if (!(this.webphoneCounts >= 5)) {
+                  _context2.next = 16;
+                  break;
+                }
+
+                this._alert.warning({
+                  message: _webphoneErrors2.default.webphoneCountOverLimit
+                });
+                return _context2.abrupt('return');
+
+              case 16:
+                if (!(!fromNumbers || fromNumbers.length === 0)) {
+                  _context2.next = 19;
+                  break;
+                }
+
+                this._alert.warning({
+                  message: _webphoneErrors2.default.notOutboundCallWithoutDL
+                });
+                return _context2.abrupt('return');
+
+              case 19:
                 this.store.dispatch({
                   type: this.actionTypes.connect
                 });
                 _context2.t2 = this;
-                _context2.next = 14;
+                _context2.next = 23;
                 return this._sipProvision();
 
-              case 14:
+              case 23:
                 _context2.t3 = _context2.sent;
 
                 _context2.t2._createWebphone.call(_context2.t2, _context2.t3);
 
-                _context2.next = 21;
+                _context2.next = 31;
                 break;
 
-              case 18:
-                _context2.prev = 18;
+              case 27:
+                _context2.prev = 27;
                 _context2.t4 = _context2['catch'](9);
 
                 this.store.dispatch({
                   type: this.actionTypes.connectError,
                   error: _context2.t4
                 });
+                this._alert.warning({
+                  message: _webphoneErrors2.default.connectFailed
+                });
 
-              case 21:
+              case 31:
               case 'end':
                 return _context2.stop();
             }
           }
-        }, _callee2, this, [[9, 18]]);
+        }, _callee2, this, [[9, 27]]);
       }));
 
-      function connect() {
+      function connect(_x) {
         return _ref3.apply(this, arguments);
       }
 
@@ -343,7 +392,7 @@ var Webphone = function (_RcModule) {
                   });
                   this._webphone.userAgent.stop();
                   this._webphone.userAgent.unregister();
-                  this.sessions.forEach(function (session) {
+                  this._sessions.forEach(function (session) {
                     _this4.hangup(session);
                   });
                 }
@@ -457,7 +506,7 @@ var Webphone = function (_RcModule) {
         }, _callee4, this, [[0, 8]]);
       }));
 
-      function answer(_x) {
+      function answer(_x2) {
         return _ref5.apply(this, arguments);
       }
 
@@ -499,7 +548,7 @@ var Webphone = function (_RcModule) {
         }, _callee5, this, [[0, 6]]);
       }));
 
-      function forward(_x2, _x3) {
+      function forward(_x3, _x4) {
         return _ref6.apply(this, arguments);
       }
 
@@ -577,7 +626,7 @@ var Webphone = function (_RcModule) {
         }, _callee6, this, [[0, 7]]);
       }));
 
-      function startRecord(_x4) {
+      function startRecord(_x5) {
         return _ref7.apply(this, arguments);
       }
 
@@ -616,7 +665,7 @@ var Webphone = function (_RcModule) {
         }, _callee7, this, [[0, 7]]);
       }));
 
-      function stopRecord(_x5) {
+      function stopRecord(_x6) {
         return _ref8.apply(this, arguments);
       }
 
@@ -653,7 +702,7 @@ var Webphone = function (_RcModule) {
         }, _callee8, this, [[0, 6]]);
       }));
 
-      function park(_x6) {
+      function park(_x7) {
         return _ref9.apply(this, arguments);
       }
 
@@ -690,7 +739,7 @@ var Webphone = function (_RcModule) {
         }, _callee9, this, [[0, 6]]);
       }));
 
-      function transfer(_x7, _x8) {
+      function transfer(_x8, _x9) {
         return _ref10.apply(this, arguments);
       }
 
@@ -760,7 +809,7 @@ var Webphone = function (_RcModule) {
         }, _callee11, this, [[0, 7]]);
       }));
 
-      function transferWarm(_x9, _x10) {
+      function transferWarm(_x10, _x11) {
         return _ref11.apply(this, arguments);
       }
 
@@ -797,7 +846,7 @@ var Webphone = function (_RcModule) {
         }, _callee12, this, [[0, 6]]);
       }));
 
-      function flip(_x11, _x12) {
+      function flip(_x12, _x13) {
         return _ref13.apply(this, arguments);
       }
 

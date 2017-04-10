@@ -258,7 +258,7 @@ var Call = function (_RcModule) {
                 }
 
                 _context2.next = 7;
-                return _this3._webphone.connect();
+                return _this3._webphone.connect(_this3.fromNumbers);
 
               case 7:
                 _this3.store.dispatch({
@@ -268,7 +268,7 @@ var Call = function (_RcModule) {
                 break;
 
               case 10:
-                if (!((!_this3._numberValidate.ready || !_this3._callingSettings.ready || !_this3._extensionPhoneNumber.ready || !_this3._regionSettings.ready || !_this3._webphone.ready || !_this3._ringout.ready || !_this3._softphone.ready || !_this3._storage.ready) && _this3.status === _moduleStatuses2.default.ready)) {
+                if (!((!_this3._numberValidate.ready || !_this3._callingSettings.ready || !_this3._extensionPhoneNumber.ready || !_this3._regionSettings.ready || !_this3._webphone.ready || !_this3._ringout.ready || !_this3._softphone.ready || !_this3._storage.ready) && _this3.ready)) {
                   _context2.next = 18;
                   break;
                 }
@@ -324,7 +324,7 @@ var Call = function (_RcModule) {
                 }
 
                 _context2.next = 30;
-                return _this3._webphone.connect();
+                return _this3._webphone.connect(_this3.fromNumbers);
 
               case 30:
               case 'end':
@@ -515,6 +515,11 @@ var Call = function (_RcModule) {
     key: 'status',
     get: function get() {
       return this.state.status;
+    }
+  }, {
+    key: 'ready',
+    get: function get() {
+      return this.state.status === _moduleStatuses2.default.ready;
     }
   }, {
     key: 'callStatus',

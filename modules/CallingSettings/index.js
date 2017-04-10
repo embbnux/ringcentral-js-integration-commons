@@ -88,7 +88,8 @@ var CallingSettings = function (_RcModule) {
         rolesAndPermissions = _ref.rolesAndPermissions,
         tabManager = _ref.tabManager,
         onFirstLogin = _ref.onFirstLogin,
-        options = (0, _objectWithoutProperties3.default)(_ref, ['alert', 'brand', 'extensionInfo', 'extensionPhoneNumber', 'forwardingNumber', 'storage', 'rolesAndPermissions', 'tabManager', 'onFirstLogin']);
+        addWebphone = _ref.addWebphone,
+        options = (0, _objectWithoutProperties3.default)(_ref, ['alert', 'brand', 'extensionInfo', 'extensionPhoneNumber', 'forwardingNumber', 'storage', 'rolesAndPermissions', 'tabManager', 'onFirstLogin', 'addWebphone']);
     (0, _classCallCheck3.default)(this, CallingSettings);
 
     var _this = (0, _possibleConstructorReturn3.default)(this, (CallingSettings.__proto__ || (0, _getPrototypeOf2.default)(CallingSettings)).call(this, (0, _extends3.default)({}, options, {
@@ -176,7 +177,7 @@ var CallingSettings = function (_RcModule) {
       return _this.otherPhoneNumbers.length > 0;
     }, function (ringoutEnabled, webphoneEnabled, hasOtherPhone) {
       var callWithOptions = [];
-      if (webphoneEnabled) {
+      if (addWebphone && webphoneEnabled) {
         callWithOptions.push(_callingOptions2.default.browser);
       }
       callWithOptions.push(_callingOptions2.default.softphone);
