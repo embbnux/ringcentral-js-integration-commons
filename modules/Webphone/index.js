@@ -325,31 +325,31 @@ var Webphone = function (_RcModule) {
                 return _context2.abrupt('return');
 
               case 9:
-
+                debugger;
                 this.store.dispatch({
                   type: reconnect ? this.actionTypes.reconnect : this.actionTypes.connect
                 });
 
-                _context2.next = 12;
+                _context2.next = 13;
                 return this._sipProvision();
 
-              case 12:
+              case 13:
                 sipProvision = _context2.sent;
 
                 if (!(this.connectionStatus === _connectionStatus2.default.disconnecting)) {
-                  _context2.next = 15;
+                  _context2.next = 16;
                   break;
                 }
 
                 return _context2.abrupt('return');
 
-              case 15:
+              case 16:
                 this._createWebphone(sipProvision);
-                _context2.next = 24;
+                _context2.next = 25;
                 break;
 
-              case 18:
-                _context2.prev = 18;
+              case 19:
+                _context2.prev = 19;
                 _context2.t0 = _context2['catch'](0);
 
                 this.store.dispatch({
@@ -361,15 +361,15 @@ var Webphone = function (_RcModule) {
                   ttl: 0,
                   allowDuplicates: false
                 });
-                _context2.next = 24;
+                _context2.next = 25;
                 return this._connect({ reconnect: true });
 
-              case 24:
+              case 25:
               case 'end':
                 return _context2.stop();
             }
           }
-        }, _callee2, this, [[0, 18]]);
+        }, _callee2, this, [[0, 19]]);
       }));
 
       function _connect(_x) {
