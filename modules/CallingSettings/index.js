@@ -223,7 +223,7 @@ var CallingSettings = function (_RcModule) {
                   });
                   if (!_this2.timestamp) {
                     // first time login
-                    defaultCallWith = _this2._webphoneEnabled ? _callingOptions2.default.browser : _callingOptions2.default.softphone;
+                    defaultCallWith = _this2.callWithOptions && _this2.callWithOptions[0];
 
                     _this2.store.dispatch({
                       type: _this2.actionTypes.setData,

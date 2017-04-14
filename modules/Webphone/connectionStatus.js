@@ -10,5 +10,5 @@ var _Enum2 = _interopRequireDefault(_Enum);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = new _Enum2.default(['connecting', 'connected', 'disconnecting', 'disconnected'], 'connectionStatus');
+exports.default = new _Enum2.default(['connecting', 'connected', 'disconnecting', 'disconnected', 'connectFailed'], 'connectionStatus');
 //# sourceMappingURL=connectionStatus.js.map

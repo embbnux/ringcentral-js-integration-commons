@@ -17,7 +17,6 @@ function getWebphoneCountsReducer(types) {
     switch (type) {
       case types.connect:
         return state + 1;
-      case types.connectError:
       case types.disconnect:
         return state - 1;
       default:

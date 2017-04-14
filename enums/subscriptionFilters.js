@@ -13,7 +13,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 exports.default = new _keyValueMap2.default({
   presence: '/account/~/extension/~/presence',
   detailedPresence: '/account/~/extension/~/presence?detailedTelephonyState=true',
-  detailedPresenceWithSip: '/account/~/extension/~/presence?detailedTelephonyState=true&sipData=true',
   accountExtension: '/account/~/extension'
 });
 //# sourceMappingURL=subscriptionFilters.js.map

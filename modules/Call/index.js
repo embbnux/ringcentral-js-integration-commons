@@ -258,7 +258,7 @@ var Call = function (_RcModule) {
                 }
 
                 _context2.next = 7;
-                return _this3._webphone.connect(_this3.fromNumbers);
+                return _this3._webphone.connect(_this3.fromNumbers.length > 0);
 
               case 7:
                 _this3.store.dispatch({

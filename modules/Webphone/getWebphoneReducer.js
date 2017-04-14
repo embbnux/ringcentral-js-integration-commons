@@ -5,6 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.getVideoElementPreparedReducer = getVideoElementPreparedReducer;
 exports.getConnectionStatusReducer = getConnectionStatusReducer;
+exports.getConnectRetryCountsReducer = getConnectRetryCountsReducer;
 exports.default = getWebphoneReducer;
 
 var _redux = require('redux');
@@ -40,14 +41,35 @@ function getConnectionStatusReducer(types) {
 
     switch (type) {
       case types.connect:
+      case types.reconnect:
         return _connectionStatus2.default.connecting;
       case types.registered:
         return _connectionStatus2.default.connected;
-      case types.registrationFailed:
       case types.unregistered:
         return _connectionStatus2.default.disconnected;
       case types.disconnect:
         return _connectionStatus2.default.disconnecting;
+      case types.connectError:
+      case types.registrationFailed:
+        return _connectionStatus2.default.connectFailed;
+      default:
+        return state;
+    }
+  };
+}
+
+function getConnectRetryCountsReducer(types) {
+  return function () {
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+    var _ref3 = arguments[1];
+    var type = _ref3.type;
+
+    switch (type) {
+      case types.reconnect:
+        return state + 1;
+      case types.resetRetryCounts:
+      case types.registered:
+        return 0;
       default:
         return state;
     }
@@ -58,7 +80,8 @@ function getWebphoneReducer(types) {
   return (0, _redux.combineReducers)({
     status: (0, _getModuleStatusReducer2.default)(types),
     videoElementPrepared: getVideoElementPreparedReducer(types),
-    connectionStatus: getConnectionStatusReducer(types)
+    connectionStatus: getConnectionStatusReducer(types),
+    connectRetryCounts: getConnectRetryCountsReducer(types)
   });
 }
 //# sourceMappingURL=getWebphoneReducer.js.map

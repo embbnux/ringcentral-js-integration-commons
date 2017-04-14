@@ -61,6 +61,10 @@ var _RcModule2 = require('../../lib/RcModule');
 
 var _RcModule3 = _interopRequireDefault(_RcModule2);
 
+var _sleep = require('../../lib/sleep');
+
+var _sleep2 = _interopRequireDefault(_sleep);
+
 var _moduleStatus = require('../../enums/moduleStatus');
 
 var _moduleStatus2 = _interopRequireDefault(_moduleStatus);
@@ -88,6 +92,11 @@ var _getCacheReducer = require('./getCacheReducer');
 var _getCacheReducer2 = _interopRequireDefault(_getCacheReducer);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var FIRST_THREE_RETRIES_DELAY = 10 * 1000;
+var FOURTH_RETRIES_DELAY = 30 * 1000;
+var FIFTH_RETRIES_DELAY = 60 * 1000;
+var MAX_RETRIES_DELAY = 2 * 60 * 1000;
 
 var Webphone = function (_RcModule) {
   (0, _inherits3.default)(Webphone, _RcModule);
@@ -193,24 +202,34 @@ var Webphone = function (_RcModule) {
     key: '_sipProvision',
     value: function () {
       var _ref2 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
+        var response;
         return _regenerator2.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                _context.next = 2;
+                _context.prev = 0;
+                _context.next = 3;
                 return this._client.service.platform().post('/client-info/sip-provision', {
                   sipInfo: [{ transport: 'WSS' }]
                 });
 
-              case 2:
-                return _context.abrupt('return', _context.sent.json());
-
               case 3:
+                response = _context.sent;
+                return _context.abrupt('return', response.json());
+
+              case 7:
+                _context.prev = 7;
+                _context.t0 = _context['catch'](0);
+
+                console.error(_context.t0);
+                throw new Error(_webphoneErrors2.default.getSipProvisionError);
+
+              case 11:
               case 'end':
                 return _context.stop();
             }
           }
-        }, _callee, this);
+        }, _callee, this, [[0, 7]]);
       }));
 
       function _sipProvision() {
@@ -253,6 +272,8 @@ var Webphone = function (_RcModule) {
           type: _this3.actionTypes.registrationFailed,
           error: error
         });
+        _this3._webphone.userAgent.removeAllListeners();
+        _this3._connect({ reconnect: true });
       };
       this._webphone.userAgent.audioHelper.setVolume(0.3);
       this._webphone.userAgent.on('registered', onRegistered);
@@ -264,140 +285,173 @@ var Webphone = function (_RcModule) {
       });
     }
   }, {
-    key: 'connect',
+    key: '_connect',
     value: function () {
-      var _ref3 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2(fromNumbers) {
+      var _ref3 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2(_ref4) {
+        var _ref4$reconnect = _ref4.reconnect,
+            reconnect = _ref4$reconnect === undefined ? false : _ref4$reconnect;
+        var sipProvision;
         return _regenerator2.default.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                _context2.next = 2;
+                _context2.prev = 0;
+
+                if (!reconnect) {
+                  _context2.next = 4;
+                  break;
+                }
+
+                _context2.next = 4;
+                return this._retrySleep();
+
+              case 4:
+                if (!(this.connectionStatus === _connectionStatus2.default.connecting)) {
+                  _context2.next = 6;
+                  break;
+                }
+
+                return _context2.abrupt('return');
+
+              case 6:
+                if (!(reconnect && this.connectionStatus !== _connectionStatus2.default.connectFailed)) {
+                  _context2.next = 9;
+                  break;
+                }
+
+                this.store.dispatch({
+                  type: this.actionTypes.resetRetryCounts
+                });
+                return _context2.abrupt('return');
+
+              case 9:
+
+                this.store.dispatch({
+                  type: reconnect ? this.actionTypes.reconnect : this.actionTypes.connect
+                });
+
+                _context2.next = 12;
+                return this._sipProvision();
+
+              case 12:
+                sipProvision = _context2.sent;
+
+                if (!(this.connectionStatus === _connectionStatus2.default.disconnecting)) {
+                  _context2.next = 15;
+                  break;
+                }
+
+                return _context2.abrupt('return');
+
+              case 15:
+                this._createWebphone(sipProvision);
+                _context2.next = 24;
+                break;
+
+              case 18:
+                _context2.prev = 18;
+                _context2.t0 = _context2['catch'](0);
+
+                this.store.dispatch({
+                  type: this.actionTypes.connectError,
+                  error: _context2.t0
+                });
+                this._alert.warning({
+                  message: _webphoneErrors2.default.connectFailed,
+                  ttl: 0,
+                  allowDuplicates: false
+                });
+                _context2.next = 24;
+                return this._connect({ reconnect: true });
+
+              case 24:
+              case 'end':
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this, [[0, 18]]);
+      }));
+
+      function _connect(_x) {
+        return _ref3.apply(this, arguments);
+      }
+
+      return _connect;
+    }()
+  }, {
+    key: 'connect',
+    value: function () {
+      var _ref5 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3(hasFromNumber) {
+        return _regenerator2.default.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                _context3.next = 2;
                 return this._auth.checkIsLoggedIn();
 
               case 2:
-                _context2.t1 = _context2.sent;
+                _context3.t1 = _context3.sent;
 
-                if (!_context2.t1) {
-                  _context2.next = 5;
+                if (!_context3.t1) {
+                  _context3.next = 5;
                   break;
                 }
 
-                _context2.t1 = this.enabled;
+                _context3.t1 = this.enabled;
 
               case 5:
-                _context2.t0 = _context2.t1;
+                _context3.t0 = _context3.t1;
 
-                if (!_context2.t0) {
-                  _context2.next = 8;
+                if (!_context3.t0) {
+                  _context3.next = 8;
                   break;
                 }
 
-                _context2.t0 = this.connectionStatus === _connectionStatus2.default.disconnected;
+                _context3.t0 = this.connectionStatus === _connectionStatus2.default.disconnected;
 
               case 8:
-                if (!_context2.t0) {
-                  _context2.next = 31;
+                if (!_context3.t0) {
+                  _context3.next = 20;
                   break;
                 }
 
-                _context2.prev = 9;
-
                 if ((0, _webphoneHelper.isBrowerSupport)()) {
-                  _context2.next = 13;
+                  _context3.next = 12;
                   break;
                 }
 
                 this._alert.warning({
                   message: _webphoneErrors2.default.browserNotSupported
                 });
-                return _context2.abrupt('return');
+                return _context3.abrupt('return');
 
-              case 13:
+              case 12:
                 if (!(this.webphoneCounts >= 5)) {
-                  _context2.next = 16;
+                  _context3.next = 15;
                   break;
                 }
 
                 this._alert.warning({
                   message: _webphoneErrors2.default.webphoneCountOverLimit
                 });
-                return _context2.abrupt('return');
+                return _context3.abrupt('return');
 
-              case 16:
-                if (!(!fromNumbers || fromNumbers.length === 0)) {
-                  _context2.next = 19;
+              case 15:
+                if (hasFromNumber) {
+                  _context3.next = 18;
                   break;
                 }
 
                 this._alert.warning({
                   message: _webphoneErrors2.default.notOutboundCallWithoutDL
                 });
-                return _context2.abrupt('return');
+                return _context3.abrupt('return');
 
-              case 19:
-                this.store.dispatch({
-                  type: this.actionTypes.connect
-                });
-                _context2.t2 = this;
-                _context2.next = 23;
-                return this._sipProvision();
+              case 18:
+                _context3.next = 20;
+                return this._connect();
 
-              case 23:
-                _context2.t3 = _context2.sent;
-
-                _context2.t2._createWebphone.call(_context2.t2, _context2.t3);
-
-                _context2.next = 31;
-                break;
-
-              case 27:
-                _context2.prev = 27;
-                _context2.t4 = _context2['catch'](9);
-
-                this.store.dispatch({
-                  type: this.actionTypes.connectError,
-                  error: _context2.t4
-                });
-                this._alert.warning({
-                  message: _webphoneErrors2.default.connectFailed
-                });
-
-              case 31:
-              case 'end':
-                return _context2.stop();
-            }
-          }
-        }, _callee2, this, [[9, 27]]);
-      }));
-
-      function connect(_x) {
-        return _ref3.apply(this, arguments);
-      }
-
-      return connect;
-    }()
-  }, {
-    key: 'disconnect',
-    value: function () {
-      var _ref4 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3() {
-        var _this4 = this;
-
-        return _regenerator2.default.wrap(function _callee3$(_context3) {
-          while (1) {
-            switch (_context3.prev = _context3.next) {
-              case 0:
-                if (this._webphone && this.connectionStatus === _connectionStatus2.default.connected) {
-                  this.store.dispatch({
-                    type: this.actionTypes.disconnect
-                  });
-                  this._webphone.userAgent.stop();
-                  this._webphone.userAgent.unregister();
-                  this._sessions.forEach(function (session) {
-                    _this4.hangup(session);
-                  });
-                }
-
-              case 1:
+              case 20:
               case 'end':
                 return _context3.stop();
             }
@@ -405,8 +459,45 @@ var Webphone = function (_RcModule) {
         }, _callee3, this);
       }));
 
+      function connect(_x2) {
+        return _ref5.apply(this, arguments);
+      }
+
+      return connect;
+    }()
+  }, {
+    key: 'disconnect',
+    value: function () {
+      var _ref6 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee4() {
+        var _this4 = this;
+
+        return _regenerator2.default.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                if (this.connectionStatus === _connectionStatus2.default.connected || this.connectionStatus === _connectionStatus2.default.connecting || this.connectionStatus === _connectionStatus2.default.connectFailed) {
+                  this.store.dispatch({
+                    type: this.actionTypes.disconnect
+                  });
+                  if (this._webphone) {
+                    this._webphone.userAgent.stop();
+                    this._webphone.userAgent.unregister();
+                    this._sessions.forEach(function (session) {
+                      _this4.hangup(session);
+                    });
+                  }
+                }
+
+              case 1:
+              case 'end':
+                return _context4.stop();
+            }
+          }
+        }, _callee4, this);
+      }));
+
       function disconnect() {
-        return _ref4.apply(this, arguments);
+        return _ref6.apply(this, arguments);
       }
 
       return disconnect;
@@ -472,42 +563,43 @@ var Webphone = function (_RcModule) {
   }, {
     key: 'answer',
     value: function () {
-      var _ref5 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee4(session) {
-        return _regenerator2.default.wrap(function _callee4$(_context4) {
+      var _ref7 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee5(session) {
+        return _regenerator2.default.wrap(function _callee5$(_context5) {
           while (1) {
-            switch (_context4.prev = _context4.next) {
+            switch (_context5.prev = _context5.next) {
               case 0:
-                _context4.prev = 0;
+                _context5.prev = 0;
 
                 if (this._activeSession && !this._activeSession.isOnHold().local) {
                   this._activeSession.hold();
                 }
                 this._activeSession = session;
                 this._onAccepted(session, 'inbound');
-                _context4.next = 6;
+                _context5.next = 6;
                 return session.accept(this.acceptOptions);
 
               case 6:
-                _context4.next = 12;
+                _context5.next = 13;
                 break;
 
               case 8:
-                _context4.prev = 8;
-                _context4.t0 = _context4['catch'](0);
+                _context5.prev = 8;
+                _context5.t0 = _context5['catch'](0);
 
                 console.log('Accept failed');
+                this._activeSession = null;
                 this._removeSession(session);
 
-              case 12:
+              case 13:
               case 'end':
-                return _context4.stop();
+                return _context5.stop();
             }
           }
-        }, _callee4, this, [[0, 8]]);
+        }, _callee5, this, [[0, 8]]);
       }));
 
-      function answer(_x2) {
-        return _ref5.apply(this, arguments);
+      function answer(_x3) {
+        return _ref7.apply(this, arguments);
       }
 
       return answer;
@@ -520,36 +612,36 @@ var Webphone = function (_RcModule) {
   }, {
     key: 'forward',
     value: function () {
-      var _ref6 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee5(forwardNumber, session) {
-        return _regenerator2.default.wrap(function _callee5$(_context5) {
+      var _ref8 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee6(forwardNumber, session) {
+        return _regenerator2.default.wrap(function _callee6$(_context6) {
           while (1) {
-            switch (_context5.prev = _context5.next) {
+            switch (_context6.prev = _context6.next) {
               case 0:
-                _context5.prev = 0;
-                _context5.next = 3;
+                _context6.prev = 0;
+                _context6.next = 3;
                 return session.forward(forwardNumber, this.acceptOptions);
 
               case 3:
                 console.log('Forwarded');
-                _context5.next = 9;
+                _context6.next = 9;
                 break;
 
               case 6:
-                _context5.prev = 6;
-                _context5.t0 = _context5['catch'](0);
+                _context6.prev = 6;
+                _context6.t0 = _context6['catch'](0);
 
-                console.error(_context5.t0);
+                console.error(_context6.t0);
 
               case 9:
               case 'end':
-                return _context5.stop();
+                return _context6.stop();
             }
           }
-        }, _callee5, this, [[0, 6]]);
+        }, _callee6, this, [[0, 6]]);
       }));
 
-      function forward(_x3, _x4) {
-        return _ref6.apply(this, arguments);
+      function forward(_x4, _x5) {
+        return _ref8.apply(this, arguments);
       }
 
       return forward;
@@ -596,57 +688,18 @@ var Webphone = function (_RcModule) {
   }, {
     key: 'startRecord',
     value: function () {
-      var _ref7 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee6(session) {
-        return _regenerator2.default.wrap(function _callee6$(_context6) {
-          while (1) {
-            switch (_context6.prev = _context6.next) {
-              case 0:
-                _context6.prev = 0;
-                _context6.next = 3;
-                return session.startRecord();
-
-              case 3:
-                session.isOnRecord = true;
-                console.log('Recording Started');
-                _context6.next = 11;
-                break;
-
-              case 7:
-                _context6.prev = 7;
-                _context6.t0 = _context6['catch'](0);
-
-                session.isOnRecord = false;
-                console.error(_context6.t0);
-
-              case 11:
-              case 'end':
-                return _context6.stop();
-            }
-          }
-        }, _callee6, this, [[0, 7]]);
-      }));
-
-      function startRecord(_x5) {
-        return _ref7.apply(this, arguments);
-      }
-
-      return startRecord;
-    }()
-  }, {
-    key: 'stopRecord',
-    value: function () {
-      var _ref8 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee7(session) {
+      var _ref9 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee7(session) {
         return _regenerator2.default.wrap(function _callee7$(_context7) {
           while (1) {
             switch (_context7.prev = _context7.next) {
               case 0:
                 _context7.prev = 0;
                 _context7.next = 3;
-                return session.stopRecord();
+                return session.startRecord();
 
               case 3:
-                session.isOnRecord = false;
-                console.log('Recording Stopped');
+                session.isOnRecord = true;
+                console.log('Recording Started');
                 _context7.next = 11;
                 break;
 
@@ -654,7 +707,7 @@ var Webphone = function (_RcModule) {
                 _context7.prev = 7;
                 _context7.t0 = _context7['catch'](0);
 
-                session.isOnRecord = true;
+                session.isOnRecord = false;
                 console.error(_context7.t0);
 
               case 11:
@@ -665,8 +718,47 @@ var Webphone = function (_RcModule) {
         }, _callee7, this, [[0, 7]]);
       }));
 
-      function stopRecord(_x6) {
-        return _ref8.apply(this, arguments);
+      function startRecord(_x6) {
+        return _ref9.apply(this, arguments);
+      }
+
+      return startRecord;
+    }()
+  }, {
+    key: 'stopRecord',
+    value: function () {
+      var _ref10 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee8(session) {
+        return _regenerator2.default.wrap(function _callee8$(_context8) {
+          while (1) {
+            switch (_context8.prev = _context8.next) {
+              case 0:
+                _context8.prev = 0;
+                _context8.next = 3;
+                return session.stopRecord();
+
+              case 3:
+                session.isOnRecord = false;
+                console.log('Recording Stopped');
+                _context8.next = 11;
+                break;
+
+              case 7:
+                _context8.prev = 7;
+                _context8.t0 = _context8['catch'](0);
+
+                session.isOnRecord = true;
+                console.error(_context8.t0);
+
+              case 11:
+              case 'end':
+                return _context8.stop();
+            }
+          }
+        }, _callee8, this, [[0, 7]]);
+      }));
+
+      function stopRecord(_x7) {
+        return _ref10.apply(this, arguments);
       }
 
       return stopRecord;
@@ -674,54 +766,17 @@ var Webphone = function (_RcModule) {
   }, {
     key: 'park',
     value: function () {
-      var _ref9 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee8(session) {
-        return _regenerator2.default.wrap(function _callee8$(_context8) {
-          while (1) {
-            switch (_context8.prev = _context8.next) {
-              case 0:
-                _context8.prev = 0;
-                _context8.next = 3;
-                return session.park();
-
-              case 3:
-                console.log('Parked');
-                _context8.next = 9;
-                break;
-
-              case 6:
-                _context8.prev = 6;
-                _context8.t0 = _context8['catch'](0);
-
-                console.error(_context8.t0);
-
-              case 9:
-              case 'end':
-                return _context8.stop();
-            }
-          }
-        }, _callee8, this, [[0, 6]]);
-      }));
-
-      function park(_x7) {
-        return _ref9.apply(this, arguments);
-      }
-
-      return park;
-    }()
-  }, {
-    key: 'transfer',
-    value: function () {
-      var _ref10 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee9(transferNumber, session) {
+      var _ref11 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee9(session) {
         return _regenerator2.default.wrap(function _callee9$(_context9) {
           while (1) {
             switch (_context9.prev = _context9.next) {
               case 0:
                 _context9.prev = 0;
                 _context9.next = 3;
-                return session.transfer(transferNumber);
+                return session.park();
 
               case 3:
-                console.log('Transferred');
+                console.log('Parked');
                 _context9.next = 9;
                 break;
 
@@ -739,8 +794,45 @@ var Webphone = function (_RcModule) {
         }, _callee9, this, [[0, 6]]);
       }));
 
-      function transfer(_x8, _x9) {
-        return _ref10.apply(this, arguments);
+      function park(_x8) {
+        return _ref11.apply(this, arguments);
+      }
+
+      return park;
+    }()
+  }, {
+    key: 'transfer',
+    value: function () {
+      var _ref12 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee10(transferNumber, session) {
+        return _regenerator2.default.wrap(function _callee10$(_context10) {
+          while (1) {
+            switch (_context10.prev = _context10.next) {
+              case 0:
+                _context10.prev = 0;
+                _context10.next = 3;
+                return session.transfer(transferNumber);
+
+              case 3:
+                console.log('Transferred');
+                _context10.next = 9;
+                break;
+
+              case 6:
+                _context10.prev = 6;
+                _context10.t0 = _context10['catch'](0);
+
+                console.error(_context10.t0);
+
+              case 9:
+              case 'end':
+                return _context10.stop();
+            }
+          }
+        }, _callee10, this, [[0, 6]]);
+      }));
+
+      function transfer(_x9, _x10) {
+        return _ref12.apply(this, arguments);
       }
 
       return transfer;
@@ -748,16 +840,16 @@ var Webphone = function (_RcModule) {
   }, {
     key: 'transferWarm',
     value: function () {
-      var _ref11 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee11(transferNumber, session) {
+      var _ref13 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee12(transferNumber, session) {
         var _this7 = this;
 
         var newSession;
-        return _regenerator2.default.wrap(function _callee11$(_context11) {
+        return _regenerator2.default.wrap(function _callee12$(_context12) {
           while (1) {
-            switch (_context11.prev = _context11.next) {
+            switch (_context12.prev = _context12.next) {
               case 0:
-                _context11.prev = 0;
-                _context11.next = 3;
+                _context12.prev = 0;
+                _context12.next = 3;
                 return session.hold();
 
               case 3:
@@ -765,52 +857,52 @@ var Webphone = function (_RcModule) {
                   media: this.acceptOptions.media
                 });
 
-                newSession.once('accepted', (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee10() {
-                  return _regenerator2.default.wrap(function _callee10$(_context10) {
+                newSession.once('accepted', (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee11() {
+                  return _regenerator2.default.wrap(function _callee11$(_context11) {
                     while (1) {
-                      switch (_context10.prev = _context10.next) {
+                      switch (_context11.prev = _context11.next) {
                         case 0:
-                          _context10.prev = 0;
-                          _context10.next = 3;
+                          _context11.prev = 0;
+                          _context11.next = 3;
                           return session.warmTransfer(newSession);
 
                         case 3:
                           console.log('Transferred');
-                          _context10.next = 9;
+                          _context11.next = 9;
                           break;
 
                         case 6:
-                          _context10.prev = 6;
-                          _context10.t0 = _context10['catch'](0);
+                          _context11.prev = 6;
+                          _context11.t0 = _context11['catch'](0);
 
-                          console.error(_context10.t0);
+                          console.error(_context11.t0);
 
                         case 9:
                         case 'end':
-                          return _context10.stop();
+                          return _context11.stop();
                       }
                     }
-                  }, _callee10, _this7, [[0, 6]]);
+                  }, _callee11, _this7, [[0, 6]]);
                 })));
-                _context11.next = 10;
+                _context12.next = 10;
                 break;
 
               case 7:
-                _context11.prev = 7;
-                _context11.t0 = _context11['catch'](0);
+                _context12.prev = 7;
+                _context12.t0 = _context12['catch'](0);
 
-                console.error(_context11.t0);
+                console.error(_context12.t0);
 
               case 10:
               case 'end':
-                return _context11.stop();
+                return _context12.stop();
             }
           }
-        }, _callee11, this, [[0, 7]]);
+        }, _callee12, this, [[0, 7]]);
       }));
 
-      function transferWarm(_x10, _x11) {
-        return _ref11.apply(this, arguments);
+      function transferWarm(_x11, _x12) {
+        return _ref13.apply(this, arguments);
       }
 
       return transferWarm;
@@ -818,36 +910,36 @@ var Webphone = function (_RcModule) {
   }, {
     key: 'flip',
     value: function () {
-      var _ref13 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee12(flipValue, session) {
-        return _regenerator2.default.wrap(function _callee12$(_context12) {
+      var _ref15 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee13(flipValue, session) {
+        return _regenerator2.default.wrap(function _callee13$(_context13) {
           while (1) {
-            switch (_context12.prev = _context12.next) {
+            switch (_context13.prev = _context13.next) {
               case 0:
-                _context12.prev = 0;
-                _context12.next = 3;
+                _context13.prev = 0;
+                _context13.next = 3;
                 return session.flip(flipValue);
 
               case 3:
                 console.log('Flipped');
-                _context12.next = 9;
+                _context13.next = 9;
                 break;
 
               case 6:
-                _context12.prev = 6;
-                _context12.t0 = _context12['catch'](0);
+                _context13.prev = 6;
+                _context13.t0 = _context13['catch'](0);
 
-                console.error(_context12.t0);
+                console.error(_context13.t0);
 
               case 9:
               case 'end':
-                return _context12.stop();
+                return _context13.stop();
             }
           }
-        }, _callee12, this, [[0, 6]]);
+        }, _callee13, this, [[0, 6]]);
       }));
 
-      function flip(_x12, _x13) {
-        return _ref13.apply(this, arguments);
+      function flip(_x13, _x14) {
+        return _ref15.apply(this, arguments);
       }
 
       return flip;
@@ -869,10 +961,10 @@ var Webphone = function (_RcModule) {
     }
   }, {
     key: 'makeCall',
-    value: function makeCall(_ref14) {
-      var toNumber = _ref14.toNumber,
-          fromNumber = _ref14.fromNumber,
-          homeCountryId = _ref14.homeCountryId;
+    value: function makeCall(_ref16) {
+      var toNumber = _ref16.toNumber,
+          fromNumber = _ref16.fromNumber,
+          homeCountryId = _ref16.homeCountryId;
 
       var session = this._webphone.userAgent.invite(toNumber, {
         media: this.acceptOptions.media,
@@ -898,9 +990,71 @@ var Webphone = function (_RcModule) {
       this._sessions.delete(session.id);
     }
   }, {
+    key: '_retrySleep',
+    value: function () {
+      var _ref17 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee14() {
+        return _regenerator2.default.wrap(function _callee14$(_context14) {
+          while (1) {
+            switch (_context14.prev = _context14.next) {
+              case 0:
+                if (!(this.connectRetryCounts < 3)) {
+                  _context14.next = 3;
+                  break;
+                }
+
+                _context14.next = 3;
+                return (0, _sleep2.default)(FIRST_THREE_RETRIES_DELAY);
+
+              case 3:
+                if (!(this.connectRetryCounts === 3)) {
+                  _context14.next = 6;
+                  break;
+                }
+
+                _context14.next = 6;
+                return (0, _sleep2.default)(FOURTH_RETRIES_DELAY);
+
+              case 6:
+                if (!(this.connectRetryCounts === 4)) {
+                  _context14.next = 9;
+                  break;
+                }
+
+                _context14.next = 9;
+                return (0, _sleep2.default)(FIFTH_RETRIES_DELAY);
+
+              case 9:
+                if (!(this.connectRetryCounts > 4)) {
+                  _context14.next = 12;
+                  break;
+                }
+
+                _context14.next = 12;
+                return (0, _sleep2.default)(MAX_RETRIES_DELAY);
+
+              case 12:
+              case 'end':
+                return _context14.stop();
+            }
+          }
+        }, _callee14, this);
+      }));
+
+      function _retrySleep() {
+        return _ref17.apply(this, arguments);
+      }
+
+      return _retrySleep;
+    }()
+  }, {
     key: 'status',
     get: function get() {
       return this.state.status;
+    }
+  }, {
+    key: 'activeSession',
+    get: function get() {
+      return this._activeSession;
     }
   }, {
     key: 'ready',
@@ -926,6 +1080,11 @@ var Webphone = function (_RcModule) {
     key: 'webphoneCounts',
     get: function get() {
       return this._storage.getItem(this._storageKey).webphoneCounts;
+    }
+  }, {
+    key: 'connectRetryCounts',
+    get: function get() {
+      return this.state.connectRetryCounts;
     }
   }, {
     key: 'acceptOptions',
