@@ -273,7 +273,7 @@ var Webphone = function (_RcModule) {
           error: error
         });
         _this3._webphone.userAgent.removeAllListeners();
-        _this3._connect({ reconnect: true });
+        _this3._connect(true);
       };
       this._webphone.userAgent.audioHelper.setVolume(0.3);
       this._webphone.userAgent.on('registered', onRegistered);
@@ -287,9 +287,8 @@ var Webphone = function (_RcModule) {
   }, {
     key: '_connect',
     value: function () {
-      var _ref3 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2(_ref4) {
-        var _ref4$reconnect = _ref4.reconnect,
-            reconnect = _ref4$reconnect === undefined ? false : _ref4$reconnect;
+      var _ref3 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2() {
+        var reconnect = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
         var sipProvision;
         return _regenerator2.default.wrap(function _callee2$(_context2) {
           while (1) {
@@ -325,31 +324,31 @@ var Webphone = function (_RcModule) {
                 return _context2.abrupt('return');
 
               case 9:
-                debugger;
+
                 this.store.dispatch({
                   type: reconnect ? this.actionTypes.reconnect : this.actionTypes.connect
                 });
 
-                _context2.next = 13;
+                _context2.next = 12;
                 return this._sipProvision();
 
-              case 13:
+              case 12:
                 sipProvision = _context2.sent;
 
                 if (!(this.connectionStatus === _connectionStatus2.default.disconnecting)) {
-                  _context2.next = 16;
+                  _context2.next = 15;
                   break;
                 }
 
                 return _context2.abrupt('return');
 
-              case 16:
+              case 15:
                 this._createWebphone(sipProvision);
-                _context2.next = 25;
+                _context2.next = 24;
                 break;
 
-              case 19:
-                _context2.prev = 19;
+              case 18:
+                _context2.prev = 18;
                 _context2.t0 = _context2['catch'](0);
 
                 this.store.dispatch({
@@ -361,18 +360,18 @@ var Webphone = function (_RcModule) {
                   ttl: 0,
                   allowDuplicates: false
                 });
-                _context2.next = 25;
-                return this._connect({ reconnect: true });
+                _context2.next = 24;
+                return this._connect(true);
 
-              case 25:
+              case 24:
               case 'end':
                 return _context2.stop();
             }
           }
-        }, _callee2, this, [[0, 19]]);
+        }, _callee2, this, [[0, 18]]);
       }));
 
-      function _connect(_x) {
+      function _connect() {
         return _ref3.apply(this, arguments);
       }
 
@@ -381,7 +380,7 @@ var Webphone = function (_RcModule) {
   }, {
     key: 'connect',
     value: function () {
-      var _ref5 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3(hasFromNumber) {
+      var _ref4 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3(hasFromNumber) {
         return _regenerator2.default.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
@@ -460,7 +459,7 @@ var Webphone = function (_RcModule) {
       }));
 
       function connect(_x2) {
-        return _ref5.apply(this, arguments);
+        return _ref4.apply(this, arguments);
       }
 
       return connect;
@@ -468,7 +467,7 @@ var Webphone = function (_RcModule) {
   }, {
     key: 'disconnect',
     value: function () {
-      var _ref6 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee4() {
+      var _ref5 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee4() {
         var _this4 = this;
 
         return _regenerator2.default.wrap(function _callee4$(_context4) {
@@ -497,7 +496,7 @@ var Webphone = function (_RcModule) {
       }));
 
       function disconnect() {
-        return _ref6.apply(this, arguments);
+        return _ref5.apply(this, arguments);
       }
 
       return disconnect;
@@ -563,7 +562,7 @@ var Webphone = function (_RcModule) {
   }, {
     key: 'answer',
     value: function () {
-      var _ref7 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee5(session) {
+      var _ref6 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee5(session) {
         return _regenerator2.default.wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
@@ -599,7 +598,7 @@ var Webphone = function (_RcModule) {
       }));
 
       function answer(_x3) {
-        return _ref7.apply(this, arguments);
+        return _ref6.apply(this, arguments);
       }
 
       return answer;
@@ -612,7 +611,7 @@ var Webphone = function (_RcModule) {
   }, {
     key: 'forward',
     value: function () {
-      var _ref8 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee6(forwardNumber, session) {
+      var _ref7 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee6(forwardNumber, session) {
         return _regenerator2.default.wrap(function _callee6$(_context6) {
           while (1) {
             switch (_context6.prev = _context6.next) {
@@ -641,7 +640,7 @@ var Webphone = function (_RcModule) {
       }));
 
       function forward(_x4, _x5) {
-        return _ref8.apply(this, arguments);
+        return _ref7.apply(this, arguments);
       }
 
       return forward;
@@ -688,7 +687,7 @@ var Webphone = function (_RcModule) {
   }, {
     key: 'startRecord',
     value: function () {
-      var _ref9 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee7(session) {
+      var _ref8 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee7(session) {
         return _regenerator2.default.wrap(function _callee7$(_context7) {
           while (1) {
             switch (_context7.prev = _context7.next) {
@@ -719,7 +718,7 @@ var Webphone = function (_RcModule) {
       }));
 
       function startRecord(_x6) {
-        return _ref9.apply(this, arguments);
+        return _ref8.apply(this, arguments);
       }
 
       return startRecord;
@@ -727,7 +726,7 @@ var Webphone = function (_RcModule) {
   }, {
     key: 'stopRecord',
     value: function () {
-      var _ref10 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee8(session) {
+      var _ref9 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee8(session) {
         return _regenerator2.default.wrap(function _callee8$(_context8) {
           while (1) {
             switch (_context8.prev = _context8.next) {
@@ -758,7 +757,7 @@ var Webphone = function (_RcModule) {
       }));
 
       function stopRecord(_x7) {
-        return _ref10.apply(this, arguments);
+        return _ref9.apply(this, arguments);
       }
 
       return stopRecord;
@@ -766,7 +765,7 @@ var Webphone = function (_RcModule) {
   }, {
     key: 'park',
     value: function () {
-      var _ref11 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee9(session) {
+      var _ref10 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee9(session) {
         return _regenerator2.default.wrap(function _callee9$(_context9) {
           while (1) {
             switch (_context9.prev = _context9.next) {
@@ -795,7 +794,7 @@ var Webphone = function (_RcModule) {
       }));
 
       function park(_x8) {
-        return _ref11.apply(this, arguments);
+        return _ref10.apply(this, arguments);
       }
 
       return park;
@@ -803,7 +802,7 @@ var Webphone = function (_RcModule) {
   }, {
     key: 'transfer',
     value: function () {
-      var _ref12 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee10(transferNumber, session) {
+      var _ref11 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee10(transferNumber, session) {
         return _regenerator2.default.wrap(function _callee10$(_context10) {
           while (1) {
             switch (_context10.prev = _context10.next) {
@@ -832,7 +831,7 @@ var Webphone = function (_RcModule) {
       }));
 
       function transfer(_x9, _x10) {
-        return _ref12.apply(this, arguments);
+        return _ref11.apply(this, arguments);
       }
 
       return transfer;
@@ -840,7 +839,7 @@ var Webphone = function (_RcModule) {
   }, {
     key: 'transferWarm',
     value: function () {
-      var _ref13 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee12(transferNumber, session) {
+      var _ref12 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee12(transferNumber, session) {
         var _this7 = this;
 
         var newSession;
@@ -902,7 +901,7 @@ var Webphone = function (_RcModule) {
       }));
 
       function transferWarm(_x11, _x12) {
-        return _ref13.apply(this, arguments);
+        return _ref12.apply(this, arguments);
       }
 
       return transferWarm;
@@ -910,7 +909,7 @@ var Webphone = function (_RcModule) {
   }, {
     key: 'flip',
     value: function () {
-      var _ref15 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee13(flipValue, session) {
+      var _ref14 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee13(flipValue, session) {
         return _regenerator2.default.wrap(function _callee13$(_context13) {
           while (1) {
             switch (_context13.prev = _context13.next) {
@@ -939,7 +938,7 @@ var Webphone = function (_RcModule) {
       }));
 
       function flip(_x13, _x14) {
-        return _ref15.apply(this, arguments);
+        return _ref14.apply(this, arguments);
       }
 
       return flip;
@@ -961,10 +960,10 @@ var Webphone = function (_RcModule) {
     }
   }, {
     key: 'makeCall',
-    value: function makeCall(_ref16) {
-      var toNumber = _ref16.toNumber,
-          fromNumber = _ref16.fromNumber,
-          homeCountryId = _ref16.homeCountryId;
+    value: function makeCall(_ref15) {
+      var toNumber = _ref15.toNumber,
+          fromNumber = _ref15.fromNumber,
+          homeCountryId = _ref15.homeCountryId;
 
       var session = this._webphone.userAgent.invite(toNumber, {
         media: this.acceptOptions.media,
@@ -992,7 +991,7 @@ var Webphone = function (_RcModule) {
   }, {
     key: '_retrySleep',
     value: function () {
-      var _ref17 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee14() {
+      var _ref16 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee14() {
         return _regenerator2.default.wrap(function _callee14$(_context14) {
           while (1) {
             switch (_context14.prev = _context14.next) {
@@ -1041,7 +1040,7 @@ var Webphone = function (_RcModule) {
       }));
 
       function _retrySleep() {
-        return _ref17.apply(this, arguments);
+        return _ref16.apply(this, arguments);
       }
 
       return _retrySleep;
