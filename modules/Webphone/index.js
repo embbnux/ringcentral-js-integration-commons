@@ -87,10 +87,6 @@ var _getWebphoneReducer = require('./getWebphoneReducer');
 
 var _getWebphoneReducer2 = _interopRequireDefault(_getWebphoneReducer);
 
-var _getCacheReducer = require('./getCacheReducer');
-
-var _getCacheReducer2 = _interopRequireDefault(_getCacheReducer);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var FIRST_THREE_RETRIES_DELAY = 10 * 1000;
@@ -128,7 +124,7 @@ var Webphone = function (_RcModule) {
     _this._client = client;
     _this._rolesAndPermissions = rolesAndPermissions;
     _this._storage = storage;
-    _this._storageKey = 'webphone';
+    _this._storageWebphoneCountsKey = 'webphoneCounts';
     _this._webphone = null;
     _this._remoteVideo = null;
     _this._localVideo = null;
@@ -137,9 +133,11 @@ var Webphone = function (_RcModule) {
     _this._sessions = new _map2.default();
 
     _this._reducer = (0, _getWebphoneReducer2.default)(_this.actionTypes);
-    _this._cacheReducer = (0, _getCacheReducer2.default)(_this.actionTypes);
 
-    storage.registerReducer({ key: _this._storageKey, reducer: _this._cacheReducer });
+    storage.registerReducer({
+      key: _this._storageWebphoneCountsKey,
+      reducer: (0, _getWebphoneReducer.getWebphoneCountsReducer)(_this.actionTypes)
+    });
     return _this;
   }
 
@@ -186,17 +184,18 @@ var Webphone = function (_RcModule) {
         this.store.dispatch({
           type: this.actionTypes.resetSuccess
         });
+        this.disconnect();
       }
     }
   }, {
     key: '_shouldInit',
     value: function _shouldInit() {
-      return this._auth.ready && this._rolesAndPermissions.ready && !this.ready;
+      return this._auth.loggedIn && this._rolesAndPermissions.ready && !this.ready;
     }
   }, {
     key: '_shouldReset',
     value: function _shouldReset() {
-      return (!this._auth.ready || !this._rolesAndPermissions.ready) && this.ready;
+      return (!this._auth.loggedIn || !this._rolesAndPermissions.ready) && this.ready;
     }
   }, {
     key: '_sipProvision',
@@ -420,7 +419,8 @@ var Webphone = function (_RcModule) {
                 }
 
                 this._alert.warning({
-                  message: _webphoneErrors2.default.browserNotSupported
+                  message: _webphoneErrors2.default.browserNotSupported,
+                  ttl: 0
                 });
                 return _context3.abrupt('return');
 
@@ -1078,7 +1078,7 @@ var Webphone = function (_RcModule) {
   }, {
     key: 'webphoneCounts',
     get: function get() {
-      return this._storage.getItem(this._storageKey).webphoneCounts;
+      return this._storage.getItem(this._storageWebphoneCountsKey);
     }
   }, {
     key: 'connectRetryCounts',

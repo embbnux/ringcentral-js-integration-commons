@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.getVideoElementPreparedReducer = getVideoElementPreparedReducer;
 exports.getConnectionStatusReducer = getConnectionStatusReducer;
 exports.getConnectRetryCountsReducer = getConnectRetryCountsReducer;
+exports.getWebphoneCountsReducer = getWebphoneCountsReducer;
 exports.default = getWebphoneReducer;
 
 var _redux = require('redux');
@@ -76,12 +77,30 @@ function getConnectRetryCountsReducer(types) {
   };
 }
 
+function getWebphoneCountsReducer(types) {
+  return function () {
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+    var _ref4 = arguments[1];
+    var type = _ref4.type;
+
+    switch (type) {
+      case types.connect:
+        return state + 1;
+      case types.disconnect:
+        return state - 1;
+      default:
+        return state;
+    }
+  };
+}
+
 function getWebphoneReducer(types) {
   return (0, _redux.combineReducers)({
     status: (0, _getModuleStatusReducer2.default)(types),
     videoElementPrepared: getVideoElementPreparedReducer(types),
     connectionStatus: getConnectionStatusReducer(types),
-    connectRetryCounts: getConnectRetryCountsReducer(types)
+    connectRetryCounts: getConnectRetryCountsReducer(types),
+    webphoneCounts: getWebphoneCountsReducer(types)
   });
 }
 //# sourceMappingURL=getWebphoneReducer.js.map
