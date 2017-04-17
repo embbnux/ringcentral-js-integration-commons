@@ -514,20 +514,20 @@ var Webphone = function (_RcModule) {
       });
       session.on('rejected', function () {
         console.log('rejected');
-        _this5._removeSessions(session);
+        _this5._removeSession(session);
       });
       session.on('failed', function (response, cause) {
         console.log('Event: Failed');
         console.log(cause);
-        _this5._removeSessions(session);
+        _this5._removeSession(session);
       });
       session.on('terminated', function () {
         console.log('Event: Failed');
-        _this5._removeSessions(session);
+        _this5._removeSession(session);
       });
       session.on('cancel', function () {
         console.log('Event: Cancel');
-        _this5._removeSessions(session);
+        _this5._removeSession(session);
       });
       session.on('refer', function () {
         console.log('Event: Refer');
