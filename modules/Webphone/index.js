@@ -953,6 +953,7 @@ var Webphone = function (_RcModule) {
     value: function hangup(session) {
       try {
         session.terminate();
+        this._cleanActiveSession(session);
       } catch (e) {
         console.log(e);
         this._removeSession(session);
@@ -986,7 +987,15 @@ var Webphone = function (_RcModule) {
   }, {
     key: '_removeSession',
     value: function _removeSession(session) {
+      this._cleanActiveSession(session);
       this._sessions.delete(session.id);
+    }
+  }, {
+    key: '_cleanActiveSession',
+    value: function _cleanActiveSession(session) {
+      if (session === this._activeSession) {
+        this._activeSession = null;
+      }
     }
   }, {
     key: '_retrySleep',
