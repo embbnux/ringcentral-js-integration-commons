@@ -953,11 +953,10 @@ var Webphone = function (_RcModule) {
     value: function hangup(session) {
       try {
         session.terminate();
-        this._cleanActiveSession(session);
       } catch (e) {
         console.log(e);
-        this._removeSession(session);
       }
+      this._removeSession(session);
     }
   }, {
     key: 'makeCall',
