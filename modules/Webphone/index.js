@@ -555,7 +555,11 @@ var Webphone = function (_RcModule) {
 
       if (!this._activeSession) {
         this._activeSession = session;
+        this.store.dispatch({
+          type: this.actionTypes.updateSession
+        });
       }
+
       this._addSession(session);
       session.on('rejected', function () {
         console.log('Event: Rejected');
@@ -575,7 +579,7 @@ var Webphone = function (_RcModule) {
                 if (this._activeSession && !this._activeSession.isOnHold().local) {
                   this._activeSession.hold();
                 }
-                this._activeSession = session;
+                this._setActiveSession(session);
                 this._onAccepted(session, 'inbound');
                 _context5.next = 6;
                 return session.accept(this.acceptOptions);
@@ -589,8 +593,8 @@ var Webphone = function (_RcModule) {
                 _context5.t0 = _context5['catch'](0);
 
                 console.log('Accept failed');
-                this._activeSession = null;
                 this._removeSession(session);
+                this._removeActiveSession();
 
               case 13:
               case 'end':
@@ -674,6 +678,7 @@ var Webphone = function (_RcModule) {
     key: 'hold',
     value: function hold(session) {
       session.hold();
+      this._cleanActiveSession(session);
     }
   }, {
     key: 'unhold',
@@ -686,6 +691,7 @@ var Webphone = function (_RcModule) {
           }
         }
       });
+      this._setActiveSession(session);
     }
   }, {
     key: 'startRecord',
@@ -977,8 +983,8 @@ var Webphone = function (_RcModule) {
       if (this._activeSession && !this._activeSession.isOnHold().local) {
         this._activeSession.hold();
       }
-      this._activeSession = session;
       this._addSession(session);
+      this._setActiveSession(session);
       return session;
     }
   }, {
@@ -993,11 +999,28 @@ var Webphone = function (_RcModule) {
       this._sessions.delete(session.id);
     }
   }, {
+    key: '_setActiveSession',
+    value: function _setActiveSession(session) {
+      this._activeSession = session;
+      this.store.dispatch({
+        type: this.actionTypes.updateSession
+      });
+    }
+  }, {
+    key: '_removeActiveSession',
+    value: function _removeActiveSession() {
+      this._activeSession = null;
+      this.store.dispatch({
+        type: this.actionTypes.destroySession
+      });
+    }
+  }, {
     key: '_cleanActiveSession',
     value: function _cleanActiveSession(session) {
-      if (session === this._activeSession) {
-        this._activeSession = null;
+      if (session !== this._activeSession) {
+        return;
       }
+      this._removeActiveSession();
     }
   }, {
     key: '_retrySleep',

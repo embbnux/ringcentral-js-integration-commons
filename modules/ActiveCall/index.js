@@ -101,7 +101,8 @@ var ActiveCall = function (_RcModule) {
             });
           } else {
             this.store.dispatch({
-              type: this.actionTypes.newSession
+              type: this.actionTypes.newSession,
+              id: this._session.id
             });
           }
         }
@@ -125,6 +126,14 @@ var ActiveCall = function (_RcModule) {
       });
     }
   }, {
+    key: 'hangup',
+    value: function hangup() {
+      if (!this._session || !this._webphone) {
+        return;
+      }
+      this._webphone.hangup(this._session);
+    }
+  }, {
     key: 'status',
     get: function get() {
       return this.state.status;
@@ -133,6 +142,16 @@ var ActiveCall = function (_RcModule) {
     key: 'ready',
     get: function get() {
       return this.state.status === _moduleStatus2.default.ready;
+    }
+  }, {
+    key: 'minimized',
+    get: function get() {
+      return this.state.minimized;
+    }
+  }, {
+    key: 'active',
+    get: function get() {
+      return !!this.state.sessionId;
     }
   }]);
   return ActiveCall;

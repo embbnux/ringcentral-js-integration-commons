@@ -4,7 +4,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.getMinimizedReducer = getMinimizedReducer;
-exports.getActiveReducer = getActiveReducer;
+exports.getSessionIdReducer = getSessionIdReducer;
 exports.default = getWebphoneReducer;
 
 var _redux = require('redux');
@@ -32,17 +32,18 @@ function getMinimizedReducer(types) {
   };
 }
 
-function getActiveReducer(types) {
+function getSessionIdReducer(types) {
   return function () {
-    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
     var _ref2 = arguments[1];
-    var type = _ref2.type;
+    var type = _ref2.type,
+        id = _ref2.id;
 
     switch (type) {
       case types.newSession:
-        return true;
+        return id;
       case types.destroySession:
-        return false;
+        return null;
       default:
         return state;
     }
@@ -53,7 +54,7 @@ function getWebphoneReducer(types) {
   return (0, _redux.combineReducers)({
     status: (0, _getModuleStatusReducer2.default)(types),
     minimized: getMinimizedReducer(types),
-    active: getActiveReducer(types)
+    sessionId: getSessionIdReducer(types)
   });
 }
 //# sourceMappingURL=getActiveCallReducer.js.map

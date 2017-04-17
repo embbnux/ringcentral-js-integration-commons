@@ -5,6 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.getVideoElementPreparedReducer = getVideoElementPreparedReducer;
 exports.getConnectionStatusReducer = getConnectionStatusReducer;
+exports.getSessionStatusReducer = getSessionStatusReducer;
 exports.getConnectRetryCountsReducer = getConnectRetryCountsReducer;
 exports.getWebphoneCountsReducer = getWebphoneCountsReducer;
 exports.default = getWebphoneReducer;
@@ -59,11 +60,28 @@ function getConnectionStatusReducer(types) {
   };
 }
 
+function getSessionStatusReducer(types) {
+  return function () {
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _connectionStatus2.default.idle;
+    var _ref3 = arguments[1];
+    var type = _ref3.type;
+
+    switch (type) {
+      case types.updateSession:
+        return _connectionStatus2.default.active;
+      case types.destroySession:
+        return _connectionStatus2.default.idle;
+      default:
+        return state;
+    }
+  };
+}
+
 function getConnectRetryCountsReducer(types) {
   return function () {
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    var _ref3 = arguments[1];
-    var type = _ref3.type;
+    var _ref4 = arguments[1];
+    var type = _ref4.type;
 
     switch (type) {
       case types.reconnect:
@@ -80,8 +98,8 @@ function getConnectRetryCountsReducer(types) {
 function getWebphoneCountsReducer(types) {
   return function () {
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    var _ref4 = arguments[1];
-    var type = _ref4.type;
+    var _ref5 = arguments[1];
+    var type = _ref5.type;
 
     switch (type) {
       case types.connect:
@@ -99,6 +117,7 @@ function getWebphoneReducer(types) {
     status: (0, _getModuleStatusReducer2.default)(types),
     videoElementPrepared: getVideoElementPreparedReducer(types),
     connectionStatus: getConnectionStatusReducer(types),
+    sessionStatus: getSessionStatusReducer(types),
     connectRetryCounts: getConnectRetryCountsReducer(types),
     webphoneCounts: getWebphoneCountsReducer(types)
   });
