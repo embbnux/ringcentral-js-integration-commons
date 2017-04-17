@@ -69,6 +69,7 @@ var ActiveCall = function (_RcModule) {
     _this._session = null;
 
     _this.toggleMinimized = _this.toggleMinimized.bind(_this);
+    _this.hangup = _this.hangup.bind(_this);
     return _this;
   }
 
@@ -131,7 +132,7 @@ var ActiveCall = function (_RcModule) {
       if (!this._session || !this._webphone) {
         return;
       }
-      this._webphone.hangup(this._session);
+      this._webphone.hangup(this._webphone.activeSession);
     }
   }, {
     key: 'status',
