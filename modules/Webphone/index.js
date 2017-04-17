@@ -553,6 +553,9 @@ var Webphone = function (_RcModule) {
     value: function _onInvite(session) {
       var _this6 = this;
 
+      if (!this._activeSession) {
+        this._activeSession = session;
+      }
       this._addSession(session);
       session.on('rejected', function () {
         console.log('Event: Rejected');
