@@ -52,10 +52,7 @@ function messageIsUnread(message) {
 function getMessageSyncParams(_ref) {
   var syncToken = _ref.syncToken,
       conversationId = _ref.conversationId,
-      _ref$dateTo = _ref.dateTo,
-      dateTo = _ref$dateTo === undefined ? new Date() : _ref$dateTo,
-      _ref$recordCount = _ref.recordCount,
-      recordCount = _ref$recordCount === undefined ? 250 : _ref$recordCount;
+      dateTo = _ref.dateTo;
 
   if (syncToken) {
     return {
@@ -67,10 +64,11 @@ function getMessageSyncParams(_ref) {
   lastSevenDate.setDate(lastSevenDate.getDate() - 7);
   var params = {
     syncType: _syncTypes2.default.fSync,
-    dateFrom: lastSevenDate.toISOString(),
-    dateTo: new Date(dateTo).toISOString(),
-    recordCount: recordCount
+    dateFrom: lastSevenDate.toISOString()
   };
+  if (dateTo) {
+    params.dateTo = new Date(dateTo).toISOString();
+  }
   if (conversationId) {
     params.conversationId = conversationId;
   }
@@ -257,7 +255,7 @@ function pushRecordsToMessageData(_ref4) {
     newMessages[index] = normalizeRecord((0, _removeUri2.default)(record));
   };
   records.forEach(function (record) {
-    if (!record.conversation) {
+    if (!record || !record.conversation) {
       return;
     }
     var existedIndexofMessages = findIndexOfMessages(messageMap, record);

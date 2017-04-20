@@ -145,6 +145,7 @@ var CallHistory = function (_RcModule) {
                         endedCalls: endedCalls,
                         timestamp: Date.now()
                       });
+                      _this._callLog.sync();
                     }
                   }
                 }
@@ -325,6 +326,11 @@ var CallHistory = function (_RcModule) {
     key: 'calls',
     get: function get() {
       return this._selectors.calls();
+    }
+  }, {
+    key: 'recentlyEndedCalls',
+    get: function get() {
+      return this.state.endedCalls;
     }
   }]);
   return CallHistory;

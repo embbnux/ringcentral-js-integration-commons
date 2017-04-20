@@ -176,7 +176,7 @@ var ConnectivityMonitor = function (_RcModule) {
   }, {
     key: '_requestErrorHandler',
     value: function _requestErrorHandler(apiResponse) {
-      if (apiResponse instanceof Error && apiResponse.message === 'Failed to fetch') {
+      if (apiResponse instanceof Error && (!apiResponse.apiResponse || typeof apiResponse.apiResponse.response !== 'function' || !apiResponse.apiResponse.response())) {
         if (this.connectivity) {
           this.store.dispatch({
             type: this.actionTypes.connectFail
@@ -198,8 +198,8 @@ var ConnectivityMonitor = function (_RcModule) {
       client.on(client.events.requestSuccess, this._requestSuccessHandler);
       client.on(client.events.requestError, this._requestErrorHandler);
       this._unbindHandlers = function () {
-        client.off(client.events.requestSuccess, _this3._requestSuccessHandler);
-        client.off(client.events.requestError, _this3._requestErrorHandler);
+        client.removeListener(client.events.requestSuccess, _this3._requestSuccessHandler);
+        client.removeListener(client.events.requestError, _this3._requestErrorHandler);
         _this3._unbindHandlers = null;
       };
     }
