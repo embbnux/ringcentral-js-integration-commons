@@ -44,8 +44,8 @@ function getSessionReducer(types) {
         return {
           id: session.id,
           type: session.type,
-          toPhoneNumber: session.request.to.uri.user,
-          fromPhoneNumber: session.request.from.uri.user,
+          to: session.request.to.uri.user,
+          from: session.request.from.uri.user,
           status: session.status
         };
       case types.destroySession:
