@@ -520,7 +520,7 @@ var Webphone = function (_RcModule) {
           _this5.hangup(session);
         } else {
           session.status = _sessionStatus2.default.connected;
-          session.acceptedAt = new Date();
+          session.acceptedAt = Date.now();
         }
       });
       session.on('progress', function () {
@@ -539,12 +539,14 @@ var Webphone = function (_RcModule) {
       session.on('failed', function (response, cause) {
         console.log('Event: Failed');
         console.log(cause);
+        debugger;
         session.isCanceled = false;
         session.status = _sessionStatus2.default.finished;
         _this5._removeSession(session);
       });
       session.on('terminated', function () {
-        console.log('Event: Failed');
+        debugger;
+        console.log('Event: Terminated');
         session.isCanceled = false;
         session.status = _sessionStatus2.default.finished;
         _this5._removeSession(session);
