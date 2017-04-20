@@ -999,8 +999,8 @@ var Webphone = function (_RcModule) {
         session.terminate();
       } catch (e) {
         console.log(e);
+        this._removeSession(session);
       }
-      this._removeSession(session);
     }
   }, {
     key: 'makeCall',
