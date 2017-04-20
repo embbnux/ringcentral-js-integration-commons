@@ -103,7 +103,7 @@ var ActiveCall = function (_RcModule) {
           } else {
             this.store.dispatch({
               type: this.actionTypes.newSession,
-              id: this._session.id
+              id: this._session
             });
           }
         }
@@ -152,7 +152,7 @@ var ActiveCall = function (_RcModule) {
   }, {
     key: 'active',
     get: function get() {
-      return !!this.state.sessionId;
+      return !!this.state.session;
     }
   }]);
   return ActiveCall;

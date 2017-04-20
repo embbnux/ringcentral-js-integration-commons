@@ -73,9 +73,17 @@ var _connectionStatus = require('./connectionStatus');
 
 var _connectionStatus2 = _interopRequireDefault(_connectionStatus);
 
+var _sessionStatus = require('./sessionStatus');
+
+var _sessionStatus2 = _interopRequireDefault(_sessionStatus);
+
 var _actionTypes = require('./actionTypes');
 
 var _actionTypes2 = _interopRequireDefault(_actionTypes);
+
+var _sessionTypes = require('./sessionTypes');
+
+var _sessionTypes2 = _interopRequireDefault(_sessionTypes);
 
 var _webphoneErrors = require('./webphoneErrors');
 
@@ -508,44 +516,70 @@ var Webphone = function (_RcModule) {
 
       session.on('accepted', function () {
         console.log('accepted');
+        if (session.isCanceled) {
+          _this5.hangup(session);
+        } else {
+          session.status = _sessionStatus2.default.connected;
+          session.acceptedAt = new Date();
+        }
       });
       session.on('progress', function () {
         console.log('progress...');
+        if (session.isCanceled) {
+          return;
+        }
+        session.status = _sessionStatus2.default.connecting;
       });
       session.on('rejected', function () {
         console.log('rejected');
+        session.isCanceled = false;
+        session.status = _sessionStatus2.default.finished;
         _this5._removeSession(session);
       });
       session.on('failed', function (response, cause) {
         console.log('Event: Failed');
         console.log(cause);
+        session.isCanceled = false;
+        session.status = _sessionStatus2.default.finished;
         _this5._removeSession(session);
       });
       session.on('terminated', function () {
         console.log('Event: Failed');
+        session.isCanceled = false;
+        session.status = _sessionStatus2.default.finished;
         _this5._removeSession(session);
       });
       session.on('cancel', function () {
         console.log('Event: Cancel');
+        session.isCanceled = true;
+        session.status = _sessionStatus2.default.finished;
         _this5._removeSession(session);
       });
       session.on('refer', function () {
         console.log('Event: Refer');
       });
       session.on('replaced', function (newSession) {
+        session.status = _sessionStatus2.default.replaced;
+        newSession.status = _sessionStatus2.default.connected;
+        newSession.type = _sessionTypes2.default.inbound;
+        _this5._addSession(newSession);
         _this5.onAccepted(newSession);
       });
       session.on('muted', function () {
         console.log('Event: Muted');
+        session.status = _sessionStatus2.default.onMute;
       });
       session.on('unmuted', function () {
         console.log('Event: Unmuted');
+        session.status = _sessionStatus2.default.connected;
       });
       session.on('hold', function () {
         console.log('Event: hold');
+        session.status = _sessionStatus2.default.onHold;
       });
       session.on('unhold', function () {
         console.log('Event: unhold');
+        session.status = _sessionStatus2.default.connected;
       });
     }
   }, {
@@ -553,6 +587,7 @@ var Webphone = function (_RcModule) {
     value: function _onInvite(session) {
       var _this6 = this;
 
+      session.type = _sessionTypes2.default.inbound;
       if (!this._activeSession) {
         this._activeSession = session;
         this.store.dispatch({
@@ -979,6 +1014,7 @@ var Webphone = function (_RcModule) {
         fromNumber: fromNumber,
         homeCountryId: homeCountryId
       });
+      session.type = _sessionTypes2.default.outbound;
       this._onAccepted(session);
       if (this._activeSession && !this._activeSession.isOnHold().local) {
         this._activeSession.hold();

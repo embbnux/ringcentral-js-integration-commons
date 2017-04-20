@@ -167,17 +167,17 @@ var Call = function (_RcModule) {
               if (_context.t0.message === _ringoutErrors2.default.firstLegConnectFailed) {
                 _this._alert.warning({
                   message: _callErrors2.default.connectFailed,
-                  payroll: _context.t0
+                  payload: _context.t0
                 });
               } else if (_context.t0.message === 'Failed to fetch') {
                 _this._alert.danger({
                   message: _callErrors2.default.networkError,
-                  payroll: _context.t0
+                  payload: _context.t0
                 });
               } else if (_context.t0.message !== 'Refresh token has expired') {
                 _this._alert.danger({
                   message: _callErrors2.default.internalError,
-                  payroll: _context.t0
+                  payload: _context.t0
                 });
               }
               _this.store.dispatch({
