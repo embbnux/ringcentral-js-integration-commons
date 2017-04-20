@@ -103,7 +103,7 @@ var ActiveCall = function (_RcModule) {
           } else {
             this.store.dispatch({
               type: this.actionTypes.newSession,
-              id: this._session
+              session: this._session
             });
           }
         }
