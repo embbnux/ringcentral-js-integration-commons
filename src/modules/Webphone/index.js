@@ -278,10 +278,12 @@ export default class Webphone extends RcModule {
     session.on('accepted', () => {
       console.log('accepted');
       session.callStatus = sessionStatus.connected;
+      this._updateCurrentSessionAnsSessions(session);
     });
     session.on('progress', () => {
       console.log('progress...');
       session.callStatus = sessionStatus.connecting;
+      this._updateCurrentSessionAnsSessions(session);
     });
     session.on('rejected', () => {
       console.log('rejected');
@@ -296,7 +298,7 @@ export default class Webphone extends RcModule {
     });
     session.on('terminated', () => {
       console.log('Event: Terminated');
-      session.status = sessionStatus.finished;
+      session.callStatus = sessionStatus.finished;
       this._removeSession(session);
     });
     session.on('cancel', () => {
@@ -316,10 +318,12 @@ export default class Webphone extends RcModule {
     });
     session.on('muted', () => {
       console.log('Event: Muted');
+      session.isOnMute = true;
       session.callStatus = sessionStatus.onMute;
     });
     session.on('unmuted', () => {
       console.log('Event: Unmuted');
+      session.isOnMute = false;
       session.callStatus = sessionStatus.connected;
     });
     session.on('hold', () => {
@@ -334,10 +338,12 @@ export default class Webphone extends RcModule {
 
   _onInvite(session) {
     session.direction = callDirections.inbound;
+    session.callStatus = sessionStatus.connecting;
     if (!this._activeSession) {
       this._activeSession = session;
       this.store.dispatch({
-        type: this.actionTypes.updateSession,
+        type: this.actionTypes.updateCurrentSession,
+        session,
       });
     }
 
@@ -503,6 +509,7 @@ export default class Webphone extends RcModule {
       homeCountryId,
     });
     session.direction = callDirections.outbound;
+    session.callStatus = sessionStatus.connecting;
     this._onAccepted(session);
     if (this._activeSession && !this._activeSession.isOnHold().local) {
       this._activeSession.hold();
@@ -514,24 +521,33 @@ export default class Webphone extends RcModule {
 
   _addSession(session) {
     this._sessions.set(session.id, session);
+    this.store.dispatch({
+      type: this.actionTypes.updateSessions,
+      sessions: this._sessions,
+    });
   }
 
   _removeSession(session) {
     this._cleanActiveSession(session);
     this._sessions.delete(session.id);
+    this.store.dispatch({
+      type: this.actionTypes.updateSessions,
+      sessions: this._sessions,
+    });
   }
 
   _setActiveSession(session) {
     this._activeSession = session;
     this.store.dispatch({
-      type: this.actionTypes.updateSession,
+      type: this.actionTypes.updateCurrentSession,
+      session,
     });
   }
 
   _removeActiveSession() {
     this._activeSession = null;
     this.store.dispatch({
-      type: this.actionTypes.destroySession,
+      type: this.actionTypes.destroyCurrentSession,
     });
   }
 
@@ -540,6 +556,25 @@ export default class Webphone extends RcModule {
       return;
     }
     this._removeActiveSession();
+  }
+
+  _updateCurrentSessionAnsSessions(session) {
+    this._updateCurrentSession(session);
+    this._updateSessions();
+  }
+
+  _updateCurrentSession(session) {
+    this.store.dispatch({
+      type: this.actionTypes.updateCurrentSession,
+      session,
+    });
+  }
+
+  _updateSessions() {
+    this.store.dispatch({
+      type: this.actionTypes.updateSessions,
+      sessions: this._sessions,
+    });
   }
 
   async _retrySleep() {

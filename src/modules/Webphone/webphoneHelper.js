@@ -10,3 +10,16 @@ export function isBrowerSupport() {
   }
   return false;
 }
+
+export function normalizeSession(session) {
+  return {
+    id: session.id,
+    direction: session.direction,
+    callStatus: session.callStatus,
+    to: session.request.to.uri.user,
+    from: session.request.from.uri.user,
+    startTime: (new Date(session.startTime)).getTime(),
+    isOnHold: !!session.isOnHold().local,
+    isOnMute: !!session.isOnMute,
+  };
+}
