@@ -1,1 +1,0 @@
-{"version":3,"sources":["modules/Webphone/sessionTypes.js"],"names":[],"mappings":";;;;;;AAAA;;;;;;kBAEe,mBAAS,CACtB,UADsB,EAEtB,SAFsB,CAAT,EAGZ,kBAHY,C","file":"sessionTypes.js","sourcesContent":["import Enum from '../../lib/Enum';\n\nexport default new Enum([\n  'outbound',\n  'inbound',\n], 'webphone-session');\n"]}

@@ -55,6 +55,10 @@ var _actionTypes = require('./actionTypes');
 
 var _actionTypes2 = _interopRequireDefault(_actionTypes);
 
+var _callDirections = require('../../enums/callDirections');
+
+var _callDirections2 = _interopRequireDefault(_callDirections);
+
 var _getCallMonitorReducer = require('./getCallMonitorReducer');
 
 var _getCallMonitorReducer2 = _interopRequireDefault(_getCallMonitorReducer);
@@ -82,11 +86,12 @@ var CallMonitor = function (_RcModule) {
         activeCalls = _ref.activeCalls,
         activityMatcher = _ref.activityMatcher,
         contactMatcher = _ref.contactMatcher,
+        webphone = _ref.webphone,
         onRinging = _ref.onRinging,
         onNewCall = _ref.onNewCall,
         onCallUpdated = _ref.onCallUpdated,
         onCallEnded = _ref.onCallEnded,
-        options = (0, _objectWithoutProperties3.default)(_ref, ['accountInfo', 'detailedPresence', 'activeCalls', 'activityMatcher', 'contactMatcher', 'onRinging', 'onNewCall', 'onCallUpdated', 'onCallEnded']);
+        options = (0, _objectWithoutProperties3.default)(_ref, ['accountInfo', 'detailedPresence', 'activeCalls', 'activityMatcher', 'contactMatcher', 'webphone', 'onRinging', 'onNewCall', 'onCallUpdated', 'onCallEnded']);
     (0, _classCallCheck3.default)(this, CallMonitor);
 
     var _this = (0, _possibleConstructorReturn3.default)(this, (CallMonitor.__proto__ || (0, _getPrototypeOf2.default)(CallMonitor)).call(this, (0, _extends3.default)({}, options, {
@@ -179,6 +184,7 @@ var CallMonitor = function (_RcModule) {
     _this._activeCalls = _ensureExist2.default.call(_this, activeCalls, 'activeCalls');
     _this._contactMatcher = contactMatcher;
     _this._activityMatcher = activityMatcher;
+    _this._webphone = webphone;
     _this._onRinging = onRinging;
     _this._onNewCall = onNewCall;
     _this._onCallUpdated = onCallUpdated;
@@ -191,7 +197,9 @@ var CallMonitor = function (_RcModule) {
       return _this._activeCalls.calls;
     }, function () {
       return _this._accountInfo.countryCode;
-    }, function (callsFromPresence, callsFromActiveCalls, countryCode) {
+    }, function () {
+      return _this._webphone && _this._webphone.sessions;
+    }, function (callsFromPresence, callsFromActiveCalls, countryCode, sessions) {
       return callsFromPresence.map(function (call) {
         var activeCall = call.inboundLeg && callsFromActiveCalls.find(function (item) {
           return item.sessionId === call.inboundLeg.sessionId;
@@ -206,6 +214,31 @@ var CallMonitor = function (_RcModule) {
           phoneNumber: call.to && call.to.phoneNumber,
           countryCode: countryCode
         });
+        var webphoneSession = void 0;
+        if (sessions && call.sipData) {
+          sessions.forEach(function (session) {
+            if (webphoneSession) {
+              return;
+            }
+            if (session.direction !== call.direction) {
+              return;
+            }
+            var remoteUri = void 0;
+            if (session.direction === _callDirections2.default.outbound) {
+              remoteUri = session.request.to.uri.user;
+            } else {
+              remoteUri = session.request.from.uri.user;
+            }
+            if (call.sipData.remoteUri.indexOf(remoteUri) === -1) {
+              return;
+            }
+            var sipStartTime = new Date(session.startTime).getTime();
+            if (call.startTime - sipStartTime > 5000 || sipStartTime - call.startTime > 5000) {
+              return;
+            }
+            webphoneSession = session;
+          });
+        }
 
         return (0, _extends3.default)({}, call, {
           from: (0, _extends3.default)({}, activeCall && activeCall.to || {}, {
@@ -214,7 +247,8 @@ var CallMonitor = function (_RcModule) {
           to: (0, _extends3.default)({}, activeCall && activeCall.from || {}, {
             phoneNumber: toNumber
           }),
-          startTime: activeCall && activeCall.startTime || call.startTime
+          startTime: activeCall && activeCall.startTime || call.startTime,
+          webphoneSession: webphoneSession
         });
       });
     });

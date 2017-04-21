@@ -517,7 +517,6 @@ var Webphone = function (_RcModule) {
       session.on('accepted', function () {
         console.log('accepted');
         session.callStatus = _sessionStatus2.default.connected;
-        session.acceptedAt = Date.now();
       });
       session.on('progress', function () {
         console.log('progress...');
@@ -1113,6 +1112,11 @@ var Webphone = function (_RcModule) {
     key: 'activeSession',
     get: function get() {
       return this._activeSession;
+    }
+  }, {
+    key: 'sessions',
+    get: function get() {
+      return this._sessions;
     }
   }, {
     key: 'ready',
