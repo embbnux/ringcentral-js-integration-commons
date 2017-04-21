@@ -81,9 +81,9 @@ var _actionTypes = require('./actionTypes');
 
 var _actionTypes2 = _interopRequireDefault(_actionTypes);
 
-var _sessionTypes = require('./sessionTypes');
+var _callDirections = require('../../enums/callDirections');
 
-var _sessionTypes2 = _interopRequireDefault(_sessionTypes);
+var _callDirections2 = _interopRequireDefault(_callDirections);
 
 var _webphoneErrors = require('./webphoneErrors');
 
@@ -516,72 +516,59 @@ var Webphone = function (_RcModule) {
 
       session.on('accepted', function () {
         console.log('accepted');
-        if (session.isCanceled) {
-          _this5.hangup(session);
-        } else {
-          session.status = _sessionStatus2.default.connected;
-          session.acceptedAt = Date.now();
-        }
+        session.callStatus = _sessionStatus2.default.connected;
+        session.acceptedAt = Date.now();
       });
       session.on('progress', function () {
         console.log('progress...');
-        if (session.isCanceled) {
-          return;
-        }
-        session.status = _sessionStatus2.default.connecting;
+        session.callStatus = _sessionStatus2.default.connecting;
       });
       session.on('rejected', function () {
         console.log('rejected');
-        session.isCanceled = false;
-        session.status = _sessionStatus2.default.finished;
+        session.callStatus = _sessionStatus2.default.finished;
         _this5._removeSession(session);
       });
       session.on('failed', function (response, cause) {
         console.log('Event: Failed');
         console.log(cause);
-        debugger;
-        session.isCanceled = false;
-        session.status = _sessionStatus2.default.finished;
+        session.callStatus = _sessionStatus2.default.finished;
         _this5._removeSession(session);
       });
       session.on('terminated', function () {
-        debugger;
         console.log('Event: Terminated');
-        session.isCanceled = false;
         session.status = _sessionStatus2.default.finished;
         _this5._removeSession(session);
       });
       session.on('cancel', function () {
         console.log('Event: Cancel');
-        session.isCanceled = true;
-        session.status = _sessionStatus2.default.finished;
+        session.callStatus = _sessionStatus2.default.finished;
         _this5._removeSession(session);
       });
       session.on('refer', function () {
         console.log('Event: Refer');
       });
       session.on('replaced', function (newSession) {
-        session.status = _sessionStatus2.default.replaced;
-        newSession.status = _sessionStatus2.default.connected;
-        newSession.type = _sessionTypes2.default.inbound;
+        session.callStatus = _sessionStatus2.default.replaced;
+        newSession.callStatus = _sessionStatus2.default.connected;
+        newSession.direction = _callDirections2.default.inbound;
         _this5._addSession(newSession);
         _this5.onAccepted(newSession);
       });
       session.on('muted', function () {
         console.log('Event: Muted');
-        session.status = _sessionStatus2.default.onMute;
+        session.callStatus = _sessionStatus2.default.onMute;
       });
       session.on('unmuted', function () {
         console.log('Event: Unmuted');
-        session.status = _sessionStatus2.default.connected;
+        session.callStatus = _sessionStatus2.default.connected;
       });
       session.on('hold', function () {
         console.log('Event: hold');
-        session.status = _sessionStatus2.default.onHold;
+        session.callStatus = _sessionStatus2.default.onHold;
       });
       session.on('unhold', function () {
         console.log('Event: unhold');
-        session.status = _sessionStatus2.default.connected;
+        session.callStatus = _sessionStatus2.default.connected;
       });
     }
   }, {
@@ -589,7 +576,7 @@ var Webphone = function (_RcModule) {
     value: function _onInvite(session) {
       var _this6 = this;
 
-      session.type = _sessionTypes2.default.inbound;
+      session.direction = _callDirections2.default.inbound;
       if (!this._activeSession) {
         this._activeSession = session;
         this.store.dispatch({
@@ -1016,7 +1003,7 @@ var Webphone = function (_RcModule) {
         fromNumber: fromNumber,
         homeCountryId: homeCountryId
       });
-      session.type = _sessionTypes2.default.outbound;
+      session.direction = _callDirections2.default.outbound;
       this._onAccepted(session);
       if (this._activeSession && !this._activeSession.isOnHold().local) {
         this._activeSession.hold();
