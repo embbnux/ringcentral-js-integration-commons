@@ -5,9 +5,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.getVideoElementPreparedReducer = getVideoElementPreparedReducer;
 exports.getConnectionStatusReducer = getConnectionStatusReducer;
-exports.getSessionStatusReducer = getSessionStatusReducer;
 exports.getConnectRetryCountsReducer = getConnectRetryCountsReducer;
 exports.getWebphoneCountsReducer = getWebphoneCountsReducer;
+exports.getCurrentSessionReducer = getCurrentSessionReducer;
+exports.getSessionsReducer = getSessionsReducer;
 exports.default = getWebphoneReducer;
 
 var _redux = require('redux');
@@ -15,6 +16,8 @@ var _redux = require('redux');
 var _getModuleStatusReducer = require('../../lib/getModuleStatusReducer');
 
 var _getModuleStatusReducer2 = _interopRequireDefault(_getModuleStatusReducer);
+
+var _webphoneHelper = require('./webphoneHelper');
 
 var _connectionStatus = require('./connectionStatus');
 
@@ -60,28 +63,11 @@ function getConnectionStatusReducer(types) {
   };
 }
 
-function getSessionStatusReducer(types) {
-  return function () {
-    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _connectionStatus2.default.idle;
-    var _ref3 = arguments[1];
-    var type = _ref3.type;
-
-    switch (type) {
-      case types.updateSession:
-        return _connectionStatus2.default.active;
-      case types.destroySession:
-        return _connectionStatus2.default.idle;
-      default:
-        return state;
-    }
-  };
-}
-
 function getConnectRetryCountsReducer(types) {
   return function () {
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    var _ref4 = arguments[1];
-    var type = _ref4.type;
+    var _ref3 = arguments[1];
+    var type = _ref3.type;
 
     switch (type) {
       case types.reconnect:
@@ -98,8 +84,8 @@ function getConnectRetryCountsReducer(types) {
 function getWebphoneCountsReducer(types) {
   return function () {
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    var _ref5 = arguments[1];
-    var type = _ref5.type;
+    var _ref4 = arguments[1];
+    var type = _ref4.type;
 
     switch (type) {
       case types.connect:
@@ -112,14 +98,55 @@ function getWebphoneCountsReducer(types) {
   };
 }
 
+function getCurrentSessionReducer(types) {
+  return function () {
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+    var _ref5 = arguments[1];
+    var type = _ref5.type,
+        session = _ref5.session;
+
+    switch (type) {
+      case types.updateCurrentSession:
+        return (0, _webphoneHelper.normalizeSession)(session);
+      case types.destroyCurrentSession:
+        return null;
+      default:
+        return state;
+    }
+  };
+}
+
+function getSessionsReducer(types) {
+  return function () {
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+    var _ref6 = arguments[1];
+    var type = _ref6.type,
+        sessions = _ref6.sessions;
+
+    var newSessions = [];
+    switch (type) {
+      case types.updateSessions:
+        sessions.forEach(function (session) {
+          newSessions.push((0, _webphoneHelper.normalizeSession)(session));
+        });
+        return newSessions;
+      case types.destroySessions:
+        return null;
+      default:
+        return state;
+    }
+  };
+}
+
 function getWebphoneReducer(types) {
   return (0, _redux.combineReducers)({
     status: (0, _getModuleStatusReducer2.default)(types),
     videoElementPrepared: getVideoElementPreparedReducer(types),
     connectionStatus: getConnectionStatusReducer(types),
-    sessionStatus: getSessionStatusReducer(types),
     connectRetryCounts: getConnectRetryCountsReducer(types),
-    webphoneCounts: getWebphoneCountsReducer(types)
+    webphoneCounts: getWebphoneCountsReducer(types),
+    currentSession: getCurrentSessionReducer(types),
+    sessions: getSessionsReducer(types)
   });
 }
 //# sourceMappingURL=getWebphoneReducer.js.map

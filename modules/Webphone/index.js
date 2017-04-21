@@ -517,10 +517,12 @@ var Webphone = function (_RcModule) {
       session.on('accepted', function () {
         console.log('accepted');
         session.callStatus = _sessionStatus2.default.connected;
+        _this5._updateCurrentSessionAnsSessions(session);
       });
       session.on('progress', function () {
         console.log('progress...');
         session.callStatus = _sessionStatus2.default.connecting;
+        _this5._updateCurrentSessionAnsSessions(session);
       });
       session.on('rejected', function () {
         console.log('rejected');
@@ -535,7 +537,7 @@ var Webphone = function (_RcModule) {
       });
       session.on('terminated', function () {
         console.log('Event: Terminated');
-        session.status = _sessionStatus2.default.finished;
+        session.callStatus = _sessionStatus2.default.finished;
         _this5._removeSession(session);
       });
       session.on('cancel', function () {
@@ -555,10 +557,12 @@ var Webphone = function (_RcModule) {
       });
       session.on('muted', function () {
         console.log('Event: Muted');
+        session.isOnMute = true;
         session.callStatus = _sessionStatus2.default.onMute;
       });
       session.on('unmuted', function () {
         console.log('Event: Unmuted');
+        session.isOnMute = false;
         session.callStatus = _sessionStatus2.default.connected;
       });
       session.on('hold', function () {
@@ -576,10 +580,12 @@ var Webphone = function (_RcModule) {
       var _this6 = this;
 
       session.direction = _callDirections2.default.inbound;
+      session.callStatus = _sessionStatus2.default.connecting;
       if (!this._activeSession) {
         this._activeSession = session;
         this.store.dispatch({
-          type: this.actionTypes.updateSession
+          type: this.actionTypes.updateCurrentSession,
+          session: session
         });
       }
 
@@ -1003,6 +1009,7 @@ var Webphone = function (_RcModule) {
         homeCountryId: homeCountryId
       });
       session.direction = _callDirections2.default.outbound;
+      session.callStatus = _sessionStatus2.default.connecting;
       this._onAccepted(session);
       if (this._activeSession && !this._activeSession.isOnHold().local) {
         this._activeSession.hold();
@@ -1015,19 +1022,28 @@ var Webphone = function (_RcModule) {
     key: '_addSession',
     value: function _addSession(session) {
       this._sessions.set(session.id, session);
+      this.store.dispatch({
+        type: this.actionTypes.updateSessions,
+        sessions: this._sessions
+      });
     }
   }, {
     key: '_removeSession',
     value: function _removeSession(session) {
       this._cleanActiveSession(session);
       this._sessions.delete(session.id);
+      this.store.dispatch({
+        type: this.actionTypes.updateSessions,
+        sessions: this._sessions
+      });
     }
   }, {
     key: '_setActiveSession',
     value: function _setActiveSession(session) {
       this._activeSession = session;
       this.store.dispatch({
-        type: this.actionTypes.updateSession
+        type: this.actionTypes.updateCurrentSession,
+        session: session
       });
     }
   }, {
@@ -1035,7 +1051,7 @@ var Webphone = function (_RcModule) {
     value: function _removeActiveSession() {
       this._activeSession = null;
       this.store.dispatch({
-        type: this.actionTypes.destroySession
+        type: this.actionTypes.destroyCurrentSession
       });
     }
   }, {
@@ -1045,6 +1061,28 @@ var Webphone = function (_RcModule) {
         return;
       }
       this._removeActiveSession();
+    }
+  }, {
+    key: '_updateCurrentSessionAnsSessions',
+    value: function _updateCurrentSessionAnsSessions(session) {
+      this._updateCurrentSession(session);
+      this._updateSessions();
+    }
+  }, {
+    key: '_updateCurrentSession',
+    value: function _updateCurrentSession(session) {
+      this.store.dispatch({
+        type: this.actionTypes.updateCurrentSession,
+        session: session
+      });
+    }
+  }, {
+    key: '_updateSessions',
+    value: function _updateSessions() {
+      this.store.dispatch({
+        type: this.actionTypes.updateSessions,
+        sessions: this._sessions
+      });
     }
   }, {
     key: '_retrySleep',
