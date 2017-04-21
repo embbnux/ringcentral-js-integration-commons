@@ -6,7 +6,9 @@ import RcModule from '../../lib/RcModule';
 import sleep from '../../lib/sleep';
 import moduleStatus from '../../enums/moduleStatus';
 import connectionStatus from './connectionStatus';
+import sessionStatus from './sessionStatus';
 import actionTypes from './actionTypes';
+import callDirections from '../../enums/callDirections';
 import webphoneErrors from './webphoneErrors';
 
 import { isBrowerSupport } from './webphoneHelper';
@@ -275,48 +277,63 @@ export default class Webphone extends RcModule {
   _onAccepted(session) {
     session.on('accepted', () => {
       console.log('accepted');
+      session.callStatus = sessionStatus.connected;
     });
     session.on('progress', () => {
       console.log('progress...');
+      session.callStatus = sessionStatus.connecting;
     });
     session.on('rejected', () => {
       console.log('rejected');
+      session.callStatus = sessionStatus.finished;
       this._removeSession(session);
     });
     session.on('failed', (response, cause) => {
       console.log('Event: Failed');
       console.log(cause);
+      session.callStatus = sessionStatus.finished;
       this._removeSession(session);
     });
     session.on('terminated', () => {
-      console.log('Event: Failed');
+      console.log('Event: Terminated');
+      session.status = sessionStatus.finished;
       this._removeSession(session);
     });
     session.on('cancel', () => {
       console.log('Event: Cancel');
+      session.callStatus = sessionStatus.finished;
       this._removeSession(session);
     });
     session.on('refer', () => {
       console.log('Event: Refer');
     });
     session.on('replaced', (newSession) => {
+      session.callStatus = sessionStatus.replaced;
+      newSession.callStatus = sessionStatus.connected;
+      newSession.direction = callDirections.inbound;
+      this._addSession(newSession);
       this.onAccepted(newSession);
     });
     session.on('muted', () => {
       console.log('Event: Muted');
+      session.callStatus = sessionStatus.onMute;
     });
     session.on('unmuted', () => {
       console.log('Event: Unmuted');
+      session.callStatus = sessionStatus.connected;
     });
     session.on('hold', () => {
       console.log('Event: hold');
+      session.callStatus = sessionStatus.onHold;
     });
     session.on('unhold', () => {
       console.log('Event: unhold');
+      session.callStatus = sessionStatus.connected;
     });
   }
 
   _onInvite(session) {
+    session.direction = callDirections.inbound;
     if (!this._activeSession) {
       this._activeSession = session;
       this.store.dispatch({
@@ -475,8 +492,8 @@ export default class Webphone extends RcModule {
       session.terminate();
     } catch (e) {
       console.log(e);
+      this._removeSession(session);
     }
-    this._removeSession(session);
   }
 
   makeCall({ toNumber, fromNumber, homeCountryId }) {
@@ -485,6 +502,7 @@ export default class Webphone extends RcModule {
       fromNumber,
       homeCountryId,
     });
+    session.direction = callDirections.outbound;
     this._onAccepted(session);
     if (this._activeSession && !this._activeSession.isOnHold().local) {
       this._activeSession.hold();
@@ -545,6 +563,10 @@ export default class Webphone extends RcModule {
 
   get activeSession() {
     return this._activeSession;
+  }
+
+  get sessions() {
+    return this._sessions;
   }
 
   get ready() {

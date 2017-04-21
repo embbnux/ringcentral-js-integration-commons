@@ -2,6 +2,7 @@ import 'core-js/fn/array/find';
 import RcModule from '../../lib/RcModule';
 import moduleStatuses from '../../enums/moduleStatuses';
 import actionTypes from './actionTypes';
+import callDirections from '../../enums/callDirections';
 import getCallMonitorReducer from './getCallMonitorReducer';
 import normalizeNumber from '../../lib/normalizeNumber';
 import {
@@ -18,6 +19,7 @@ export default class CallMonitor extends RcModule {
     activeCalls,
     activityMatcher,
     contactMatcher,
+    webphone,
     onRinging,
     onNewCall,
     onCallUpdated,
@@ -33,6 +35,7 @@ export default class CallMonitor extends RcModule {
     this._activeCalls = this::ensureExist(activeCalls, 'activeCalls');
     this._contactMatcher = contactMatcher;
     this._activityMatcher = activityMatcher;
+    this._webphone = webphone;
     this._onRinging = onRinging;
     this._onNewCall = onNewCall;
     this._onCallUpdated = onCallUpdated;
@@ -43,7 +46,8 @@ export default class CallMonitor extends RcModule {
       () => this._detailedPresence.calls,
       () => this._activeCalls.calls,
       () => this._accountInfo.countryCode,
-      (callsFromPresence, callsFromActiveCalls, countryCode) => (
+      () => this._webphone && this._webphone.sessions,
+      (callsFromPresence, callsFromActiveCalls, countryCode, sessions) => (
         callsFromPresence.map((call) => {
           const activeCall = call.inboundLeg &&
             callsFromActiveCalls.find(item => item.sessionId === call.inboundLeg.sessionId);
@@ -57,6 +61,31 @@ export default class CallMonitor extends RcModule {
             phoneNumber: call.to && call.to.phoneNumber,
             countryCode,
           });
+          let webphoneSession;
+          if (sessions && call.sipData) {
+            sessions.forEach((session) => {
+              if (webphoneSession) {
+                return;
+              }
+              if (session.direction !== call.direction) {
+                return;
+              }
+              let remoteUri;
+              if (session.direction === callDirections.outbound) {
+                remoteUri = session.request.to.uri.user;
+              } else {
+                remoteUri = session.request.from.uri.user;
+              }
+              if (call.sipData.remoteUri.indexOf(remoteUri) === -1) {
+                return;
+              }
+              const sipStartTime = (new Date(session.startTime)).getTime();
+              if (call.startTime - sipStartTime > 5000 || sipStartTime - call.startTime > 5000) {
+                return;
+              }
+              webphoneSession = session;
+            });
+          }
 
           return {
             ...call,
@@ -69,6 +98,7 @@ export default class CallMonitor extends RcModule {
               phoneNumber: toNumber,
             },
             startTime: (activeCall && activeCall.startTime) || call.startTime,
+            webphoneSession,
           };
         })
       ),

@@ -46,7 +46,7 @@ export default class ActiveCall extends RcModule {
         } else {
           this.store.dispatch({
             type: this.actionTypes.newSession,
-            id: this._session.id,
+            session: this._session,
           });
         }
       }
@@ -77,7 +77,7 @@ export default class ActiveCall extends RcModule {
     if (!this._session || !this._webphone) {
       return;
     }
-    this._webphone.hangup(this._webphone.activeSession);
+    this._webphone.hangup(this._session);
   }
 
   get status() {
@@ -93,6 +93,6 @@ export default class ActiveCall extends RcModule {
   }
 
   get active() {
-    return !!this.state.sessionId;
+    return !!this.state.session;
   }
 }

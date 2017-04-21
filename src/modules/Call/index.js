@@ -185,17 +185,17 @@ export default class Call extends RcModule {
           if (error.message === ringoutErrors.firstLegConnectFailed) {
             this._alert.warning({
               message: callErrors.connectFailed,
-              payroll: error
+              payload: error
             });
           } else if (error.message === 'Failed to fetch') {
             this._alert.danger({
               message: callErrors.networkError,
-              payroll: error,
+              payload: error,
             });
           } else if (error.message !== 'Refresh token has expired') {
             this._alert.danger({
               message: callErrors.internalError,
-              payroll: error,
+              payload: error,
             });
           }
           this.store.dispatch({

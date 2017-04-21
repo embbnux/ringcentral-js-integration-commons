@@ -14,11 +14,17 @@ export function getMinimizedReducer(types) {
   };
 }
 
-export function getSessionIdReducer(types) {
-  return (state = null, { type, id }) => {
+export function getSessionReducer(types) {
+  return (state = null, { type, session }) => {
     switch (type) {
       case types.newSession:
-        return id;
+        return {
+          id: session.id,
+          type: session.type,
+          to: session.request.to.uri.user,
+          from: session.request.from.uri.user,
+          status: session.status
+        };
       case types.destroySession:
         return null;
       default:
@@ -31,6 +37,6 @@ export default function getWebphoneReducer(types) {
   return combineReducers({
     status: getModuleStatusReducer(types),
     minimized: getMinimizedReducer(types),
-    sessionId: getSessionIdReducer(types),
+    session: getSessionReducer(types),
   });
 }
