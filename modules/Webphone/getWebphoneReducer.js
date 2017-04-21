@@ -148,7 +148,7 @@ function getMinimizedReducer(types) {
     switch (type) {
       case types.toggleMinimized:
         return !state;
-      case types.newSession:
+      case types.resetMinimized:
         return false;
       default:
         return state;

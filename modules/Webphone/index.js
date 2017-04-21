@@ -1171,6 +1171,11 @@ var Webphone = function (_RcModule) {
       return this.state.status === _moduleStatus2.default.ready;
     }
   }, {
+    key: 'minimized',
+    get: function get() {
+      return this.state.minimized;
+    }
+  }, {
     key: 'videoElementPrepared',
     get: function get() {
       return this.state.videoElementPrepared;
