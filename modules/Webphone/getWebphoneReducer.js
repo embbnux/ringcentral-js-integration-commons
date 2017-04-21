@@ -9,6 +9,7 @@ exports.getConnectRetryCountsReducer = getConnectRetryCountsReducer;
 exports.getWebphoneCountsReducer = getWebphoneCountsReducer;
 exports.getCurrentSessionReducer = getCurrentSessionReducer;
 exports.getSessionsReducer = getSessionsReducer;
+exports.getMinimizedReducer = getMinimizedReducer;
 exports.default = getWebphoneReducer;
 
 var _redux = require('redux');
@@ -138,6 +139,23 @@ function getSessionsReducer(types) {
   };
 }
 
+function getMinimizedReducer(types) {
+  return function () {
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+    var _ref7 = arguments[1];
+    var type = _ref7.type;
+
+    switch (type) {
+      case types.toggleMinimized:
+        return !state;
+      case types.newSession:
+        return false;
+      default:
+        return state;
+    }
+  };
+}
+
 function getWebphoneReducer(types) {
   return (0, _redux.combineReducers)({
     status: (0, _getModuleStatusReducer2.default)(types),
@@ -146,7 +164,8 @@ function getWebphoneReducer(types) {
     connectRetryCounts: getConnectRetryCountsReducer(types),
     webphoneCounts: getWebphoneCountsReducer(types),
     currentSession: getCurrentSessionReducer(types),
-    sessions: getSessionsReducer(types)
+    sessions: getSessionsReducer(types),
+    minimized: getMinimizedReducer(types)
   });
 }
 //# sourceMappingURL=getWebphoneReducer.js.map

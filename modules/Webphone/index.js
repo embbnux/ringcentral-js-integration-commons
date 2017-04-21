@@ -146,6 +146,8 @@ var Webphone = function (_RcModule) {
       key: _this._storageWebphoneCountsKey,
       reducer: (0, _getWebphoneReducer.getWebphoneCountsReducer)(_this.actionTypes)
     });
+
+    _this.toggleMinimized = _this.toggleMinimized.bind(_this);
     return _this;
   }
 
@@ -1082,6 +1084,13 @@ var Webphone = function (_RcModule) {
       this.store.dispatch({
         type: this.actionTypes.updateSessions,
         sessions: this._sessions
+      });
+    }
+  }, {
+    key: 'toggleMinimized',
+    value: function toggleMinimized() {
+      this.store.dispatch({
+        type: this.actionTypes.toggleMinimized
       });
     }
   }, {
