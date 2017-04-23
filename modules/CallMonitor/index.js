@@ -216,28 +216,27 @@ var CallMonitor = function (_RcModule) {
         });
         var webphoneSession = void 0;
         if (sessions && call.sipData) {
-          sessions.forEach(function (session) {
-            if (webphoneSession) {
-              return;
-            }
+          webphoneSession = sessions.find(function (session) {
             if (session.direction !== call.direction) {
-              return;
+              return false;
             }
-            var remoteUri = void 0;
+            var remoteUser = void 0;
             if (session.direction === _callDirections2.default.outbound) {
-              remoteUri = session.request.to.uri.user;
+              remoteUser = session.to;
             } else {
-              remoteUri = session.request.from.uri.user;
+              remoteUser = session.from;
             }
-            if (call.sipData.remoteUri.indexOf(remoteUri) === -1) {
-              return;
+            if (call.sipData.remoteUri.indexOf(remoteUser) === -1) {
+              return false;
             }
-            var sipStartTime = new Date(session.startTime).getTime();
-            if (call.startTime - sipStartTime > 5000 || sipStartTime - call.startTime > 5000) {
-              return;
+            if (call.startTime - session.startTime > 5000 || session.startTime - call.startTime > 5000) {
+              return false;
             }
-            webphoneSession = session;
+            return true;
           });
+          if (webphoneSession) {
+            webphoneSession = _this._webphone.originalSessions.get(webphoneSession.id);
+          }
         }
 
         return (0, _extends3.default)({}, call, {

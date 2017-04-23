@@ -1161,7 +1161,7 @@ var Webphone = function (_RcModule) {
       return this._activeSession;
     }
   }, {
-    key: 'sessions',
+    key: 'originalSessions',
     get: function get() {
       return this._sessions;
     }
@@ -1174,6 +1174,16 @@ var Webphone = function (_RcModule) {
     key: 'minimized',
     get: function get() {
       return this.state.minimized;
+    }
+  }, {
+    key: 'currentSession',
+    get: function get() {
+      return this.state.currentSession;
+    }
+  }, {
+    key: 'sessions',
+    get: function get() {
+      return this.state.sessions;
     }
   }, {
     key: 'videoElementPrepared',
