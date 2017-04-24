@@ -89,6 +89,19 @@ export function getSessionsReducer(types) {
   };
 }
 
+export function getMinimizedReducer(types) {
+  return (state = false, { type }) => {
+    switch (type) {
+      case types.toggleMinimized:
+        return !state;
+      case types.resetMinimized:
+        return false;
+      default:
+        return state;
+    }
+  };
+}
+
 export default function getWebphoneReducer(types) {
   return combineReducers({
     status: getModuleStatusReducer(types),
@@ -98,5 +111,6 @@ export default function getWebphoneReducer(types) {
     webphoneCounts: getWebphoneCountsReducer(types),
     currentSession: getCurrentSessionReducer(types),
     sessions: getSessionsReducer(types),
+    minimized: getMinimizedReducer(types),
   });
 }

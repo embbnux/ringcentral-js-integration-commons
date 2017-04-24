@@ -16,4 +16,6 @@ export default new Enum([
   'destroyCurrentSession',
   'updateSessions',
   'destroySessions',
+  'toggleMinimized',
+  'resetMinimized',
 ], 'webphone');

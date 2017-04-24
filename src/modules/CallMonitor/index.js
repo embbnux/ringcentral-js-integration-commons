@@ -63,28 +63,30 @@ export default class CallMonitor extends RcModule {
           });
           let webphoneSession;
           if (sessions && call.sipData) {
-            sessions.forEach((session) => {
-              if (webphoneSession) {
-                return;
-              }
+            webphoneSession = sessions.find((session) => {
               if (session.direction !== call.direction) {
-                return;
+                return false;
               }
-              let remoteUri;
+              let remoteUser;
               if (session.direction === callDirections.outbound) {
-                remoteUri = session.request.to.uri.user;
+                remoteUser = session.to;
               } else {
-                remoteUri = session.request.from.uri.user;
+                remoteUser = session.from;
               }
-              if (call.sipData.remoteUri.indexOf(remoteUri) === -1) {
-                return;
+              if (call.sipData.remoteUri.indexOf(remoteUser) === -1) {
+                return false;
               }
-              const sipStartTime = (new Date(session.startTime)).getTime();
-              if (call.startTime - sipStartTime > 5000 || sipStartTime - call.startTime > 5000) {
-                return;
+              if (
+                call.startTime - session.startTime > 4000 ||
+                session.startTime - call.startTime > 4000
+              ) {
+                return false;
               }
-              webphoneSession = session;
+              return true;
             });
+            if (webphoneSession) {
+              webphoneSession = this._webphone.originalSessions.get(webphoneSession.id);
+            }
           }
 
           return {
@@ -97,7 +99,11 @@ export default class CallMonitor extends RcModule {
               ...((activeCall && activeCall.from) || {}),
               phoneNumber: toNumber,
             },
-            startTime: (activeCall && activeCall.startTime) || call.startTime,
+            startTime: (
+              (webphoneSession && webphoneSession.startTime) ||
+              (activeCall && activeCall.startTime) ||
+              call.startTime
+            ),
             webphoneSession,
           };
         })

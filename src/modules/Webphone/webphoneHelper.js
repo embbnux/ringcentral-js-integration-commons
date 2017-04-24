@@ -21,5 +21,6 @@ export function normalizeSession(session) {
     startTime: (new Date(session.startTime)).getTime(),
     isOnHold: !!session.isOnHold().local,
     isOnMute: !!session.isOnMute,
+    isOnRecord: !!session.isOnRecord,
   };
 }

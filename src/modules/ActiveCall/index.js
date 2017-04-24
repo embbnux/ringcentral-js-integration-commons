@@ -77,7 +77,7 @@ export default class ActiveCall extends RcModule {
     if (!this._session || !this._webphone) {
       return;
     }
-    this._webphone.hangup(this._session);
+    this._webphone.hangup(this._session.id);
   }
 
   get status() {
