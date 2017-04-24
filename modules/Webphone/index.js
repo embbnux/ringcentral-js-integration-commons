@@ -767,9 +767,9 @@ var Webphone = function (_RcModule) {
         return;
       }
       session.unhold();
-      this.sessions.forEach(function (sessionItem, sessionItemId) {
+      this._sessions.forEach(function (sessionItem, sessionItemId) {
         if (session.id !== sessionItemId) {
-          if (!session.isOnHold().local) {
+          if (!sessionItem.isOnHold().local) {
             sessionItem.hold();
           }
         }

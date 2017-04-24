@@ -229,7 +229,7 @@ var CallMonitor = function (_RcModule) {
             if (call.sipData.remoteUri.indexOf(remoteUser) === -1) {
               return false;
             }
-            if (call.startTime - session.startTime > 5000 || session.startTime - call.startTime > 5000) {
+            if (call.startTime - session.startTime > 4000 || session.startTime - call.startTime > 4000) {
               return false;
             }
             return true;
@@ -246,7 +246,7 @@ var CallMonitor = function (_RcModule) {
           to: (0, _extends3.default)({}, activeCall && activeCall.from || {}, {
             phoneNumber: toNumber
           }),
-          startTime: activeCall && activeCall.startTime || call.startTime,
+          startTime: webphoneSession && webphoneSession.startTime || activeCall && activeCall.startTime || call.startTime,
           webphoneSession: webphoneSession
         });
       });
