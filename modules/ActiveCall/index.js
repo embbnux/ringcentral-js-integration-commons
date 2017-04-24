@@ -132,7 +132,7 @@ var ActiveCall = function (_RcModule) {
       if (!this._session || !this._webphone) {
         return;
       }
-      this._webphone.hangup(this._session);
+      this._webphone.hangup(this._session.id);
     }
   }, {
     key: 'status',

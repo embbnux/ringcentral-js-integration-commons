@@ -26,7 +26,8 @@ function normalizeSession(session) {
     from: session.request.from.uri.user,
     startTime: new Date(session.startTime).getTime(),
     isOnHold: !!session.isOnHold().local,
-    isOnMute: !!session.isOnMute
+    isOnMute: !!session.isOnMute,
+    isOnRecord: !!session.isOnRecord
   };
 }
 //# sourceMappingURL=webphoneHelper.js.map
