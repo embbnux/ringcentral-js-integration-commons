@@ -253,6 +253,15 @@ var CallMonitor = function (_RcModule) {
           startTime: wephoneStartTime || activeCall && activeCall.startTime || call.startTime,
           webphoneSession: webphoneSession
         });
+      }).filter(function (call) {
+        if (!call.webphoneSession) {
+          return true;
+        }
+        var session = _this._webphone.originalSessions.get(call.webphoneSession.id);
+        if (!session) {
+          return false;
+        }
+        return true;
       });
     });
     _this.addSelector('calls', _this._selectors.normalizedCalls, function () {
