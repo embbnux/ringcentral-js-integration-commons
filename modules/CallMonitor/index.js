@@ -215,6 +215,7 @@ var CallMonitor = function (_RcModule) {
           countryCode: countryCode
         });
         var webphoneSession = void 0;
+        var wephoneStartTime = void 0;
         if (sessions && call.sipData) {
           webphoneSession = sessions.find(function (session) {
             if (session.direction !== call.direction) {
@@ -236,6 +237,9 @@ var CallMonitor = function (_RcModule) {
           });
           if (webphoneSession) {
             webphoneSession = _this._webphone.originalSessions.get(webphoneSession.id);
+            if (webphoneSession && webphoneSession.startTime) {
+              wephoneStartTime = new Date(webphoneSession.startTime).getTime();
+            }
           }
         }
 
@@ -246,7 +250,7 @@ var CallMonitor = function (_RcModule) {
           to: (0, _extends3.default)({}, activeCall && activeCall.from || {}, {
             phoneNumber: toNumber
           }),
-          startTime: webphoneSession && webphoneSession.startTime || activeCall && activeCall.startTime || call.startTime,
+          startTime: wephoneStartTime || activeCall && activeCall.startTime || call.startTime,
           webphoneSession: webphoneSession
         });
       });
