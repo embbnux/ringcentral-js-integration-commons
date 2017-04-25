@@ -618,7 +618,7 @@ var Webphone = function (_RcModule) {
               case 3:
                 _context5.prev = 3;
 
-                if (this._activeSession && !this._activeSession.isOnHold().local) {
+                if (this._activeSession && !this._activeSession.isOnHold().local && this._activeSession !== session) {
                   this._activeSession.hold();
                 }
                 this._setActiveSession(session);
