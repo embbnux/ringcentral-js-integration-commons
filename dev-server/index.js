@@ -11,7 +11,6 @@ import RcModule from '../src/lib/RcModule';
 import AccountExtension from '../src/modules/AccountExtension';
 import AccountInfo from '../src/modules/AccountInfo';
 import ActiveCalls from '../src/modules/ActiveCalls';
-import ActiveCall from '../src/modules/ActiveCall';
 import Alert from '../src/modules/Alert';
 import Auth from '../src/modules/Auth';
 import BlockedNumber from '../src/modules/BlockedNumber';
@@ -227,10 +226,6 @@ class DemoPhone extends RcModule {
       subscription: this.subscription,
       getState: () => this.state.detailedPresence,
     }));
-    this.addModule('activeCall', new ActiveCall({
-      webphone: this.webphone,
-      getState: () => this.state.activeCall,
-    }));
     this.addModule('activeCalls', new ActiveCalls({
       auth: this.auth,
       client: this.client,
@@ -379,7 +374,6 @@ class DemoPhone extends RcModule {
     this._reducer = combineReducers({
       accountInfo: this.accountInfo.reducer,
       accountExtension: this.accountExtension.reducer,
-      activeCall: this.activeCall.reducer,
       activeCalls: this.activeCalls.reducer,
       alert: this.alert.reducer,
       auth: this.auth.reducer,

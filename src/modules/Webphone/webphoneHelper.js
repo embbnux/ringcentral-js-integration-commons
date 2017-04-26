@@ -19,6 +19,7 @@ export function normalizeSession(session) {
     to: session.request.to.uri.user,
     from: session.request.from.uri.user,
     startTime: (new Date(session.startTime)).getTime(),
+    creationTime: session.creationTime,
     isOnHold: !!session.isOnHold().local,
     isOnMute: !!session.isOnMute,
     isOnRecord: !!session.isOnRecord,

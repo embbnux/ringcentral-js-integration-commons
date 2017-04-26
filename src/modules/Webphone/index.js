@@ -61,6 +61,10 @@ export default class Webphone extends RcModule {
     });
 
     this.toggleMinimized = this.toggleMinimized.bind(this);
+    this.answer = this.answer.bind(this);
+    this.reject = this.reject.bind(this);
+    this.resume = this.resume.bind(this);
+    this.hangup = this.hangup.bind(this);
   }
 
   initialize() {
@@ -339,6 +343,7 @@ export default class Webphone extends RcModule {
   }
 
   _onInvite(session) {
+    session.creationTime = Date.now();
     session.direction = callDirections.inbound;
     session.callStatus = sessionStatus.connecting;
     if (!this._activeSession) {
@@ -362,12 +367,16 @@ export default class Webphone extends RcModule {
       return;
     }
     try {
-      if (this._activeSession && !this._activeSession.isOnHold().local) {
+      if (
+        this._activeSession && !this._activeSession.isOnHold().local &&
+        this._activeSession !== session
+      ) {
         this._activeSession.hold();
       }
       this._setActiveSession(session);
       this._onAccepted(session, 'inbound');
       await session.accept(this.acceptOptions);
+      this._resetMinimized();
     } catch (e) {
       console.log('Accept failed');
       this._removeSession(session);
@@ -381,6 +390,11 @@ export default class Webphone extends RcModule {
       return;
     }
     session.reject();
+  }
+
+  resume(sessionId) {
+    this.unhold(sessionId);
+    this._resetMinimized();
   }
 
   async forward(forwardNumber, sessionId) {
@@ -450,7 +464,9 @@ export default class Webphone extends RcModule {
     if (!session) {
       return;
     }
-    session.unhold();
+    if (session.isOnHold().local) {
+      session.unhold();
+    }
     this._sessions.forEach((sessionItem, sessionItemId) => {
       if (session.id !== sessionItemId) {
         if (!sessionItem.isOnHold().local) {
@@ -585,12 +601,14 @@ export default class Webphone extends RcModule {
     });
     session.direction = callDirections.outbound;
     session.callStatus = sessionStatus.connecting;
+    session.creationTime = Date.now();
     this._onAccepted(session);
     if (this._activeSession && !this._activeSession.isOnHold().local) {
       this._activeSession.hold();
     }
     this._addSession(session);
     this._setActiveSession(session);
+    this._resetMinimized();
     return session;
   }
 
@@ -657,6 +675,12 @@ export default class Webphone extends RcModule {
   toggleMinimized() {
     this.store.dispatch({
       type: this.actionTypes.toggleMinimized,
+    });
+  }
+
+  _resetMinimized() {
+    this.store.dispatch({
+      type: this.actionTypes.resetMinimized,
     });
   }
 

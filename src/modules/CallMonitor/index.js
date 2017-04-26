@@ -76,17 +76,15 @@ export default class CallMonitor extends RcModule {
               if (call.sipData.remoteUri.indexOf(remoteUser) === -1) {
                 return false;
               }
+              const startTime = session.startTime || session.creationTime;
               if (
-                call.startTime - session.startTime > 4000 ||
-                session.startTime - call.startTime > 4000
+                call.startTime - startTime > 4000 ||
+                session.startTime - startTime > 4000
               ) {
                 return false;
               }
               return true;
             });
-            if (webphoneSession) {
-              webphoneSession = this._webphone.originalSessions.get(webphoneSession.id);
-            }
           }
 
           return {
@@ -106,6 +104,14 @@ export default class CallMonitor extends RcModule {
             ),
             webphoneSession,
           };
+        }).filter((call) => {
+          if (!call.webphoneSession || !sessions) {
+            return true;
+          }
+          const session = sessions.find(
+            sessionItem => call.webphoneSession.id === sessionItem.id
+          );
+          return !!session;
         })
       ),
     );
