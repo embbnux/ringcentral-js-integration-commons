@@ -148,6 +148,10 @@ var Webphone = function (_RcModule) {
     });
 
     _this.toggleMinimized = _this.toggleMinimized.bind(_this);
+    _this.answer = _this.answer.bind(_this);
+    _this.reject = _this.reject.bind(_this);
+    _this.resume = _this.resume.bind(_this);
+    _this.hangup = _this.hangup.bind(_this);
     return _this;
   }
 
@@ -627,23 +631,24 @@ var Webphone = function (_RcModule) {
                 return session.accept(this.acceptOptions);
 
               case 9:
-                _context5.next = 16;
+                this._resetMinimized();
+                _context5.next = 17;
                 break;
 
-              case 11:
-                _context5.prev = 11;
+              case 12:
+                _context5.prev = 12;
                 _context5.t0 = _context5['catch'](3);
 
                 console.log('Accept failed');
                 this._removeSession(session);
                 this._removeActiveSession();
 
-              case 16:
+              case 17:
               case 'end':
                 return _context5.stop();
             }
           }
-        }, _callee5, this, [[3, 11]]);
+        }, _callee5, this, [[3, 12]]);
       }));
 
       function answer(_x3) {
@@ -660,6 +665,12 @@ var Webphone = function (_RcModule) {
         return;
       }
       session.reject();
+    }
+  }, {
+    key: 'resume',
+    value: function resume(sessionId) {
+      this.unhold(sessionId);
+      this._resetMinimized();
     }
   }, {
     key: 'forward',
@@ -766,7 +777,9 @@ var Webphone = function (_RcModule) {
       if (!session) {
         return;
       }
-      session.unhold();
+      if (session.isOnHold().local) {
+        session.unhold();
+      }
       this._sessions.forEach(function (sessionItem, sessionItemId) {
         if (session.id !== sessionItemId) {
           if (!sessionItem.isOnHold().local) {
@@ -1225,6 +1238,13 @@ var Webphone = function (_RcModule) {
     value: function toggleMinimized() {
       this.store.dispatch({
         type: this.actionTypes.toggleMinimized
+      });
+    }
+  }, {
+    key: '_resetMinimized',
+    value: function _resetMinimized() {
+      this.store.dispatch({
+        type: this.actionTypes.resetMinimized
       });
     }
   }, {

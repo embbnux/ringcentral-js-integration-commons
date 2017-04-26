@@ -235,12 +235,6 @@ var CallMonitor = function (_RcModule) {
             }
             return true;
           });
-          if (webphoneSession) {
-            webphoneSession = _this._webphone.originalSessions.get(webphoneSession.id);
-            if (webphoneSession && webphoneSession.startTime) {
-              wephoneStartTime = new Date(webphoneSession.startTime).getTime();
-            }
-          }
         }
 
         return (0, _extends3.default)({}, call, {
@@ -250,18 +244,17 @@ var CallMonitor = function (_RcModule) {
           to: (0, _extends3.default)({}, activeCall && activeCall.from || {}, {
             phoneNumber: toNumber
           }),
-          startTime: wephoneStartTime || activeCall && activeCall.startTime || call.startTime,
+          startTime: webphoneSession && webphoneSession.startTime || activeCall && activeCall.startTime || call.startTime,
           webphoneSession: webphoneSession
         });
       }).filter(function (call) {
-        if (!call.webphoneSession) {
+        if (!call.webphoneSession || !sessions) {
           return true;
         }
-        var session = _this._webphone.originalSessions.get(call.webphoneSession.id);
-        if (!session) {
-          return false;
-        }
-        return true;
+        var session = sessions.find(function (sessionItem) {
+          return call.webphoneSession.id === sessionItem.id;
+        });
+        return !!session;
       });
     });
     _this.addSelector('calls', _this._selectors.normalizedCalls, function () {
