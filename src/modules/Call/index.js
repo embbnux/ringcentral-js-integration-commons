@@ -115,14 +115,14 @@ export default class Call extends RcModule {
         });
         this._callSettingMode = this._callingSettings.callingMode;
         if (this._callSettingMode === callingModes.webphone && this._webphone) {
-          await this._webphone.disconnect();
+          this._webphone.disconnect();
         }
       } else if (this.ready) {
         const oldCallSettingMode = this._callSettingMode;
         if (this._callingSettings.callingMode !== oldCallSettingMode && this._webphone) {
           this._callSettingMode = this._callingSettings.callingMode;
           if (oldCallSettingMode === callingModes.webphone) {
-            await this._webphone.disconnect();
+            this._webphone.disconnect();
           } else if (this._callSettingMode === callingModes.webphone) {
             await this._webphone.connect(this.fromNumbers);
           }

@@ -80,9 +80,7 @@ export default class Webphone extends RcModule {
       document.body.appendChild(this._remoteVideo);
       document.body.appendChild(this._localVideo);
       window.onbeforeunload = () => {
-        this.disconnect().then(() => {
-          console.log('closed webrtc');
-        });
+        this.disconnect();
       };
       this.store.dispatch({
         type: this.actionTypes.init,
@@ -173,6 +171,7 @@ export default class Webphone extends RcModule {
         error,
       });
       this._webphone.userAgent.removeAllListeners();
+      this._webphone = null;
       this._connect(true);
     };
     this._webphone.userAgent.audioHelper.setVolume(0.3);
@@ -261,7 +260,7 @@ export default class Webphone extends RcModule {
     }
   }
 
-  async disconnect() {
+  disconnect() {
     if (
       this.connectionStatus === connectionStatus.connected ||
       this.connectionStatus === connectionStatus.connecting ||

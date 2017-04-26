@@ -49,9 +49,12 @@ export function getConnectRetryCountsReducer(types) {
 export function getWebphoneCountsReducer(types) {
   return (state = 0, { type }) => {
     switch (type) {
+      case types.reconnect:
       case types.connect:
         return state + 1;
+      case types.connectError:
       case types.disconnect:
+      case types.registrationFailed:
         return state - 1;
       default:
         return state;
