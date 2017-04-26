@@ -89,9 +89,12 @@ function getWebphoneCountsReducer(types) {
     var type = _ref4.type;
 
     switch (type) {
+      case types.reconnect:
       case types.connect:
         return state + 1;
+      case types.connectError:
       case types.disconnect:
+      case types.registrationFailed:
         return state - 1;
       default:
         return state;
