@@ -585,6 +585,7 @@ var Webphone = function (_RcModule) {
     value: function _onInvite(session) {
       var _this6 = this;
 
+      session.creationTime = Date.now();
       session.direction = _callDirections2.default.inbound;
       session.callStatus = _sessionStatus2.default.connecting;
       if (!this._activeSession) {
@@ -1157,6 +1158,7 @@ var Webphone = function (_RcModule) {
       });
       session.direction = _callDirections2.default.outbound;
       session.callStatus = _sessionStatus2.default.connecting;
+      session.creationTime = Date.now();
       this._onAccepted(session);
       if (this._activeSession && !this._activeSession.isOnHold().local) {
         this._activeSession.hold();

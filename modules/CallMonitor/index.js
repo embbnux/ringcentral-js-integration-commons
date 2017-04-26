@@ -215,7 +215,6 @@ var CallMonitor = function (_RcModule) {
           countryCode: countryCode
         });
         var webphoneSession = void 0;
-        var wephoneStartTime = void 0;
         if (sessions && call.sipData) {
           webphoneSession = sessions.find(function (session) {
             if (session.direction !== call.direction) {
@@ -230,7 +229,8 @@ var CallMonitor = function (_RcModule) {
             if (call.sipData.remoteUri.indexOf(remoteUser) === -1) {
               return false;
             }
-            if (call.startTime - session.startTime > 4000 || session.startTime - call.startTime > 4000) {
+            var startTime = session.startTime || session.creationTime;
+            if (call.startTime - startTime > 4000 || session.startTime - startTime > 4000) {
               return false;
             }
             return true;
