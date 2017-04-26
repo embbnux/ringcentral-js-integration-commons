@@ -298,7 +298,7 @@ var Call = function (_RcModule) {
                 }
 
                 _context2.next = 26;
-                return _this3._webphone.connect(_this3.fromNumbers);
+                return _this3._webphone.connect(_this3._callingSettings.fromNumbers.length > 0);
 
               case 26:
               case 'end':
