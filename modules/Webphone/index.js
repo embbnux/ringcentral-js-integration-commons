@@ -1163,6 +1163,7 @@ var Webphone = function (_RcModule) {
       }
       this._addSession(session);
       this._setActiveSession(session);
+      this._resetMinimized();
       return session;
     }
   }, {
