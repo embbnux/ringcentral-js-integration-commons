@@ -11,7 +11,11 @@ import actionTypes from './actionTypes';
 import callDirections from '../../enums/callDirections';
 import webphoneErrors from './webphoneErrors';
 
-import { isBrowerSupport } from './webphoneHelper';
+import {
+  isBrowerSupport,
+  patchUserAgent,
+  patchIncomingSession,
+} from './webphoneHelper';
 import getWebphoneReducer, { getWebphoneCountsReducer } from './getWebphoneReducer';
 
 const FIRST_THREE_RETRIES_DELAY = 10 * 1000;
@@ -182,6 +186,7 @@ export default class Webphone extends RcModule {
       console.log('UA invite');
       this._onInvite(session);
     });
+    patchUserAgent(this._webphone.userAgent);
   }
 
   async _connect(reconnect = false) {
@@ -352,7 +357,7 @@ export default class Webphone extends RcModule {
         session,
       });
     }
-
+    patchIncomingSession(session);
     this._addSession(session);
     session.on('rejected', () => {
       console.log('Event: Rejected');
@@ -576,7 +581,11 @@ export default class Webphone extends RcModule {
     if (!session) {
       return;
     }
-    session.dtmf(dtmfValue);
+    try {
+      session.dtmf(dtmfValue);
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   hangup(sessionId) {
