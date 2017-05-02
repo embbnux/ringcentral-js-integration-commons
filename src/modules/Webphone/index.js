@@ -389,11 +389,9 @@ export default class Webphone extends RcModule {
   }
 
   reject(sessionId) {
-    const session = this._sessions.get(sessionId);
-    if (!session) {
-      return;
-    }
-    session.reject();
+    this._sessionHandleWithId(sessionId, (session) => {
+      session.reject();
+    });
   }
 
   resume(sessionId) {
@@ -415,52 +413,42 @@ export default class Webphone extends RcModule {
   }
 
   increaseVolume(sessionId) {
-    const session = this._sessions.get(sessionId);
-    if (!session) {
-      return;
-    }
-    session.ua.audioHelper.setVolume(
-      (session.ua.audioHelper.volume != null ? session.ua.audioHelper.volume : 0.5) + 0.1
-    );
+    this._sessionHandleWithId(sessionId, (session) => {
+      session.ua.audioHelper.setVolume(
+        (session.ua.audioHelper.volume != null ? session.ua.audioHelper.volume : 0.5) + 0.1
+      );
+    });
   }
 
   decreaseVolume(sessionId) {
-    const session = this._sessions.get(sessionId);
-    if (!session) {
-      return;
-    }
-    session.ua.audioHelper.setVolume(
-      (session.ua.audioHelper.volume != null ? session.ua.audioHelper.volume : 0.5) - 0.1
-    );
+    this._sessionHandleWithId(sessionId, (session) => {
+      session.ua.audioHelper.setVolume(
+        (session.ua.audioHelper.volume != null ? session.ua.audioHelper.volume : 0.5) - 0.1
+      );
+    });
   }
 
   mute(sessionId) {
-    const session = this._sessions.get(sessionId);
-    if (!session) {
-      return;
-    }
-    session.isOnMute = true;
-    session.mute();
-    this._updateCurrentSessionAndSessions(session);
+    this._sessionHandleWithId(sessionId, (session) => {
+      session.isOnMute = true;
+      session.mute();
+      this._updateCurrentSessionAndSessions(session);
+    });
   }
 
   unmute(sessionId) {
-    const session = this._sessions.get(sessionId);
-    if (!session) {
-      return;
-    }
-    session.isOnMute = false;
-    session.unmute();
-    this._updateCurrentSessionAndSessions(session);
+    this._sessionHandleWithId(sessionId, (session) => {
+      session.isOnMute = false;
+      session.unmute();
+      this._updateCurrentSessionAndSessions(session);
+    });
   }
 
   hold(sessionId) {
-    const session = this._sessions.get(sessionId);
-    if (!session) {
-      return;
-    }
-    session.hold();
-    this._updateCurrentSessionAndSessions(session);
+    this._sessionHandleWithId(sessionId, (session) => {
+      session.hold();
+      this._updateCurrentSessionAndSessions(session);
+    });
   }
 
   unhold(sessionId) {
@@ -577,28 +565,54 @@ export default class Webphone extends RcModule {
   }
 
   sendDTMF(dtmfValue, sessionId) {
-    const session = this._sessions.get(sessionId);
-    if (!session) {
-      return;
-    }
-    try {
-      session.dtmf(dtmfValue);
-    } catch (e) {
-      console.error(e);
-    }
+    this._sessionHandleWithId(sessionId, (session) => {
+      try {
+        session.dtmf(dtmfValue);
+      } catch (e) {
+        console.error(e);
+      }
+    });
   }
 
   hangup(sessionId) {
+    this._sessionHandleWithId(sessionId, (session) => {
+      try {
+        session.terminate();
+      } catch (e) {
+        console.error(e);
+        this._removeSession(session);
+      }
+    });
+  }
+
+  toVoiceMail(sessionId) {
+    this._sessionHandleWithId(sessionId, (session) => {
+      try {
+        session.toVoiceMail();
+      } catch (e) {
+        console.error(e);
+        this._removeSession(session);
+      }
+    });
+  }
+
+  replyWithMessage(sessionId, replyOptions) {
+    this._sessionHandleWithId(sessionId, (session) => {
+      try {
+        session.replyWithMessage(replyOptions);
+      } catch (e) {
+        console.error(e);
+        this._removeSession(session);
+      }
+    });
+  }
+
+  _sessionHandleWithId(sessionId, func) {
     const session = this._sessions.get(sessionId);
     if (!session) {
-      return;
+      return null;
     }
-    try {
-      session.terminate();
-    } catch (e) {
-      console.log(e);
-      this._removeSession(session);
-    }
+    return func(session);
   }
 
   makeCall({ toNumber, fromNumber, homeCountryId }) {
