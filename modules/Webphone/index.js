@@ -642,11 +642,9 @@ var Webphone = function (_RcModule) {
   }, {
     key: 'reject',
     value: function reject(sessionId) {
-      var session = this._sessions.get(sessionId);
-      if (!session) {
-        return;
-      }
-      session.reject();
+      this._sessionHandleWithId(sessionId, function (session) {
+        session.reject();
+      });
     }
   }, {
     key: 'resume',
@@ -705,52 +703,48 @@ var Webphone = function (_RcModule) {
   }, {
     key: 'increaseVolume',
     value: function increaseVolume(sessionId) {
-      var session = this._sessions.get(sessionId);
-      if (!session) {
-        return;
-      }
-      session.ua.audioHelper.setVolume((session.ua.audioHelper.volume != null ? session.ua.audioHelper.volume : 0.5) + 0.1);
+      this._sessionHandleWithId(sessionId, function (session) {
+        session.ua.audioHelper.setVolume((session.ua.audioHelper.volume != null ? session.ua.audioHelper.volume : 0.5) + 0.1);
+      });
     }
   }, {
     key: 'decreaseVolume',
     value: function decreaseVolume(sessionId) {
-      var session = this._sessions.get(sessionId);
-      if (!session) {
-        return;
-      }
-      session.ua.audioHelper.setVolume((session.ua.audioHelper.volume != null ? session.ua.audioHelper.volume : 0.5) - 0.1);
+      this._sessionHandleWithId(sessionId, function (session) {
+        session.ua.audioHelper.setVolume((session.ua.audioHelper.volume != null ? session.ua.audioHelper.volume : 0.5) - 0.1);
+      });
     }
   }, {
     key: 'mute',
     value: function mute(sessionId) {
-      var session = this._sessions.get(sessionId);
-      if (!session) {
-        return;
-      }
-      session.isOnMute = true;
-      session.mute();
-      this._updateCurrentSessionAndSessions(session);
+      var _this7 = this;
+
+      this._sessionHandleWithId(sessionId, function (session) {
+        session.isOnMute = true;
+        session.mute();
+        _this7._updateCurrentSessionAndSessions(session);
+      });
     }
   }, {
     key: 'unmute',
     value: function unmute(sessionId) {
-      var session = this._sessions.get(sessionId);
-      if (!session) {
-        return;
-      }
-      session.isOnMute = false;
-      session.unmute();
-      this._updateCurrentSessionAndSessions(session);
+      var _this8 = this;
+
+      this._sessionHandleWithId(sessionId, function (session) {
+        session.isOnMute = false;
+        session.unmute();
+        _this8._updateCurrentSessionAndSessions(session);
+      });
     }
   }, {
     key: 'hold',
     value: function hold(sessionId) {
-      var session = this._sessions.get(sessionId);
-      if (!session) {
-        return;
-      }
-      session.hold();
-      this._updateCurrentSessionAndSessions(session);
+      var _this9 = this;
+
+      this._sessionHandleWithId(sessionId, function (session) {
+        session.hold();
+        _this9._updateCurrentSessionAndSessions(session);
+      });
     }
   }, {
     key: 'unhold',
@@ -978,7 +972,7 @@ var Webphone = function (_RcModule) {
     key: 'transferWarm',
     value: function () {
       var _ref11 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee11(transferNumber, sessionId) {
-        var _this7 = this;
+        var _this10 = this;
 
         var session, newSession;
         return _regenerator2.default.wrap(function _callee11$(_context11) {
@@ -1029,7 +1023,7 @@ var Webphone = function (_RcModule) {
                           return _context10.stop();
                       }
                     }
-                  }, _callee10, _this7, [[0, 6]]);
+                  }, _callee10, _this10, [[0, 6]]);
                 })));
                 _context11.next = 13;
                 break;
@@ -1105,29 +1099,64 @@ var Webphone = function (_RcModule) {
   }, {
     key: 'sendDTMF',
     value: function sendDTMF(dtmfValue, sessionId) {
-      var session = this._sessions.get(sessionId);
-      if (!session) {
-        return;
-      }
-      try {
-        session.dtmf(dtmfValue);
-      } catch (e) {
-        console.error(e);
-      }
+      this._sessionHandleWithId(sessionId, function (session) {
+        try {
+          session.dtmf(dtmfValue);
+        } catch (e) {
+          console.error(e);
+        }
+      });
     }
   }, {
     key: 'hangup',
     value: function hangup(sessionId) {
+      var _this11 = this;
+
+      this._sessionHandleWithId(sessionId, function (session) {
+        try {
+          session.terminate();
+        } catch (e) {
+          console.error(e);
+          _this11._removeSession(session);
+        }
+      });
+    }
+  }, {
+    key: 'toVoiceMail',
+    value: function toVoiceMail(sessionId) {
+      var _this12 = this;
+
+      this._sessionHandleWithId(sessionId, function (session) {
+        try {
+          session.toVoiceMail();
+        } catch (e) {
+          console.error(e);
+          _this12._removeSession(session);
+        }
+      });
+    }
+  }, {
+    key: 'replyWithMessage',
+    value: function replyWithMessage(sessionId, replyOptions) {
+      var _this13 = this;
+
+      this._sessionHandleWithId(sessionId, function (session) {
+        try {
+          session.replyWithMessage(replyOptions);
+        } catch (e) {
+          console.error(e);
+          _this13._removeSession(session);
+        }
+      });
+    }
+  }, {
+    key: '_sessionHandleWithId',
+    value: function _sessionHandleWithId(sessionId, func) {
       var session = this._sessions.get(sessionId);
       if (!session) {
-        return;
+        return null;
       }
-      try {
-        session.terminate();
-      } catch (e) {
-        console.log(e);
-        this._removeSession(session);
-      }
+      return func(session);
     }
   }, {
     key: 'makeCall',
