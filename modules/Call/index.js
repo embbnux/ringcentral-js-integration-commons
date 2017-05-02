@@ -88,10 +88,9 @@ var Call = function (_RcModule) {
         softphone = _ref.softphone,
         ringout = _ref.ringout,
         webphone = _ref.webphone,
-        extensionPhoneNumber = _ref.extensionPhoneNumber,
         numberValidate = _ref.numberValidate,
         regionSettings = _ref.regionSettings,
-        options = (0, _objectWithoutProperties3.default)(_ref, ['alert', 'client', 'storage', 'callingSettings', 'softphone', 'ringout', 'webphone', 'extensionPhoneNumber', 'numberValidate', 'regionSettings']);
+        options = (0, _objectWithoutProperties3.default)(_ref, ['alert', 'client', 'storage', 'callingSettings', 'softphone', 'ringout', 'webphone', 'numberValidate', 'regionSettings']);
     (0, _classCallCheck3.default)(this, Call);
 
     var _this = (0, _possibleConstructorReturn3.default)(this, (Call.__proto__ || (0, _getPrototypeOf2.default)(Call)).call(this, (0, _extends3.default)({}, options, {
@@ -203,7 +202,6 @@ var Call = function (_RcModule) {
     _this._softphone = softphone;
     _this._webphone = webphone;
     _this._numberValidate = numberValidate;
-    _this._extensionPhoneNumber = extensionPhoneNumber;
     _this._regionSettings = regionSettings;
     _this._callSettingMode = null;
 
@@ -225,7 +223,7 @@ var Call = function (_RcModule) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                if (!(_this3._numberValidate.ready && _this3._callingSettings.ready && _this3._storage.ready && _this3._extensionPhoneNumber.ready && _this3._regionSettings.ready && (!_this3._webphone || _this3._webphone.ready) && _this3._ringout.ready && _this3._softphone.ready && _this3.status === _moduleStatuses2.default.pending)) {
+                if (!(_this3._numberValidate.ready && _this3._callingSettings.ready && _this3._storage.ready && _this3._regionSettings.ready && (!_this3._webphone || _this3._webphone.ready) && _this3._ringout.ready && _this3._softphone.ready && _this3.status === _moduleStatuses2.default.pending)) {
                   _context2.next = 9;
                   break;
                 }
@@ -252,7 +250,7 @@ var Call = function (_RcModule) {
                 break;
 
               case 9:
-                if (!((!_this3._numberValidate.ready || !_this3._callingSettings.ready || !_this3._extensionPhoneNumber.ready || !_this3._regionSettings.ready || !!_this3._webphone && !_this3._webphone.ready || !_this3._ringout.ready || !_this3._softphone.ready || !_this3._storage.ready) && _this3.ready)) {
+                if (!((!_this3._numberValidate.ready || !_this3._callingSettings.ready || !_this3._regionSettings.ready || !!_this3._webphone && !_this3._webphone.ready || !_this3._ringout.ready || !_this3._softphone.ready || !_this3._storage.ready) && _this3.ready)) {
                   _context2.next = 15;
                   break;
                 }

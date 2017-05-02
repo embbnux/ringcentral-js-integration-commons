@@ -295,6 +295,7 @@ var Webphone = function (_RcModule) {
         console.log('UA invite');
         _this3._onInvite(session);
       });
+      (0, _webphoneHelper.patchUserAgent)(this._webphone.userAgent);
     }
   }, {
     key: '_connect',
@@ -575,7 +576,7 @@ var Webphone = function (_RcModule) {
           session: session
         });
       }
-
+      (0, _webphoneHelper.patchIncomingSession)(session);
       this._addSession(session);
       session.on('rejected', function () {
         console.log('Event: Rejected');
@@ -1108,7 +1109,11 @@ var Webphone = function (_RcModule) {
       if (!session) {
         return;
       }
-      session.dtmf(dtmfValue);
+      try {
+        session.dtmf(dtmfValue);
+      } catch (e) {
+        console.error(e);
+      }
     }
   }, {
     key: 'hangup',
