@@ -55,10 +55,6 @@ var _actionTypes = require('./actionTypes');
 
 var _actionTypes2 = _interopRequireDefault(_actionTypes);
 
-var _callDirections = require('../../enums/callDirections');
-
-var _callDirections2 = _interopRequireDefault(_callDirections);
-
 var _getCallMonitorReducer = require('./getCallMonitorReducer');
 
 var _getCallMonitorReducer2 = _interopRequireDefault(_getCallMonitorReducer);
@@ -86,12 +82,11 @@ var CallMonitor = function (_RcModule) {
         activeCalls = _ref.activeCalls,
         activityMatcher = _ref.activityMatcher,
         contactMatcher = _ref.contactMatcher,
-        webphone = _ref.webphone,
         onRinging = _ref.onRinging,
         onNewCall = _ref.onNewCall,
         onCallUpdated = _ref.onCallUpdated,
         onCallEnded = _ref.onCallEnded,
-        options = (0, _objectWithoutProperties3.default)(_ref, ['accountInfo', 'detailedPresence', 'activeCalls', 'activityMatcher', 'contactMatcher', 'webphone', 'onRinging', 'onNewCall', 'onCallUpdated', 'onCallEnded']);
+        options = (0, _objectWithoutProperties3.default)(_ref, ['accountInfo', 'detailedPresence', 'activeCalls', 'activityMatcher', 'contactMatcher', 'onRinging', 'onNewCall', 'onCallUpdated', 'onCallEnded']);
     (0, _classCallCheck3.default)(this, CallMonitor);
 
     var _this = (0, _possibleConstructorReturn3.default)(this, (CallMonitor.__proto__ || (0, _getPrototypeOf2.default)(CallMonitor)).call(this, (0, _extends3.default)({}, options, {
@@ -184,7 +179,6 @@ var CallMonitor = function (_RcModule) {
     _this._activeCalls = _ensureExist2.default.call(_this, activeCalls, 'activeCalls');
     _this._contactMatcher = contactMatcher;
     _this._activityMatcher = activityMatcher;
-    _this._webphone = webphone;
     _this._onRinging = onRinging;
     _this._onNewCall = onNewCall;
     _this._onCallUpdated = onCallUpdated;
@@ -197,9 +191,7 @@ var CallMonitor = function (_RcModule) {
       return _this._activeCalls.calls;
     }, function () {
       return _this._accountInfo.countryCode;
-    }, function () {
-      return _this._webphone && _this._webphone.sessions;
-    }, function (callsFromPresence, callsFromActiveCalls, countryCode, sessions) {
+    }, function (callsFromPresence, callsFromActiveCalls, countryCode) {
       return callsFromPresence.map(function (call) {
         var activeCall = call.inboundLeg && callsFromActiveCalls.find(function (item) {
           return item.sessionId === call.inboundLeg.sessionId;
@@ -214,28 +206,6 @@ var CallMonitor = function (_RcModule) {
           phoneNumber: call.to && call.to.phoneNumber,
           countryCode: countryCode
         });
-        var webphoneSession = void 0;
-        if (sessions && call.sipData) {
-          webphoneSession = sessions.find(function (session) {
-            if (session.direction !== call.direction) {
-              return false;
-            }
-            var remoteUser = void 0;
-            if (session.direction === _callDirections2.default.outbound) {
-              remoteUser = session.to;
-            } else {
-              remoteUser = session.from;
-            }
-            if (call.sipData.remoteUri.indexOf(remoteUser) === -1) {
-              return false;
-            }
-            var startTime = session.startTime || session.creationTime;
-            if (call.startTime - startTime > 4000 || session.startTime - startTime > 4000) {
-              return false;
-            }
-            return true;
-          });
-        }
 
         return (0, _extends3.default)({}, call, {
           from: (0, _extends3.default)({}, activeCall && activeCall.to || {}, {
@@ -244,17 +214,8 @@ var CallMonitor = function (_RcModule) {
           to: (0, _extends3.default)({}, activeCall && activeCall.from || {}, {
             phoneNumber: toNumber
           }),
-          startTime: webphoneSession && webphoneSession.startTime || activeCall && activeCall.startTime || call.startTime,
-          webphoneSession: webphoneSession
+          startTime: activeCall && activeCall.startTime || call.startTime
         });
-      }).filter(function (call) {
-        if (!call.webphoneSession || !sessions) {
-          return true;
-        }
-        var session = sessions.find(function (sessionItem) {
-          return call.webphoneSession.id === sessionItem.id;
-        });
-        return !!session;
       });
     });
     _this.addSelector('calls', _this._selectors.normalizedCalls, function () {
@@ -329,6 +290,11 @@ var CallMonitor = function (_RcModule) {
     key: 'initialize',
     value: function initialize() {
       this.store.subscribe(this._onStateChange);
+    }
+  }, {
+    key: 'hasRingingCalls',
+    get: function get() {
+      return (0, _callLogHelpers.hasRingingCalls)(this.calls);
     }
   }, {
     key: 'status',
