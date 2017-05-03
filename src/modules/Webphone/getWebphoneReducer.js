@@ -85,7 +85,7 @@ export function getSessionsReducer(types) {
         });
         return newSessions;
       case types.destroySessions:
-        return null;
+        return [];
       default:
         return state;
     }
