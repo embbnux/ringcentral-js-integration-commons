@@ -196,7 +196,9 @@ describe('Messages Unit Test', () => {
 
   describe('_reloadMessages', () => {
     it('should call _updateMessages and update state when current page is one', () => {
-      sinon.stub(messages, 'allMessages', { get: () => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] });
+      messages._messageStore = {
+        conversations: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+      };
       messages._perPage = 10;
       sinon.stub(messages, 'currentPage', { get: () => 1 });
       sinon.stub(messages, '_updateMessages');
@@ -205,7 +207,9 @@ describe('Messages Unit Test', () => {
     });
 
     it('should call _updateMessages and update state when current page is two', () => {
-      sinon.stub(messages, 'allMessages', { get: () => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] });
+      messages._messageStore = {
+        conversations: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+      };
       messages._perPage = 10;
       sinon.stub(messages, 'currentPage', { get: () => 2 });
       sinon.stub(messages, '_updateMessages');
@@ -214,7 +218,9 @@ describe('Messages Unit Test', () => {
     });
 
     it('should call _updateMessages and update state when messageStore.message is empty', () => {
-      sinon.stub(messages, 'allMessages', { get: () => [] });
+      messages._messageStore = {
+        conversations: [],
+      };
       messages._perPage = 10;
       sinon.stub(messages, 'currentPage', { get: () => 1 });
       sinon.stub(messages, '_updateMessages');
@@ -279,47 +285,55 @@ describe('Messages Unit Test', () => {
 
   describe('_getCurrnetPageMessages', () => {
     it('should get empty when messageStore.messages is empty and page is one', () => {
-      sinon.stub(messages, 'allMessages', { get: () => [] });
+      messages._messageStore = {
+        conversations: [],
+      };
       messages._perPage = 10;
       const result = messages._getCurrnetPageMessages(1);
       expect(result).to.deep.equal([]);
     });
 
     it('should get empty when messageStore.messages is empty and page is two', () => {
-      sinon.stub(messages, 'allMessages', { get: () => [] });
+      messages._messageStore = {
+        conversations: [],
+      };
       messages._perPage = 10;
       const result = messages._getCurrnetPageMessages(2);
       expect(result).to.deep.equal([]);
     });
 
     it('should get all messages when page is one and messageStore.message length is less then perPage', () => {
-      sinon.stub(messages, 'allMessages', { get: () => [1, 2, 3, 4, 5, 6, 7, 8, 9] });
+      messages._messageStore = {
+        conversations: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      };
       messages._perPage = 10;
       const result = messages._getCurrnetPageMessages(1);
       expect(result).to.deep.equal([9, 8, 7, 6, 5, 4, 3, 2, 1]);
     });
 
-    it(`should get messages with perPage length
-        when page is one and messageStore.message length is more then perPage`, () => {
-      sinon.stub(messages, 'allMessages', { get: () => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] });
+    it('should get messages with perPage length when page is one and messageStore.message length is more then perPage', () => {
+      messages._messageStore = {
+        conversations: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+      };
       messages._perPage = 10;
       const result = messages._getCurrnetPageMessages(1);
       expect(result).to.deep.equal([11, 10, 9, 8, 7, 6, 5, 4, 3, 2]);
     });
 
-    it(`should get messages in currentPage
-        when page is two and messageStore.message length is less then twice perPage`, () => {
-      sinon.stub(messages, 'allMessages', { get: () => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] });
+    it('should get messages in currentPage when page is two and messageStore.message length is less then twice perPage', () => {
+      messages._messageStore = {
+        conversations: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+      };
       messages._perPage = 10;
       const result = messages._getCurrnetPageMessages(2);
       expect(result).to.deep.equal([1]);
     });
 
-    it(`should get messages in currentPage
-        when page is two and messageStore.message length is less then twice perPage`, () => {
-      sinon.stub(messages, 'allMessages', {
-        get: () => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
-      });
+    it('should get messages in currentPage when page is two and messageStore.message length is less then twice perPage', () => {
+      messages._messageStore = {
+        updatedTimestamp: 1486954544923,
+        conversations: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
+      };
       messages._perPage = 10;
       const result = messages._getCurrnetPageMessages(2);
       expect(result).to.deep.equal([11, 10, 9, 8, 7, 6, 5, 4, 3, 2]);

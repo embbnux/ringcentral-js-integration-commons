@@ -1,6 +1,5 @@
 import RcModule from '../../lib/RcModule';
 import moduleStatuses from '../../enums/moduleStatuses';
-import * as messageHelper from '../../lib/messageHelper';
 
 import actionTypes from './actionTypes';
 import getMessagesReducer from './getMessagesReducer';
@@ -53,11 +52,6 @@ export default class Messages extends RcModule {
         });
         return output;
       },
-    );
-
-    this.addSelector('allMessages',
-      () => this._messageStore.conversations,
-      messages => messages.filter(message => messageHelper.messageIsTextMessage(message))
     );
 
     if (this._contactMatcher) {
@@ -130,7 +124,7 @@ export default class Messages extends RcModule {
 
   _reloadMessages() {
     const page = this.currentPage;
-    const allMessages = this.allMessages;
+    const allMessages = this._messageStore.conversations;
     let bottomIndex = allMessages.length - (this._perPage * page);
     if (bottomIndex < 0) {
       bottomIndex = 0;
@@ -158,7 +152,7 @@ export default class Messages extends RcModule {
   }
 
   _getCurrnetPageMessages(page) {
-    const allMessages = this.allMessages;
+    const allMessages = this._messageStore.conversations;
     const maxIndex = allMessages.length - 1;
     if (maxIndex < 0) {
       return [];
@@ -223,16 +217,13 @@ export default class Messages extends RcModule {
     return this.state.messages;
   }
 
-  get allMessages() {
-    return this._selectors.allMessages();
-  }
-
   get currentPage() {
     return this.state.currentPage;
   }
 
   get loading() {
-    return this.messages.length < this.allMessages.length;
+    const allMessages = this._messageStore.conversations;
+    return this.messages.length < allMessages.length;
   }
 
   get lastUpdatedAt() {

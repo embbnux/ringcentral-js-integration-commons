@@ -73,6 +73,34 @@ describe('messageIsTextMessage', () => {
   });
 });
 
+describe('messageIsFax', () => {
+  it('should return true when message type is Fax', () => {
+    const message = { type: 'Fax', availability: 'Alive' };
+    const result = messageHelper.messageIsFax(message);
+    expect(result).to.equal(true);
+  });
+
+  it('should return false when message type is SMS', () => {
+    const message = { type: 'SMS', availability: 'Alive' };
+    const result = messageHelper.messageIsFax(message);
+    expect(result).to.equal(false);
+  });
+});
+
+describe('messageIsVoicemail', () => {
+  it('should return true when message type is VoiceMail', () => {
+    const message = { type: 'VoiceMail', availability: 'Alive' };
+    const result = messageHelper.messageIsVoicemail(message);
+    expect(result).to.equal(true);
+  });
+
+  it('should return false when message type is SMS', () => {
+    const message = { type: 'SMS', availability: 'Alive' };
+    const result = messageHelper.messageIsVoicemail(message);
+    expect(result).to.equal(false);
+  });
+});
+
 describe('messageIsAcceptable', () => {
   it('should return true when message type is SMS and Alive', () => {
     const message = { type: 'SMS', availability: 'Alive' };

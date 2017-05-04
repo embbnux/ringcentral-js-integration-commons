@@ -15,6 +15,14 @@ export function messageIsTextMessage(message) {
   return (message.type !== 'Fax' && message.type !== 'VoiceMail');
 }
 
+export function messageIsFax(message) {
+  return (message.type === 'Fax');
+}
+
+export function messageIsVoicemail(message) {
+  return (message.type === 'VoiceMail');
+}
+
 export function messageIsAcceptable(message) {
   // do not show outbound faxes
   // do not show deleted messages
