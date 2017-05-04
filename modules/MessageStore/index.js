@@ -359,41 +359,22 @@ var MessageStore = function (_RcModule) {
     key: '_updateMessagesFromSync',
     value: function () {
       var _ref6 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee4() {
-        var response, oldSyncToken, params, _processResponseData, records, syncTimestamp, syncToken;
+        var response, _processResponseData, records, syncTimestamp, syncToken;
 
         return _regenerator2.default.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
-                response = void 0;
-
                 this.store.dispatch({
                   type: this.actionTypes.sync
                 });
-                oldSyncToken = this.syncToken;
-                params = messageStoreHelper.getMessageSyncParams({ syncToken: oldSyncToken });
+                _context4.next = 3;
+                return this._recursiveFSync({
+                  syncToken: this.syncToken
+                });
 
-                if (oldSyncToken) {
-                  _context4.next = 10;
-                  break;
-                }
-
-                _context4.next = 7;
-                return this._recursiveFSync((0, _extends3.default)({}, params));
-
-              case 7:
+              case 3:
                 response = _context4.sent;
-                _context4.next = 13;
-                break;
-
-              case 10:
-                _context4.next = 12;
-                return this._messageSyncApi(params);
-
-              case 12:
-                response = _context4.sent;
-
-              case 13:
                 _processResponseData = processResponseData(response), records = _processResponseData.records, syncTimestamp = _processResponseData.syncTimestamp, syncToken = _processResponseData.syncToken;
 
                 this.store.dispatch({
@@ -403,7 +384,7 @@ var MessageStore = function (_RcModule) {
                   syncToken: syncToken
                 });
 
-              case 15:
+              case 6:
               case 'end':
                 return _context4.stop();
             }
