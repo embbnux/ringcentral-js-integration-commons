@@ -3,6 +3,7 @@ import moduleStatuses from '../../enums/moduleStatuses';
 
 import { batchPutApi } from '../../lib/batchApiHelper';
 
+import * as messageHelper from '../../lib/messageHelper';
 import * as messageStoreHelper from './messageStoreHelper';
 
 import actionTypes from './actionTypes';
@@ -52,8 +53,15 @@ export default class MessageStore extends RcModule {
     this.addSelector(
       'unreadCounts',
       () => this.conversations,
-      conversations =>
-        conversations.reduce((pre, cur) => (pre + cur.unreadCounts), 0),
+      (conversations) => {
+        let unreadCounts = 0;
+        conversations.forEach((conversation) => {
+          if (messageHelper.messageIsTextMessage(conversation)) {
+            unreadCounts += conversation.unreadCounts;
+          }
+        });
+        return unreadCounts;
+      }
     );
 
     this.syncConversation = this.syncConversation.bind(this);
