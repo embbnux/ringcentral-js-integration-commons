@@ -41,10 +41,6 @@ var _moduleStatuses = require('../../enums/moduleStatuses');
 
 var _moduleStatuses2 = _interopRequireDefault(_moduleStatuses);
 
-var _messageHelper = require('../../lib/messageHelper');
-
-var messageHelper = _interopRequireWildcard(_messageHelper);
-
 var _actionTypes = require('./actionTypes');
 
 var _actionTypes2 = _interopRequireDefault(_actionTypes);
@@ -52,8 +48,6 @@ var _actionTypes2 = _interopRequireDefault(_actionTypes);
 var _getMessagesReducer = require('./getMessagesReducer');
 
 var _getMessagesReducer2 = _interopRequireDefault(_getMessagesReducer);
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -108,14 +102,6 @@ var Messages = function (_RcModule) {
         }
       });
       return output;
-    });
-
-    _this.addSelector('allMessages', function () {
-      return _this._messageStore.conversations;
-    }, function (messages) {
-      return messages.filter(function (message) {
-        return messageHelper.messageIsTextMessage(message);
-      });
     });
 
     if (_this._contactMatcher) {
@@ -193,7 +179,7 @@ var Messages = function (_RcModule) {
     key: '_reloadMessages',
     value: function _reloadMessages() {
       var page = this.currentPage;
-      var allMessages = this.allMessages;
+      var allMessages = this._messageStore.conversations;
       var bottomIndex = allMessages.length - this._perPage * page;
       if (bottomIndex < 0) {
         bottomIndex = 0;
@@ -224,7 +210,7 @@ var Messages = function (_RcModule) {
   }, {
     key: '_getCurrnetPageMessages',
     value: function _getCurrnetPageMessages(page) {
-      var allMessages = this.allMessages;
+      var allMessages = this._messageStore.conversations;
       var maxIndex = allMessages.length - 1;
       if (maxIndex < 0) {
         return [];
@@ -296,11 +282,6 @@ var Messages = function (_RcModule) {
       return this.state.messages;
     }
   }, {
-    key: 'allMessages',
-    get: function get() {
-      return this._selectors.allMessages();
-    }
-  }, {
     key: 'currentPage',
     get: function get() {
       return this.state.currentPage;
@@ -308,7 +289,8 @@ var Messages = function (_RcModule) {
   }, {
     key: 'loading',
     get: function get() {
-      return this.messages.length < this.allMessages.length;
+      var allMessages = this._messageStore.conversations;
+      return this.messages.length < allMessages.length;
     }
   }, {
     key: 'lastUpdatedAt',

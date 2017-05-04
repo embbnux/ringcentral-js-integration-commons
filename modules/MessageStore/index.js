@@ -129,7 +129,7 @@ var MessageStore = function (_RcModule) {
     });
 
     _this.addSelector('unreadCounts', function () {
-      return _this.conversations;
+      return _this.allConversations;
     }, function (conversations) {
       var unreadCounts = 0;
       conversations.forEach(function (conversation) {
@@ -138,6 +138,30 @@ var MessageStore = function (_RcModule) {
         }
       });
       return unreadCounts;
+    });
+
+    _this.addSelector('textConversations', function () {
+      return _this.allConversations;
+    }, function (conversations) {
+      return conversations.filter(function (conversation) {
+        return messageHelper.messageIsTextMessage(conversation);
+      });
+    });
+
+    _this.addSelector('faxMessages', function () {
+      return _this.allConversations;
+    }, function (conversations) {
+      return conversations.filter(function (conversation) {
+        return messageHelper.messageIsFax(conversation);
+      });
+    });
+
+    _this.addSelector('voicemailMessages', function () {
+      return _this.allConversations;
+    }, function (conversations) {
+      return conversations.filter(function (conversation) {
+        return messageHelper.messageIsVoicemail(conversation);
+      });
     });
 
     _this.syncConversation = _this.syncConversation.bind(_this);
@@ -898,9 +922,24 @@ var MessageStore = function (_RcModule) {
       return this.cache.data.messages;
     }
   }, {
-    key: 'conversations',
+    key: 'allConversations',
     get: function get() {
       return this.cache.data.conversations;
+    }
+  }, {
+    key: 'voicemailMessages',
+    get: function get() {
+      return this._selectors.voicemailMessages();
+    }
+  }, {
+    key: 'faxMessages',
+    get: function get() {
+      return this._selectors.faxMessages();
+    }
+  }, {
+    key: 'conversations',
+    get: function get() {
+      return this._selectors.textConversations();
     }
   }, {
     key: 'conversationMap',
