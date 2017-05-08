@@ -1,4 +1,3 @@
-import 'core-js/fn/array/find';
 import RcModule from '../../lib/RcModule';
 import sleep from '../../lib/sleep';
 import moduleStatuses from '../../enums/moduleStatuses';
@@ -8,6 +7,7 @@ import actionTypes from './actionTypes';
 import getContactsReducer, {
   getSyncTokenReducer,
   getContactListReducer,
+  getSyncTimestampReducer,
 } from './getContactsReducer';
 
 const CONTACTS_PER_PAGE = 250;
@@ -45,11 +45,16 @@ export default class Contacts extends RcModule {
     this._auth = auth;
     this._promise = null;
     this._syncTokenStorageKey = 'contactsSyncToken';
+    this._syncTimestampStorageKey = 'contactsSyncTimestamp';
     this._addressBookStorageKey = 'addressBookContactsList';
     this._reducer = getContactsReducer(this.actionTypes);
     this._storage.registerReducer({
       key: this._syncTokenStorageKey,
       reducer: getSyncTokenReducer(this.actionTypes),
+    });
+    this._storage.registerReducer({
+      key: this._syncTimestampStorageKey,
+      reducer: getSyncTimestampReducer(this.actionTypes),
     });
     this._storage.registerReducer({
       key: this._addressBookStorageKey,
@@ -66,6 +71,9 @@ export default class Contacts extends RcModule {
       this.store.dispatch({
         type: this.actionTypes.init,
       });
+      if (this._shouleCleanCache()) {
+        this._cleanUp();
+      }
       this._initContacts();
     } else if (this._shouldReset()) {
       this._resetModuleStatus();
@@ -87,6 +95,13 @@ export default class Contacts extends RcModule {
         !this._auth.loggedIn
       ) &&
       this.ready
+    );
+  }
+
+  _shouleCleanCache() {
+    return (
+      this._auth.isFreshLogin ||
+      (Date.now() - this.syncTimestamp) > this._ttl
     );
   }
 
@@ -119,6 +134,7 @@ export default class Contacts extends RcModule {
             type: this.actionTypes.syncSuccess,
             records: response.records,
             syncToken: response.syncInfo.syncToken,
+            syncTime: response.syncInfo.syncTime,
           });
           this._promise = null;
         } catch (error) {
@@ -178,5 +194,9 @@ export default class Contacts extends RcModule {
 
   get personContacts() {
     return this._storage.getItem(this._addressBookStorageKey);
+  }
+
+  get syncTimestamp() {
+    return this._storage.getItem(this._syncTimestampStorageKey);
   }
 }
