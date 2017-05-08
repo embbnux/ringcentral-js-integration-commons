@@ -57,6 +57,8 @@ import DateTimeFormat from '../src/modules/DateTimeFormat';
 
 import CallLogger from '../src/modules/CallLogger';
 
+import Contacts from '../src/modules/Contacts';
+
 import config from './config';
 
 const DemoView = connect(state => ({
@@ -375,6 +377,13 @@ class DemoPhone extends RcModule {
       getState: () => this.state.callLogger,
     }));
 
+    this.addModule('contacts', new Contacts({
+      client: this.client,
+      auth: this.auth,
+      storage: this.storage,
+      getState: () => this.state.contacts,
+    }));
+
     this._reducer = combineReducers({
       accountInfo: this.accountInfo.reducer,
       accountExtension: this.accountExtension.reducer,
@@ -420,6 +429,7 @@ class DemoPhone extends RcModule {
       conference: this.conference.reducer,
       webphone: this.webphone.reducer,
       callLogger: this.callLogger.reducer,
+      contacts: this.contacts.reducer,
       lastAction: (state = null, action) => {
         console.log(action);
         return action;
