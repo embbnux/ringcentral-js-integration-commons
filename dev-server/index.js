@@ -57,7 +57,8 @@ import DateTimeFormat from '../src/modules/DateTimeFormat';
 
 import CallLogger from '../src/modules/CallLogger';
 
-import Contacts from '../src/modules/Contacts';
+import AccountPhoneNumber from '../src/modules/AccountPhoneNumber';
+import AddressBook from '../src/modules/AddressBook';
 
 import config from './config';
 
@@ -376,12 +377,18 @@ class DemoPhone extends RcModule {
       contactMatcher: this.contactMatcher,
       getState: () => this.state.callLogger,
     }));
-
-    this.addModule('contacts', new Contacts({
+    this.addModule('accountPhoneNumber', new AccountPhoneNumber({
+      auth: this.auth,
+      client: this.client,
+      storage: this.storage,
+      tabManager: this.tabManager,
+      getState: () => this.state.accountPhoneNumber,
+    }));
+    this.addModule('addressBook', new AddressBook({
       client: this.client,
       auth: this.auth,
       storage: this.storage,
-      getState: () => this.state.contacts,
+      getState: () => this.state.addressBook,
     }));
 
     this._reducer = combineReducers({
@@ -429,7 +436,8 @@ class DemoPhone extends RcModule {
       conference: this.conference.reducer,
       webphone: this.webphone.reducer,
       callLogger: this.callLogger.reducer,
-      contacts: this.contacts.reducer,
+      accountPhoneNumber: this.accountPhoneNumber.reducer,
+      addressBook: this.addressBook.reducer,
       lastAction: (state = null, action) => {
         console.log(action);
         return action;
