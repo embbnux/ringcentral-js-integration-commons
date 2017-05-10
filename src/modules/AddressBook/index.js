@@ -6,7 +6,7 @@ import actionTypes from './actionTypes';
 
 import getAddressBookReducer, {
   getSyncTokenReducer,
-  getContactsReducer,
+  getContactListReducer,
   getSyncTimestampReducer,
 } from './getAddressBookReducer';
 
@@ -35,7 +35,6 @@ export default class AddressBook extends Pollable {
     client,
     auth,
     storage,
-    tabManager,
     ttl = DEFAULT_TTL,
     timeToRetry = DEFAULT_TIME_TO_RETRY,
     polling = true,
@@ -66,7 +65,7 @@ export default class AddressBook extends Pollable {
     });
     this._storage.registerReducer({
       key: this._addressBookStorageKey,
-      reducer: getContactsReducer(this.actionTypes),
+      reducer: getContactListReducer(this.actionTypes),
     });
   }
 
@@ -126,6 +125,11 @@ export default class AddressBook extends Pollable {
 
   _resetModuleStatus() {
     this.store.dispatch({
+      type: this.actionTypes.reset,
+    });
+    this._clearTimeout();
+    this._promise = null;
+    this.store.dispatch({
       type: this.actionTypes.resetSuccess,
     });
   }
@@ -144,12 +148,19 @@ export default class AddressBook extends Pollable {
             syncToken: response.syncInfo.syncToken,
             syncTime: response.syncInfo.syncTime,
           });
-          this._promise = null;
+          if (this._polling) {
+            this._startPolling();
+          }
         } catch (error) {
           this._onSyncError();
-          this._promise = null;
+          if (this._polling) {
+            this._startPolling(this.timeToRetry);
+          } else {
+            this._retry();
+          }
           throw error;
         }
+        this._promise = null;
       })();
     }
   }
@@ -210,5 +221,13 @@ export default class AddressBook extends Pollable {
 
   get timestamp() {
     return this._storage.getItem(this._syncTimestampStorageKey);
+  }
+
+  get ttl() {
+    return this._ttl;
+  }
+
+  get timeToRetry() {
+    return this._timeToRetry;
   }
 }

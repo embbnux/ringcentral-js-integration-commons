@@ -87,6 +87,6 @@ export function getSyncTimestampReducer(types) {
 export default function getContactsReducer(types) {
   return combineReducers({
     status: getModuleStatusReducer(types),
-    syncStatus: getsyncStatusReducer(types),
+    syncStatus: getSyncStatusReducer(types),
   });
 }
