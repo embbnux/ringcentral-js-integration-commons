@@ -1,4 +1,4 @@
-import RcModule from '../../lib/RcModule';
+import Pollable from '../../lib/Pollable';
 import sleep from '../../lib/sleep';
 import moduleStatuses from '../../enums/moduleStatuses';
 import syncTypes from '../../enums/syncTypes';
@@ -11,6 +11,9 @@ import getAddressBookReducer, {
 } from './getAddressBookReducer';
 
 const CONTACTS_PER_PAGE = 250;
+const DEFAULT_TTL = 30 * 60 * 1000;
+const DEFAULT_TIME_TO_RETRY = 62 * 1000;
+
 function getSyncParams(syncToken, pageId) {
   const query = {
     perPage: CONTACTS_PER_PAGE,
@@ -27,12 +30,15 @@ function getSyncParams(syncToken, pageId) {
   return query;
 }
 
-export default class AddressBook extends RcModule {
+export default class AddressBook extends Pollable {
   constructor({
     client,
     auth,
     storage,
-    ttl = 30 * 60 * 1000,
+    tabManager,
+    ttl = DEFAULT_TTL,
+    timeToRetry = DEFAULT_TIME_TO_RETRY,
+    polling = true,
     ...options,
   }) {
     super({
@@ -41,8 +47,10 @@ export default class AddressBook extends RcModule {
     });
     this._client = client;
     this._storage = storage;
-    this._ttl = ttl;
     this._auth = auth;
+    this._ttl = ttl;
+    this._timeToRetry = timeToRetry;
+    this._polling = polling;
     this._promise = null;
     this._syncTokenStorageKey = 'contactsSyncToken';
     this._syncTimestampStorageKey = 'contactsSyncTimestamp';
@@ -66,7 +74,7 @@ export default class AddressBook extends RcModule {
     this.store.subscribe(() => this._onStateChange());
   }
 
-  _onStateChange() {
+  async _onStateChange() {
     if (this._shouldInit()) {
       this.store.dispatch({
         type: this.actionTypes.init,
@@ -74,7 +82,7 @@ export default class AddressBook extends RcModule {
       if (this._shouleCleanCache()) {
         this._cleanUp();
       }
-      this._initAddressBook();
+      await this._initAddressBook();
       this.store.dispatch({
         type: this.actionTypes.initSuccess,
       });
@@ -104,7 +112,7 @@ export default class AddressBook extends RcModule {
   _shouleCleanCache() {
     return (
       this._auth.isFreshLogin ||
-      (Date.now() - this.syncTimestamp) > this._ttl
+      (Date.now() - this.timestamp) > this._ttl
     );
   }
 
@@ -180,6 +188,10 @@ export default class AddressBook extends RcModule {
     });
   }
 
+  fetchData() {
+    this.sync();
+  }
+
   get ready() {
     return this.state.status === moduleStatuses.ready;
   }
@@ -196,7 +208,7 @@ export default class AddressBook extends RcModule {
     return this._storage.getItem(this._addressBookStorageKey);
   }
 
-  get syncTimestamp() {
+  get timestamp() {
     return this._storage.getItem(this._syncTimestampStorageKey);
   }
 }

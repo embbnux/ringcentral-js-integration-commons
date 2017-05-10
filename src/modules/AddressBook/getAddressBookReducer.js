@@ -17,7 +17,7 @@ export function getSyncStatusReducer(types) {
   };
 }
 
-export function getContactsReducer(types) {
+export function getContactListReducer(types) {
   return (state = [], { type, records }) => {
     const contacts = [];
     const contactMap = {};
@@ -84,9 +84,9 @@ export function getSyncTimestampReducer(types) {
   };
 }
 
-export default function getAddressBookReducer(types) {
+export default function getContactsReducer(types) {
   return combineReducers({
     status: getModuleStatusReducer(types),
-    syncStatus: getSyncStatusReducer(types),
+    syncStatus: getsyncStatusReducer(types),
   });
 }

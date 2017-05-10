@@ -69,12 +69,8 @@ export default class Contacts extends RcModule {
   _onStateChange() {
     if (this._shouldInit()) {
       this.store.dispatch({
-        type: this.actionTypes.init,
+        type: this.actionTypes.initSuccess,
       });
-      if (this._shouleCleanCache()) {
-        this._cleanUp();
-      }
-      this._initContacts();
     } else if (this._shouldReset()) {
       this._resetModuleStatus();
     }

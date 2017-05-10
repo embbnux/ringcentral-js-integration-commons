@@ -35,6 +35,7 @@ function simplifyExtensionData(ext) {
     ext: ext.extensionNumber,
     name: ext.name,
     id: ext.id,
+    contact: ext.contact,
   };
 }
 
