@@ -1,6 +1,7 @@
 import { combineReducers } from 'redux';
 import getModuleStatusReducer from '../../lib/getModuleStatusReducer';
 import availabilityTypes from '../../enums/availabilityTypes';
+import removeUri from '../../lib/removeUri';
 import syncStatus from './syncStatus';
 
 export function getSyncStatusReducer(types) {
@@ -41,11 +42,11 @@ export function getContactListReducer(types) {
               const oldContact = contacts[oldIndex];
               contacts[oldIndex] = {
                 ...oldContact,
-                ...record
+                ...(removeUri(record)),
               };
             }
           } else if (!isDeleted) {
-            contacts.push(record);
+            contacts.push(removeUri(record));
             contactMap[record.id] = contacts.length - 1;
           }
         });
