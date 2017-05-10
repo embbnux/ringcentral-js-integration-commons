@@ -109,6 +109,7 @@ var CallingSettings = function (_RcModule) {
     _this._ringoutPromptStorageKey = 'callingSettingsRingoutPrompt';
     _this._myLocationStorageKey = 'callingSettingsMyLocation';
     _this._timestampStorageKey = 'callingSettingsTimestamp';
+    _this._fromNumberStorageKey = 'fromCallIdNumber';
 
     _this._onFirstLogin = onFirstLogin;
 
@@ -127,6 +128,10 @@ var CallingSettings = function (_RcModule) {
     _this._storage.registerReducer({
       key: _this._timestampStorageKey,
       reducer: (0, _getCallingSettingsReducer.getTimestampReducer)(_this.actionTypes)
+    });
+    _this._storage.registerReducer({
+      key: _this._fromNumberStorageKey,
+      reducer: (0, _getCallingSettingsReducer.getFromNumberReducer)(_this.actionTypes)
     });
     _this._reducer = (0, _getCallingSettingsReducer2.default)(_this.actionTypes);
 
@@ -169,6 +174,15 @@ var CallingSettings = function (_RcModule) {
       });
     });
 
+    _this.addSelector('fromNumbers', function () {
+      return _this._extensionPhoneNumber.callerIdNumbers;
+    }, function (phoneNumbers) {
+      return phoneNumbers.sort(function (firstItem, lastItem) {
+        if (firstItem.usageType === 'DirectNumber') return -1;else if (lastItem.usageType === 'DirectNumber') return 1;else if (firstItem.usageType === 'MainCompanyNumber') return -1;else if (lastItem.usageType === 'MainCompanyNumber') return 1;else if (firstItem.usageType < lastItem.usageType) return -1;else if (firstItem.usageType > lastItem.usageType) return 1;
+        return 0;
+      });
+    });
+
     _this.addSelector('callWithOptions', function () {
       return _this._rolesAndPermissions.ringoutEnabled;
     }, function () {
@@ -199,6 +213,7 @@ var CallingSettings = function (_RcModule) {
 
       return _ref2 = {}, (0, _defineProperty3.default)(_ref2, _callingOptions2.default.myphone, myPhoneNumbers), (0, _defineProperty3.default)(_ref2, _callingOptions2.default.otherphone, otherPhoneNumbers), _ref2;
     });
+    _this.updateFromNumber = _this.updateFromNumber.bind(_this);
     return _this;
   }
 
@@ -238,6 +253,7 @@ var CallingSettings = function (_RcModule) {
                     }
                   }
                   _this2._validateSettings();
+                  _this2._initFromNumber();
                   _this2.store.dispatch({
                     type: _this2.actionTypes.initSuccess
                   });
@@ -260,6 +276,23 @@ var CallingSettings = function (_RcModule) {
           }
         }, _callee, _this2);
       })));
+    }
+  }, {
+    key: '_initFromNumber',
+    value: function _initFromNumber() {
+      var fromNumber = this.fromNumber;
+      if (!fromNumber) {
+        var fromNumberList = this.fromNumbers;
+        this.updateFromNumber(fromNumberList[0]);
+      }
+    }
+  }, {
+    key: 'updateFromNumber',
+    value: function updateFromNumber(number) {
+      this.store.dispatch({
+        type: this.actionTypes.updateFromNumber,
+        number: number && number.phoneNumber
+      });
     }
   }, {
     key: '_setSoftPhoneToCallWith',
@@ -379,6 +412,16 @@ var CallingSettings = function (_RcModule) {
     key: 'availableNumbers',
     get: function get() {
       return this._selectors.availableNumbers();
+    }
+  }, {
+    key: 'fromNumber',
+    get: function get() {
+      return this._storage.getItem(this._fromNumberStorageKey);
+    }
+  }, {
+    key: 'fromNumbers',
+    get: function get() {
+      return this._selectors.fromNumbers();
     }
   }]);
   return CallingSettings;

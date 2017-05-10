@@ -121,7 +121,7 @@ var DetailedPresence = function (_Presence) {
               return _this.fetch();
 
             case 5:
-              _this._subscription.subscribe(_subscriptionFilters2.default.detailedPresence);
+              _this._subscription.subscribe(_subscriptionFilters2.default.detailedPresenceWithSip);
               _this.store.dispatch({
                 type: _this.actionTypes.initSuccess
               });
@@ -200,7 +200,7 @@ var DetailedPresence = function (_Presence) {
                 ownerId = this._auth.ownerId;
                 _context2.prev = 2;
                 _context2.next = 5;
-                return this._client.service.platform().get(_subscriptionFilters2.default.detailedPresence);
+                return this._client.service.platform().get(_subscriptionFilters2.default.detailedPresenceWithSip);
 
               case 5:
                 _json = _context2.sent.json();

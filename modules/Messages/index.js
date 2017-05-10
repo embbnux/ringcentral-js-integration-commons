@@ -312,6 +312,11 @@ var Messages = function (_RcModule) {
     get: function get() {
       return this.state.searchingResults;
     }
+  }, {
+    key: 'normalizedMessages',
+    get: function get() {
+      return this._selectors.normalizedMessages();
+    }
   }]);
   return Messages;
 }(_RcModule3.default);

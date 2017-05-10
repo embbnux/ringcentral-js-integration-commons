@@ -10,5 +10,5 @@ var _Enum2 = _interopRequireDefault(_Enum);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = new _Enum2.default(['resetSuccess', 'initSuccess', 'toggleMinimized', 'newSession', 'destroySession'], 'active-call');
-//# sourceMappingURL=actionTypes.js.map
+exports.default = new _Enum2.default(['connecting', 'connected', 'onHold', 'onMute', 'replaced', 'finished'], 'webphone-session');
+//# sourceMappingURL=sessionStatus.js.map
