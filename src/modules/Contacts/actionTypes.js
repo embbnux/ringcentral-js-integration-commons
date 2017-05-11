@@ -5,8 +5,4 @@ export default new Enum([
   'initSuccess',
   'reset',
   'resetSuccess',
-  'sync',
-  'syncError',
-  'syncSuccess',
-  'cleanUp',
 ], 'contacts');

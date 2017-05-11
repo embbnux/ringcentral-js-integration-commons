@@ -1,65 +1,104 @@
 import RcModule from '../../lib/RcModule';
-import sleep from '../../lib/sleep';
-import moduleStatuses from '../../enums/moduleStatuses';
-import syncTypes from '../../enums/syncTypes';
+import isBlank from '../../lib/isBlank';
+import normalizeNumber from '../../lib/normalizeNumber';
 import actionTypes from './actionTypes';
+import moduleStatuses from '../../enums/moduleStatuses';
+import getContactsReducer from './getContactsReducer';
 
-import getContactsReducer, {
-  getSyncTokenReducer,
-  getContactListReducer,
-  getSyncTimestampReducer,
-} from './getContactsReducer';
-
-const CONTACTS_PER_PAGE = 250;
-function getSyncParams(syncToken, pageId) {
-  const query = {
-    perPage: CONTACTS_PER_PAGE,
-  };
-  if (syncToken) {
-    query.syncToken = syncToken;
-    query.syncType = syncTypes.iSync;
+function addPhoneToContact(contact, phone, type) {
+  const phoneNumber = normalizeNumber(phone);
+  if (isBlank(phoneNumber)) {
+    return;
+  }
+  const existedPhone = contact.phoneNumbers.find(
+    number => number && number.phoneNumber === phone
+  );
+  if (existedPhone) {
+    existedPhone.type = type;
   } else {
-    query.syncType = syncTypes.fSync;
+    contact.phoneNumbers.push({
+      phoneNumber: phone,
+      type,
+    });
   }
-  if (pageId) {
-    query.pageId = pageId;
-  }
-  return query;
 }
 
 export default class Contacts extends RcModule {
   constructor({
-    client,
-    auth,
-    storage,
-    ttl = 30 * 60 * 1000,
+    addressBook,
+    accountExtension,
+    accountPhoneNumber,
     ...options,
   }) {
     super({
       ...options,
       actionTypes,
     });
-    this._client = client;
-    this._storage = storage;
-    this._ttl = ttl;
-    this._auth = auth;
-    this._promise = null;
-    this._syncTokenStorageKey = 'contactsSyncToken';
-    this._syncTimestampStorageKey = 'contactsSyncTimestamp';
-    this._addressBookStorageKey = 'addressBookContactsList';
+    this._addressBook = addressBook;
+    this._accountExtension = accountExtension;
+    this._accountPhoneNumber = accountPhoneNumber;
     this._reducer = getContactsReducer(this.actionTypes);
-    this._storage.registerReducer({
-      key: this._syncTokenStorageKey,
-      reducer: getSyncTokenReducer(this.actionTypes),
-    });
-    this._storage.registerReducer({
-      key: this._syncTimestampStorageKey,
-      reducer: getSyncTimestampReducer(this.actionTypes),
-    });
-    this._storage.registerReducer({
-      key: this._addressBookStorageKey,
-      reducer: getContactListReducer(this.actionTypes),
-    });
+
+    this.addSelector(
+      'companyContacts',
+      () => this._accountExtension.availableExtensions,
+      () => this._accountPhoneNumber.extensionToPhoneNumberMap,
+      (extensions, extensionToPhoneNumberMap) => {
+        const newExtensions = [];
+        extensions.forEach((extension) => {
+          if (!(extension.status === 'Enabled' &&
+            ['DigitalUser', 'User'].indexOf(extension.type) >= 0)) {
+            return;
+          }
+          const contact = {
+            type: 'company',
+            id: extension.id,
+            firstName: extension.contact && extension.contact.firstName,
+            lastName: extension.contact && extension.contact.lastName,
+            email: extension.contact && extension.contact.email,
+            extensionNumber: extension.ext,
+            phoneNumbers: [],
+          };
+          if (isBlank(contact.extensionNumber)) {
+            return;
+          }
+          const phones = extensionToPhoneNumberMap[contact.extensionNumber];
+          if (phones && phones.length > 0) {
+            phones.forEach((phone) => {
+              addPhoneToContact(contact, phone, 'directPhone');
+            });
+          }
+          newExtensions.push(contact);
+        });
+        return newExtensions;
+      }
+    );
+
+    this.addSelector(
+      'personalContacts',
+      () => this._addressBook.contacts,
+      (rawContacts) => {
+        const contacts = [];
+        rawContacts.forEach((rawContact) => {
+          const contact = {
+            type: 'personal',
+            phoneNumbers: [],
+            ...rawContact,
+          };
+          Object.keys(contact).forEach((key) => {
+            if (key.toLowerCase().indexOf('phone') === -1) {
+              return;
+            }
+            if (typeof contact[key] !== 'string') {
+              return;
+            }
+            addPhoneToContact(contact, contact[key], key);
+          });
+          contacts.push(contact);
+        });
+        return contacts;
+      }
+    );
   }
 
   initialize() {
@@ -78,8 +117,9 @@ export default class Contacts extends RcModule {
 
   _shouldInit() {
     return (
-      this._storage.ready &&
-      this._auth.loggedIn &&
+      this._addressBook.ready &&
+      this._accountExtension.ready &&
+      this._accountPhoneNumber.ready &&
       this.pending
     );
   }
@@ -87,29 +127,12 @@ export default class Contacts extends RcModule {
   _shouldReset() {
     return (
       (
-        !this._storage.ready ||
-        !this._auth.loggedIn
+        !this._addressBook.ready ||
+        !this._accountExtension.ready ||
+        !this._accountPhoneNumber.ready
       ) &&
       this.ready
     );
-  }
-
-  _shouleCleanCache() {
-    return (
-      this._auth.isFreshLogin ||
-      (Date.now() - this.syncTimestamp) > this._ttl
-    );
-  }
-
-  async _initContacts() {
-    try {
-      await this.sync();
-    } catch (e) {
-      console.error(e);
-    }
-    this.store.dispatch({
-      type: this.actionTypes.initSuccess,
-    });
   }
 
   _resetModuleStatus() {
@@ -118,81 +141,19 @@ export default class Contacts extends RcModule {
     });
   }
 
-  async sync() {
-    if (!this._promise) {
-      this._promise = (async () => {
-        try {
-          this.store.dispatch({
-            type: this.actionTypes.sync,
-          });
-          const response = await this._sync(this.syncToken);
-          this.store.dispatch({
-            type: this.actionTypes.syncSuccess,
-            records: response.records,
-            syncToken: response.syncInfo.syncToken,
-            syncTime: response.syncInfo.syncTime,
-          });
-          this._promise = null;
-        } catch (error) {
-          this._onSyncError();
-          this._promise = null;
-          throw error;
-        }
-      })();
-    }
-  }
-
-  _onSyncError() {
-    this.store.dispatch({
-      type: this.actionTypes.syncError,
-    });
-  }
-
-  async _sync(syncToken, pageId) {
-    const params = getSyncParams(syncToken, pageId);
-    const response = await this._syncAddressBookApi(params);
-    if (!response.nextPageId) {
-      return response;
-    }
-    await sleep(1000);
-    const lastResponse = await this._sync(syncToken, response.nextPageId);
-    return {
-      ...lastResponse,
-      records: response.records.concat(lastResponse.records),
-    };
-  }
-
-  async _syncAddressBookApi(params) {
-    const updateRequest = await this._client.account()
-                                            .extension()
-                                            .addressBookSync()
-                                            .list(params);
-    return updateRequest;
-  }
-
-  _cleanUp() {
-    this.store.dispatch({
-      type: this.actionTypes.cleanUp,
-    });
-  }
-
   get ready() {
-    return this.state.status === moduleStatuses.ready;
+    return this.status === moduleStatuses.ready;
   }
 
   get pending() {
-    return this.state.status === moduleStatuses.pending;
+    return this.status === moduleStatuses.pending;
   }
 
-  get syncToken() {
-    return this._storage.getItem(this._syncTokenStorageKey);
+  get companyContacts() {
+    return this._selectors.companyContacts();
   }
 
-  get personContacts() {
-    return this._storage.getItem(this._addressBookStorageKey);
-  }
-
-  get syncTimestamp() {
-    return this._storage.getItem(this._syncTimestampStorageKey);
+  get personalContacts() {
+    return this._selectors.personalContacts();
   }
 }

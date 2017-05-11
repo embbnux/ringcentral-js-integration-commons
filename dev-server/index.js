@@ -59,6 +59,7 @@ import CallLogger from '../src/modules/CallLogger';
 
 import AccountPhoneNumber from '../src/modules/AccountPhoneNumber';
 import AddressBook from '../src/modules/AddressBook';
+import Contacts from '../src/modules/Contacts';
 
 import config from './config';
 
@@ -390,6 +391,12 @@ class DemoPhone extends RcModule {
       storage: this.storage,
       getState: () => this.state.addressBook,
     }));
+    this.addModule('contacts', new Contacts({
+      addressBook: this.addressBook,
+      accountPhoneNumber: this.accountPhoneNumber,
+      accountExtension: this.accountExtension,
+      getState: () => this.state.contacts,
+    }));
 
     this._reducer = combineReducers({
       accountInfo: this.accountInfo.reducer,
@@ -438,6 +445,7 @@ class DemoPhone extends RcModule {
       callLogger: this.callLogger.reducer,
       accountPhoneNumber: this.accountPhoneNumber.reducer,
       addressBook: this.addressBook.reducer,
+      contacts: this.contacts.reducer,
       lastAction: (state = null, action) => {
         console.log(action);
         return action;
