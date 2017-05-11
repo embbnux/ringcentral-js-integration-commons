@@ -139,7 +139,7 @@ describe('getContactListReducer', () => {
           lastName: 'Fox1',
         },
       ]);
-    })
+    });
 
     it('should return new contact list without deleted item on sync success', () => {
       const originalState = [{
