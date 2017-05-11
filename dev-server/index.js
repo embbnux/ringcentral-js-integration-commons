@@ -50,7 +50,6 @@ import Messages from '../src/modules/Messages';
 
 import ContactMatcher from '../src/modules/ContactMatcher';
 import ActivityMatcher from '../src/modules/ActivityMatcher';
-import DateTimeIntl from '../src/modules/DateTimeIntl';
 import Conference from '../src/modules/Conference';
 
 import DateTimeFormat from '../src/modules/DateTimeFormat';
@@ -60,6 +59,8 @@ import CallLogger from '../src/modules/CallLogger';
 import AccountPhoneNumber from '../src/modules/AccountPhoneNumber';
 import AddressBook from '../src/modules/AddressBook';
 import Contacts from '../src/modules/Contacts';
+import ConversationMatcher from '../src/modules/ConversationMatcher';
+import ConversationLogger from '../src/modules/ConversationLogger';
 
 import config from './config';
 
@@ -310,12 +311,6 @@ class DemoPhone extends RcModule {
       callMonitor: this.callMonitor,
       getState: () => this.state.callHistory,
     }));
-    this.addModule('dateTimeIntl', new DateTimeIntl({
-      auth: this.auth,
-      locale: this.locale,
-      storage: this.storage,
-      getState: () => this.state.dateTimeIntl,
-    }));
     this.addModule('contactMatcher', new ContactMatcher({
       storage: this.storage,
       getState: () => this.state.contactMatcher,
@@ -323,6 +318,10 @@ class DemoPhone extends RcModule {
     this.addModule('activityMatcher', new ActivityMatcher({
       storage: this.storage,
       getState: () => this.state.activityMatcher,
+    }));
+    this.addModule('conversationMatcher', new ConversationMatcher({
+      storage: this.storage,
+      getState: () => this.state.conversationMatcher,
     }));
     this.addModule('contactSearch', new ContactSearch({
       auth: this.auth,
@@ -355,10 +354,6 @@ class DemoPhone extends RcModule {
       messageStore: this.messageStore,
       getState: () => this.state.conversation,
     }));
-    this.addModule('messages', new Messages({
-      messageStore: this.messageStore,
-      getState: () => this.state.messages,
-    }));
     this.addModule('dateTimeFormat', new DateTimeFormat({
       locale: this.locale,
       storage: this.storage,
@@ -376,6 +371,8 @@ class DemoPhone extends RcModule {
       callMonitor: this.callMonitor,
       activityMatcher: this.activityMatcher,
       contactMatcher: this.contactMatcher,
+      logFunction: async () => {},
+      readyCheckFunction: () => true,
       getState: () => this.state.callLogger,
     }));
     this.addModule('accountPhoneNumber', new AccountPhoneNumber({
@@ -397,7 +394,25 @@ class DemoPhone extends RcModule {
       accountExtension: this.accountExtension,
       getState: () => this.state.contacts,
     }));
+    this.addModule('conversationLogger', new ConversationLogger({
+      storage: this.storage,
+      messageStore: this.messageStore,
+      contactMatcher: this.contactMatcher,
+      conversationMatcher: this.conversationMatcher,
+      dateTimeFormat: this.dateTimeFormat,
+      extensionInfo: this.extensionInfo,
+      tabManager: this.tabManager,
+      logFunction: async () => {},
+      readyCheckFunction: () => true,
+      getState: () => this.state.conversationLogger,
+    }));
 
+    this.addModule('messages', new Messages({
+      messageStore: this.messageStore,
+      extensionInfo: this.extensionInfo,
+      conversationLogger: this.conversationLogger,
+      getState: () => this.state.messages,
+    }));
     this._reducer = combineReducers({
       accountInfo: this.accountInfo.reducer,
       accountExtension: this.accountExtension.reducer,
@@ -430,9 +445,9 @@ class DemoPhone extends RcModule {
       subscription: this.subscription.reducer,
       tabManager: this.tabManager.reducer,
       numberValidate: this.numberValidate.reducer,
-      dateTimeIntl: this.dateTimeIntl.reducer,
       contactMatcher: this.contactMatcher.reducer,
       activityMatcher: this.activityMatcher.reducer,
+      conversationMatcher: this.conversationMatcher.reducer,
       messageSender: this.messageSender.reducer,
       contactSearch: this.contactSearch.reducer,
       composeText: this.composeText.reducer,
@@ -446,6 +461,7 @@ class DemoPhone extends RcModule {
       accountPhoneNumber: this.accountPhoneNumber.reducer,
       addressBook: this.addressBook.reducer,
       contacts: this.contacts.reducer,
+      conversationLogger: this.conversationLogger.reducer,
       lastAction: (state = null, action) => {
         console.log(action);
         return action;
