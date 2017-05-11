@@ -111,6 +111,7 @@ export default class AddressBook extends Pollable {
   _shouleCleanCache() {
     return (
       this._auth.isFreshLogin ||
+      !this.timestamp ||
       (Date.now() - this.timestamp) > this._ttl
     );
   }

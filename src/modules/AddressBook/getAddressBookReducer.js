@@ -73,7 +73,7 @@ export function getSyncTokenReducer(types) {
 }
 
 export function getSyncTimestampReducer(types) {
-  return (state = 0, { type, syncTime }) => {
+  return (state = null, { type, syncTime }) => {
     switch (type) {
       case types.syncSuccess:
         return (new Date(syncTime)).getTime();
