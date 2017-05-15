@@ -51,7 +51,7 @@ var _DataFetcher3 = _interopRequireDefault(_DataFetcher2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var DEFAULT_MASK = ['id', 'extensionNumber', 'contact(*)', 'name', 'type', 'status', 'permissions', 'profileImage', 'regionalSettings(' + ['timezone(id,name,bias)', 'homeCountry(id,isoCode,callingCode)', 'language(localeCode)', 'formattingLocale(localeCode)', 'timeFormat'].join(',') + ')'].join(',');
+var DEFAULT_MASK = ['id', 'extensionNumber', 'contact(*)', 'name', 'type', 'status', 'permissions', 'profileImage', 'departments', 'regionalSettings(' + ['timezone(id,name,bias)', 'homeCountry(id,isoCode,callingCode)', 'language(localeCode)', 'formattingLocale(localeCode)', 'timeFormat'].join(',') + ')'].join(',');
 
 var DEFAULT_COUNTRY = {
   id: '1',
@@ -147,6 +147,16 @@ var ExtensionInfo = function (_DataFetcher) {
     key: 'country',
     get: function get() {
       return this.info.regionalSettings && this.info.regionalSettings.homeCountry || DEFAULT_COUNTRY;
+    }
+  }, {
+    key: 'departments',
+    get: function get() {
+      return this.info.departments;
+    }
+  }, {
+    key: 'isCallQueueMember',
+    get: function get() {
+      return !!this.departments;
     }
   }]);
   return ExtensionInfo;

@@ -61,6 +61,14 @@ var _moduleStatuses = require('../../enums/moduleStatuses');
 
 var _moduleStatuses2 = _interopRequireDefault(_moduleStatuses);
 
+var _dndStatus = require('./dndStatus');
+
+var _dndStatus2 = _interopRequireDefault(_dndStatus);
+
+var _presenceStatus = require('./presenceStatus');
+
+var _presenceStatus2 = _interopRequireDefault(_presenceStatus);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var presenceEndPoint = /.*\/presence(\?.*)?/;
@@ -83,12 +91,11 @@ var Presence = function (_RcModule) {
 
     _this._subscriptionHandler = function (message) {
       if (message && presenceEndPoint.test(message.event) && message.body) {
-        var dndStatus = message.body.dndStatus;
-
-        _this.store.dispatch({
-          type: _this.actionTypes.notification,
-          dndStatus: dndStatus
-        });
+        console.log('presence:');
+        console.log(message.body);
+        _this.store.dispatch((0, _extends3.default)({
+          type: _this.actionTypes.notification
+        }, message.body));
       }
     };
 
@@ -98,6 +105,11 @@ var Presence = function (_RcModule) {
 
     _this._reducer = (0, _getPresenceReducer2.default)(_this.actionTypes);
     _this._lastMessage = null;
+
+    _this.setAvailable = _this.setAvailable.bind(_this);
+    _this.setBusy = _this.setBusy.bind(_this);
+    _this.setDoNotDisturb = _this.setDoNotDisturb.bind(_this);
+    _this.setInvisible = _this.setInvisible.bind(_this);
     return _this;
   }
 
@@ -169,10 +181,9 @@ var Presence = function (_RcModule) {
                 data = _context2.sent;
 
                 if (ownerId === this._auth.ownerId) {
-                  this.store.dispatch({
-                    type: this.actionTypes.fetchSuccess,
-                    dndStatus: data.dndStatus
-                  });
+                  this.store.dispatch((0, _extends3.default)({
+                    type: this.actionTypes.fetchSuccess
+                  }, data));
                 }
                 this._promise = null;
                 _context2.next = 15;
@@ -212,6 +223,257 @@ var Presence = function (_RcModule) {
       return this._promise;
     }
   }, {
+    key: '_update',
+    value: function () {
+      var _ref4 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3(params) {
+        var ownerId, platform, data;
+        return _regenerator2.default.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                this.store.dispatch({
+                  type: this.actionTypes.update
+                });
+                _context3.prev = 1;
+                ownerId = this._auth.ownerId;
+                platform = this._client.service.platform();
+                _context3.next = 6;
+                return platform.put('/account/~/extension/~/presence', params).json;
+
+              case 6:
+                data = _context3.sent;
+
+                if (ownerId === this._auth.ownerId) {
+                  this.store.dispatch((0, _extends3.default)({
+                    type: this.actionTypes.updateSuccess
+                  }, data));
+                }
+                this._promise = null;
+                _context3.next = 16;
+                break;
+
+              case 11:
+                _context3.prev = 11;
+                _context3.t0 = _context3['catch'](1);
+
+                this._promise = null;
+                this.store.dispatch({
+                  type: this.actionTypes.updateError,
+                  error: _context3.t0
+                });
+                throw _context3.t0;
+
+              case 16:
+              case 'end':
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this, [[1, 11]]);
+      }));
+
+      function _update(_x) {
+        return _ref4.apply(this, arguments);
+      }
+
+      return _update;
+    }()
+  }, {
+    key: '_getUpdateStatusParams',
+    value: function _getUpdateStatusParams(userStatusParams) {
+      var params = {
+        dndStatus: this.dndStatus,
+        userStatus: userStatusParams
+      };
+      if (params.dndStatus !== _dndStatus2.default.takeAllCalls && params.dndStatus !== _dndStatus2.default.doNotAcceptDepartmentCalls) {
+        params.dndStatus = _dndStatus2.default.takeAllCalls;
+      }
+      return params;
+    }
+  }, {
+    key: 'setAvailable',
+    value: function () {
+      var _ref5 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee4() {
+        var params;
+        return _regenerator2.default.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                if (!(this.presenceStatus === _presenceStatus2.default.available)) {
+                  _context4.next = 2;
+                  break;
+                }
+
+                return _context4.abrupt('return');
+
+              case 2:
+                params = this._getUpdateStatusParams(_presenceStatus2.default.available);
+                _context4.next = 5;
+                return this._update(params);
+
+              case 5:
+              case 'end':
+                return _context4.stop();
+            }
+          }
+        }, _callee4, this);
+      }));
+
+      function setAvailable() {
+        return _ref5.apply(this, arguments);
+      }
+
+      return setAvailable;
+    }()
+  }, {
+    key: 'setBusy',
+    value: function () {
+      var _ref6 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee5() {
+        var params;
+        return _regenerator2.default.wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                if (!(this.presenceStatus === _presenceStatus2.default.busy && this.dndStatus !== _dndStatus2.default.doNotAcceptAnyCalls)) {
+                  _context5.next = 2;
+                  break;
+                }
+
+                return _context5.abrupt('return');
+
+              case 2:
+                params = this._getUpdateStatusParams(_presenceStatus2.default.busy);
+                _context5.next = 5;
+                return this._update(params);
+
+              case 5:
+              case 'end':
+                return _context5.stop();
+            }
+          }
+        }, _callee5, this);
+      }));
+
+      function setBusy() {
+        return _ref6.apply(this, arguments);
+      }
+
+      return setBusy;
+    }()
+  }, {
+    key: 'setDoNotDisturb',
+    value: function () {
+      var _ref7 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee6() {
+        var params;
+        return _regenerator2.default.wrap(function _callee6$(_context6) {
+          while (1) {
+            switch (_context6.prev = _context6.next) {
+              case 0:
+                if (!(this.presenceStatus === _presenceStatus2.default.busy && this.dndStatus === _dndStatus2.default.doNotAcceptAnyCalls)) {
+                  _context6.next = 2;
+                  break;
+                }
+
+                return _context6.abrupt('return');
+
+              case 2:
+                params = {
+                  dndStatus: _dndStatus2.default.doNotAcceptAnyCalls,
+                  userStatus: _presenceStatus2.default.busy
+                };
+                _context6.next = 5;
+                return this._update(params);
+
+              case 5:
+              case 'end':
+                return _context6.stop();
+            }
+          }
+        }, _callee6, this);
+      }));
+
+      function setDoNotDisturb() {
+        return _ref7.apply(this, arguments);
+      }
+
+      return setDoNotDisturb;
+    }()
+  }, {
+    key: 'setInvisible',
+    value: function () {
+      var _ref8 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee7() {
+        var params;
+        return _regenerator2.default.wrap(function _callee7$(_context7) {
+          while (1) {
+            switch (_context7.prev = _context7.next) {
+              case 0:
+                if (!(this.presenceStatus === _presenceStatus2.default.offline)) {
+                  _context7.next = 2;
+                  break;
+                }
+
+                return _context7.abrupt('return');
+
+              case 2:
+                params = this._getUpdateStatusParams(_presenceStatus2.default.offline);
+                _context7.next = 5;
+                return this._update(params);
+
+              case 5:
+              case 'end':
+                return _context7.stop();
+            }
+          }
+        }, _callee7, this);
+      }));
+
+      function setInvisible() {
+        return _ref8.apply(this, arguments);
+      }
+
+      return setInvisible;
+    }()
+  }, {
+    key: 'toggleAcceptCallQueueCalls',
+    value: function () {
+      var _ref9 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee8() {
+        var params;
+        return _regenerator2.default.wrap(function _callee8$(_context8) {
+          while (1) {
+            switch (_context8.prev = _context8.next) {
+              case 0:
+                params = {
+                  userStatus: this.userStatus
+                };
+
+                if (this.dndStatus === _dndStatus2.default.takeAllCalls) {
+                  params.dndStatus = _dndStatus2.default.doNotAcceptDepartmentCalls;
+                } else if (this.dndStatus === _dndStatus2.default.doNotAcceptDepartmentCalls) {
+                  params.dndStatus = _dndStatus2.default.takeAllCalls;
+                }
+
+                if (!params.dndStatus) {
+                  _context8.next = 5;
+                  break;
+                }
+
+                _context8.next = 5;
+                return this._update(params);
+
+              case 5:
+              case 'end':
+                return _context8.stop();
+            }
+          }
+        }, _callee8, this);
+      }));
+
+      function toggleAcceptCallQueueCalls() {
+        return _ref9.apply(this, arguments);
+      }
+
+      return toggleAcceptCallQueueCalls;
+    }()
+  }, {
     key: 'status',
     get: function get() {
       return this.state.status;
@@ -225,6 +487,21 @@ var Presence = function (_RcModule) {
     key: 'dndStatus',
     get: function get() {
       return this.state.dndStatus;
+    }
+  }, {
+    key: 'userStatus',
+    get: function get() {
+      return this.state.userStatus;
+    }
+  }, {
+    key: 'message',
+    get: function get() {
+      return this.state.message;
+    }
+  }, {
+    key: 'presenceStatus',
+    get: function get() {
+      return this.state.presenceStatus;
     }
   }]);
   return Presence;
