@@ -240,7 +240,7 @@ var Presence = function (_RcModule) {
     value: function _delayUpdate(params, oldStatus) {
       var _this3 = this;
 
-      this._clearTimeout();
+      this._clearDelayTimeout();
       this._delayTimeoutId = setTimeout((0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3() {
         var ownerId, platform, response, data;
         return _regenerator2.default.wrap(function _callee3$(_context3) {
