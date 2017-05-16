@@ -91,8 +91,6 @@ var Presence = function (_RcModule) {
 
     _this._subscriptionHandler = function (message) {
       if (message && presenceEndPoint.test(message.event) && message.body) {
-        console.log('presence:');
-        console.log(message.body);
         _this.store.dispatch((0, _extends3.default)({
           type: _this.actionTypes.notification
         }, message.body));
@@ -226,7 +224,7 @@ var Presence = function (_RcModule) {
     key: '_update',
     value: function () {
       var _ref4 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3(params) {
-        var oldStatus, ownerId, platform, data;
+        var oldStatus, ownerId, platform, response, data;
         return _regenerator2.default.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
@@ -243,10 +241,11 @@ var Presence = function (_RcModule) {
                 ownerId = this._auth.ownerId;
                 platform = this._client.service.platform();
                 _context3.next = 7;
-                return platform.put('/account/~/extension/~/presence', params).json;
+                return platform.put('/account/~/extension/~/presence', params);
 
               case 7:
-                data = _context3.sent;
+                response = _context3.sent;
+                data = response.json();
 
                 if (ownerId === this._auth.ownerId) {
                   this.store.dispatch((0, _extends3.default)({
@@ -254,11 +253,11 @@ var Presence = function (_RcModule) {
                   }, data));
                 }
                 this._promise = null;
-                _context3.next = 17;
+                _context3.next = 18;
                 break;
 
-              case 12:
-                _context3.prev = 12;
+              case 13:
+                _context3.prev = 13;
                 _context3.t0 = _context3['catch'](2);
 
                 this._promise = null;
@@ -268,12 +267,12 @@ var Presence = function (_RcModule) {
                 }, oldStatus));
                 throw _context3.t0;
 
-              case 17:
+              case 18:
               case 'end':
                 return _context3.stop();
             }
           }
-        }, _callee3, this, [[2, 12]]);
+        }, _callee3, this, [[2, 13]]);
       }));
 
       function _update(_x) {
