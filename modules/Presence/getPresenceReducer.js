@@ -29,6 +29,8 @@ function getDndStatusReducer(types) {
       case types.notification:
       case types.fetchSuccess:
       case types.updateSuccess:
+      case types.updateError:
+      case types.update:
         return dndStatus;
       case types.resetSuccess:
         return null;
@@ -71,6 +73,8 @@ function getUserStatusReducer(types) {
       case types.notification:
       case types.fetchSuccess:
       case types.updateSuccess:
+      case types.update:
+      case types.updateError:
         return userStatus;
       case types.resetSuccess:
         return null;
