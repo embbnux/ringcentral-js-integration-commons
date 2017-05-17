@@ -225,65 +225,106 @@ var Presence = function (_RcModule) {
     }
   }, {
     key: '_update',
-    value: function _update(params) {
-      var oldStatus = {
-        dndStatus: this.dndStatus,
-        userStatus: this.userStatus
-      };
-      this.store.dispatch((0, _extends3.default)({
-        type: this.actionTypes.update
-      }, params));
-      this._delayUpdate(params, oldStatus);
-    }
-  }, {
-    key: '_delayUpdate',
-    value: function _delayUpdate(params, oldStatus) {
-      var _this3 = this;
-
-      this._clearDelayTimeout();
-      this._delayTimeoutId = setTimeout((0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3() {
-        var ownerId, platform, response, data;
+    value: function () {
+      var _ref4 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3(params) {
+        var oldStatus;
         return _regenerator2.default.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
-                _this3._delayTimeoutId = null;
-                _context3.prev = 1;
-                ownerId = _this3._auth.ownerId;
-                platform = _this3._client.service.platform();
-                _context3.next = 6;
-                return platform.put('/account/~/extension/~/presence', params);
+                oldStatus = {
+                  dndStatus: this.dndStatus,
+                  userStatus: this.userStatus
+                };
 
-              case 6:
-                response = _context3.sent;
-                data = response.json();
+                this.store.dispatch((0, _extends3.default)({
+                  type: this.actionTypes.update
+                }, params));
+                _context3.next = 4;
+                return this._delayUpdate(params, oldStatus);
 
-                if (ownerId === _this3._auth.ownerId) {
-                  _this3.store.dispatch((0, _extends3.default)({
-                    type: _this3.actionTypes.updateSuccess
-                  }, data));
-                }
-                _context3.next = 15;
-                break;
-
-              case 11:
-                _context3.prev = 11;
-                _context3.t0 = _context3['catch'](1);
-
-                _this3.store.dispatch((0, _extends3.default)({
-                  type: _this3.actionTypes.updateError,
-                  error: _context3.t0
-                }, oldStatus));
-                console.error(_context3.t0);
-
-              case 15:
+              case 4:
               case 'end':
                 return _context3.stop();
             }
           }
-        }, _callee3, _this3, [[1, 11]]);
-      })), DELAY_TIME);
-    }
+        }, _callee3, this);
+      }));
+
+      function _update(_x) {
+        return _ref4.apply(this, arguments);
+      }
+
+      return _update;
+    }()
+  }, {
+    key: '_delayUpdate',
+    value: function () {
+      var _ref5 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee5(params, oldStatus) {
+        var _this3 = this;
+
+        return _regenerator2.default.wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                this._clearDelayTimeout();
+                this._delayTimeoutId = setTimeout((0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee4() {
+                  var ownerId, platform, response, data;
+                  return _regenerator2.default.wrap(function _callee4$(_context4) {
+                    while (1) {
+                      switch (_context4.prev = _context4.next) {
+                        case 0:
+                          _this3._delayTimeoutId = null;
+                          _context4.prev = 1;
+                          ownerId = _this3._auth.ownerId;
+                          platform = _this3._client.service.platform();
+                          _context4.next = 6;
+                          return platform.put('/account/~/extension/~/presence', params);
+
+                        case 6:
+                          response = _context4.sent;
+                          data = response.json();
+
+                          if (ownerId === _this3._auth.ownerId) {
+                            _this3.store.dispatch((0, _extends3.default)({
+                              type: _this3.actionTypes.updateSuccess
+                            }, data));
+                          }
+                          _context4.next = 15;
+                          break;
+
+                        case 11:
+                          _context4.prev = 11;
+                          _context4.t0 = _context4['catch'](1);
+
+                          _this3.store.dispatch((0, _extends3.default)({
+                            type: _this3.actionTypes.updateError,
+                            error: _context4.t0
+                          }, oldStatus));
+                          console.error(_context4.t0);
+
+                        case 15:
+                        case 'end':
+                          return _context4.stop();
+                      }
+                    }
+                  }, _callee4, _this3, [[1, 11]]);
+                })), DELAY_TIME);
+
+              case 2:
+              case 'end':
+                return _context5.stop();
+            }
+          }
+        }, _callee5, this);
+      }));
+
+      function _delayUpdate(_x2, _x3) {
+        return _ref5.apply(this, arguments);
+      }
+
+      return _delayUpdate;
+    }()
   }, {
     key: '_clearDelayTimeout',
     value: function _clearDelayTimeout() {
