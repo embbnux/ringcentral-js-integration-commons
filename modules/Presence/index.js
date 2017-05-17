@@ -112,6 +112,7 @@ var Presence = function (_RcModule) {
     _this.setBusy = _this.setBusy.bind(_this);
     _this.setDoNotDisturb = _this.setDoNotDisturb.bind(_this);
     _this.setInvisible = _this.setInvisible.bind(_this);
+    _this.toggleAcceptCallQueueCalls = _this.toggleAcceptCallQueueCalls.bind(_this);
     _this._updateDelayTime = updateDelayTime;
     _this._delayTimeoutId = null;
     return _this;
