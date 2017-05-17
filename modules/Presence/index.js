@@ -73,7 +73,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var presenceEndPoint = /.*\/presence(\?.*)?/;
 
-var DELAY_TIME = 1000;
+var UPDATE_DELAY_TIME = 1000;
 
 var Presence = function (_RcModule) {
   (0, _inherits3.default)(Presence, _RcModule);
@@ -84,7 +84,9 @@ var Presence = function (_RcModule) {
         subscription = _ref.subscription,
         _ref$actionTypes = _ref.actionTypes,
         actionTypes = _ref$actionTypes === undefined ? _actionTypes2.default : _ref$actionTypes,
-        options = (0, _objectWithoutProperties3.default)(_ref, ['auth', 'client', 'subscription', 'actionTypes']);
+        _ref$updateDelayTime = _ref.updateDelayTime,
+        updateDelayTime = _ref$updateDelayTime === undefined ? UPDATE_DELAY_TIME : _ref$updateDelayTime,
+        options = (0, _objectWithoutProperties3.default)(_ref, ['auth', 'client', 'subscription', 'actionTypes', 'updateDelayTime']);
     (0, _classCallCheck3.default)(this, Presence);
 
     var _this = (0, _possibleConstructorReturn3.default)(this, (Presence.__proto__ || (0, _getPrototypeOf2.default)(Presence)).call(this, (0, _extends3.default)({}, options, {
@@ -110,6 +112,7 @@ var Presence = function (_RcModule) {
     _this.setBusy = _this.setBusy.bind(_this);
     _this.setDoNotDisturb = _this.setDoNotDisturb.bind(_this);
     _this.setInvisible = _this.setInvisible.bind(_this);
+    _this._updateDelayTime = updateDelayTime;
     _this._delayTimeoutId = null;
     return _this;
   }
@@ -309,7 +312,7 @@ var Presence = function (_RcModule) {
                       }
                     }
                   }, _callee4, _this3, [[1, 11]]);
-                })), DELAY_TIME);
+                })), this._updateDelayTime);
 
               case 2:
               case 'end':
