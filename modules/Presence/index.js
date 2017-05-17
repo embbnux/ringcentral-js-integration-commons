@@ -73,7 +73,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var presenceEndPoint = /.*\/presence(\?.*)?/;
 
-var DELAY_TIME = 2 * 1000;
+var DELAY_TIME = 1000;
 
 var Presence = function (_RcModule) {
   (0, _inherits3.default)(Presence, _RcModule);
