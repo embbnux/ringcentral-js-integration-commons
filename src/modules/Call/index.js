@@ -204,6 +204,9 @@ export default class Call extends RcModule {
         [parsedNumbers[1].e164, parsedNumbers[1].subAddress].join('*') :
         parsedNumbers[1].e164;
     }
+    if (isWebphone && fromNumber === 'anonymous') {
+      parsedFromNumber = 'anonymous';
+    }
     return {
       toNumber: parsedNumbers[0].e164,
       fromNumber: parsedFromNumber,
