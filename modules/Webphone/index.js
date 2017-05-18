@@ -116,7 +116,9 @@ var Webphone = function (_RcModule) {
         _ref$webphoneLogLevel = _ref.webphoneLogLevel,
         webphoneLogLevel = _ref$webphoneLogLevel === undefined ? 3 : _ref$webphoneLogLevel,
         storage = _ref.storage,
-        options = (0, _objectWithoutProperties3.default)(_ref, ['appKey', 'appName', 'appVersion', 'alert', 'auth', 'client', 'rolesAndPermissions', 'webphoneLogLevel', 'storage']);
+        onNewCall = _ref.onNewCall,
+        onCloseCall = _ref.onCloseCall,
+        options = (0, _objectWithoutProperties3.default)(_ref, ['appKey', 'appName', 'appVersion', 'alert', 'auth', 'client', 'rolesAndPermissions', 'webphoneLogLevel', 'storage', 'onNewCall', 'onCloseCall']);
     (0, _classCallCheck3.default)(this, Webphone);
 
     var _this = (0, _possibleConstructorReturn3.default)(this, (Webphone.__proto__ || (0, _getPrototypeOf2.default)(Webphone)).call(this, (0, _extends3.default)({}, options, {
@@ -133,6 +135,8 @@ var Webphone = function (_RcModule) {
     _this._rolesAndPermissions = rolesAndPermissions;
     _this._storage = storage;
     _this._storageWebphoneCountsKey = 'webphoneCounts';
+    _this._onNewCall = onNewCall;
+    _this._onCloseCall = onCloseCall;
     _this._webphone = null;
     _this._remoteVideo = null;
     _this._localVideo = null;
@@ -581,7 +585,17 @@ var Webphone = function (_RcModule) {
       session.on('rejected', function () {
         console.log('Event: Rejected');
         _this6._removeSession(session);
+        if (_this6._onCloseCall) {
+          _this6._onCloseCall(session);
+        }
       });
+      if (this._onNewCall) {
+        this._onNewCall({
+          session: session,
+          currentSession: this.currentSession,
+          sessions: this.sessions
+        });
+      }
     }
   }, {
     key: 'answer',
@@ -1180,6 +1194,13 @@ var Webphone = function (_RcModule) {
       this._addSession(session);
       this._setActiveSession(session);
       this._resetMinimized();
+      if (this._onNewCall) {
+        this._onNewCall({
+          session: session,
+          currentSession: this.currentSession,
+          sessions: this.sessions
+        });
+      }
       return session;
     }
   }, {
