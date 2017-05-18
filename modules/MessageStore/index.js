@@ -57,10 +57,6 @@ var _moduleStatuses2 = _interopRequireDefault(_moduleStatuses);
 
 var _batchApiHelper = require('../../lib/batchApiHelper');
 
-var _messageHelper = require('../../lib/messageHelper');
-
-var messageHelper = _interopRequireWildcard(_messageHelper);
-
 var _messageStoreHelper = require('./messageStoreHelper');
 
 var messageStoreHelper = _interopRequireWildcard(_messageStoreHelper);
@@ -129,39 +125,11 @@ var MessageStore = function (_RcModule) {
     });
 
     _this.addSelector('unreadCounts', function () {
-      return _this.allConversations;
+      return _this.conversations;
     }, function (conversations) {
-      var unreadCounts = 0;
-      conversations.forEach(function (conversation) {
-        if (messageHelper.messageIsTextMessage(conversation)) {
-          unreadCounts += conversation.unreadCounts;
-        }
-      });
-      return unreadCounts;
-    });
-
-    _this.addSelector('textConversations', function () {
-      return _this.allConversations;
-    }, function (conversations) {
-      return conversations.filter(function (conversation) {
-        return messageHelper.messageIsTextMessage(conversation);
-      });
-    });
-
-    _this.addSelector('faxMessages', function () {
-      return _this.allConversations;
-    }, function (conversations) {
-      return conversations.filter(function (conversation) {
-        return messageHelper.messageIsFax(conversation);
-      });
-    });
-
-    _this.addSelector('voicemailMessages', function () {
-      return _this.allConversations;
-    }, function (conversations) {
-      return conversations.filter(function (conversation) {
-        return messageHelper.messageIsVoicemail(conversation);
-      });
+      return conversations.reduce(function (pre, cur) {
+        return pre + cur.unreadCounts;
+      }, 0);
     });
 
     _this.syncConversation = _this.syncConversation.bind(_this);
@@ -922,24 +890,9 @@ var MessageStore = function (_RcModule) {
       return this.cache.data.messages;
     }
   }, {
-    key: 'allConversations',
-    get: function get() {
-      return this.cache.data.conversations;
-    }
-  }, {
-    key: 'voicemailMessages',
-    get: function get() {
-      return this._selectors.voicemailMessages();
-    }
-  }, {
-    key: 'faxMessages',
-    get: function get() {
-      return this._selectors.faxMessages();
-    }
-  }, {
     key: 'conversations',
     get: function get() {
-      return this._selectors.textConversations();
+      return this.cache.data.conversations;
     }
   }, {
     key: 'conversationMap',

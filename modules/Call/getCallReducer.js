@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", {
 exports.getCallStatusReducer = getCallStatusReducer;
 exports.getToNumberReducer = getToNumberReducer;
 exports.getLastCallNumberReducer = getLastCallNumberReducer;
-exports.getFromNumberReducer = getFromNumberReducer;
 exports.default = getCallReducer;
 
 var _redux = require('redux');
@@ -71,22 +70,6 @@ function getLastCallNumberReducer(types) {
 
     switch (type) {
       case types.connect:
-        return number;
-      default:
-        return state;
-    }
-  };
-}
-
-function getFromNumberReducer(types) {
-  return function () {
-    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-    var _ref4 = arguments[1];
-    var type = _ref4.type,
-        number = _ref4.number;
-
-    switch (type) {
-      case types.updateFromNumber:
         return number;
       default:
         return state;

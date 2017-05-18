@@ -5,6 +5,14 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = undefined;
 
+var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
+
+var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
+
+var _promise = require('babel-runtime/core-js/promise');
+
+var _promise2 = _interopRequireDefault(_promise);
+
 var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
@@ -113,6 +121,23 @@ var CallLogger = function (_LoggerBase) {
   }
 
   (0, _createClass3.default)(CallLogger, [{
+    key: 'addLogProvider',
+    value: function addLogProvider(_ref2) {
+      var name = _ref2.name,
+          logFn = _ref2.logFn,
+          readyCheckFn = _ref2.readyCheckFn,
+          _ref2$allowAutoLog = _ref2.allowAutoLog,
+          allowAutoLog = _ref2$allowAutoLog === undefined ? true : _ref2$allowAutoLog,
+          options = (0, _objectWithoutProperties3.default)(_ref2, ['name', 'logFn', 'readyCheckFn', 'allowAutoLog']);
+
+      (0, _get3.default)(CallLogger.prototype.__proto__ || (0, _getPrototypeOf2.default)(CallLogger.prototype), 'addLogProvider', this).call(this, (0, _extends3.default)({
+        name: name,
+        logFn: logFn,
+        readyCheckFn: readyCheckFn,
+        allowAutoLog: !!allowAutoLog
+      }, options));
+    }
+  }, {
     key: '_onReset',
     value: function _onReset() {
       this._lastProcessedCalls = null;
@@ -121,24 +146,25 @@ var CallLogger = function (_LoggerBase) {
   }, {
     key: '_shouldInit',
     value: function _shouldInit() {
-      return this.pending && this._callMonitor.ready && (!this._callHistory || this._callHistory.ready) && this._contactMatcher.ready && this._activityMatcher.ready && this._readyCheckFunction() && this._storage.ready;
+      return this.pending && this._callMonitor.ready && (!this._callHistory || this._callHistory.ready) && this._contactMatcher.ready && this._activityMatcher.ready && this.logProvidersReady && this._storage.ready;
     }
   }, {
     key: '_shouldReset',
     value: function _shouldReset() {
-      return this.ready && (!this._callMonitor.ready || this._callMonitor && !this._callMonitor.ready || this._callHistory && !this._callHistory.ready || !this._contactMatcher.ready || !this._activityMatcher.ready || !this._readyCheckFunction() || !this._storage.ready);
+      return this.ready && (!this._callMonitor.ready || this._callMonitor && !this._callMonitor.ready || this._callHistory && !this._callHistory.ready || !this._contactMatcher.ready || !this._activityMatcher.ready || !this.logProvidersReady || !this._storage.ready);
     }
   }, {
     key: 'log',
     value: function () {
-      var _ref2 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee(_ref3) {
-        var call = _ref3.call,
-            options = (0, _objectWithoutProperties3.default)(_ref3, ['call']);
+      var _ref3 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee(_ref4) {
+        var call = _ref4.call,
+            name = _ref4.name,
+            options = (0, _objectWithoutProperties3.default)(_ref4, ['call', 'name']);
         return _regenerator2.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                return _context.abrupt('return', (0, _get3.default)(CallLogger.prototype.__proto__ || (0, _getPrototypeOf2.default)(CallLogger.prototype), 'log', this).call(this, (0, _extends3.default)({ item: call }, options)));
+                return _context.abrupt('return', (0, _get3.default)(CallLogger.prototype.__proto__ || (0, _getPrototypeOf2.default)(CallLogger.prototype), 'log', this).call(this, (0, _extends3.default)({ item: call, name: name }, options)));
 
               case 1:
               case 'end':
@@ -149,7 +175,7 @@ var CallLogger = function (_LoggerBase) {
       }));
 
       function log(_x) {
-        return _ref2.apply(this, arguments);
+        return _ref3.apply(this, arguments);
       }
 
       return log;
@@ -162,10 +188,11 @@ var CallLogger = function (_LoggerBase) {
   }, {
     key: 'logCall',
     value: function () {
-      var _ref4 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2(_ref5) {
-        var call = _ref5.call,
-            contact = _ref5.contact,
-            options = (0, _objectWithoutProperties3.default)(_ref5, ['call', 'contact']);
+      var _ref5 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2(_ref6) {
+        var call = _ref6.call,
+            name = _ref6.name,
+            contact = _ref6.contact,
+            options = (0, _objectWithoutProperties3.default)(_ref6, ['call', 'name', 'contact']);
         var inbound, fromEntity, toEntity;
         return _regenerator2.default.wrap(function _callee2$(_context2) {
           while (1) {
@@ -180,6 +207,7 @@ var CallLogger = function (_LoggerBase) {
                     duration: Object.prototype.hasOwnProperty.call(call, 'duration') ? call.duration : Math.round((Date.now() - call.startTime) / 1000),
                     result: call.result || call.telephonyStatus
                   }),
+                  name: name,
                   fromEntity: fromEntity,
                   toEntity: toEntity
                 }));
@@ -193,7 +221,7 @@ var CallLogger = function (_LoggerBase) {
       }));
 
       function logCall(_x2) {
-        return _ref4.apply(this, arguments);
+        return _ref5.apply(this, arguments);
       }
 
       return logCall;
@@ -201,23 +229,31 @@ var CallLogger = function (_LoggerBase) {
   }, {
     key: '_autoLogCall',
     value: function () {
-      var _ref6 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3(_ref7) {
-        var call = _ref7.call,
-            fromEntity = _ref7.fromEntity,
-            toEntity = _ref7.toEntity;
+      var _ref7 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3(_ref8) {
+        var _this2 = this;
+
+        var call = _ref8.call,
+            fromEntity = _ref8.fromEntity,
+            toEntity = _ref8.toEntity;
         return _regenerator2.default.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
                 _context3.next = 2;
-                return this.log({
-                  call: (0, _extends3.default)({}, call, {
-                    duration: Object.prototype.hasOwnProperty.call(call, 'duration') ? call.duration : Math.round((Date.now() - call.startTime) / 1000),
-                    result: call.result || call.telephonyStatus
-                  }),
-                  fromEntity: fromEntity,
-                  toEntity: toEntity
-                });
+                return _promise2.default.all([].concat((0, _toConsumableArray3.default)(this._logProviders.keys())).filter(function (name) {
+                  var provider = _this2._logProviders.get(name);
+                  return provider.allowAutoLog && provider.readyCheckFn();
+                }).map(function (name) {
+                  return _this2.log({
+                    call: (0, _extends3.default)({}, call, {
+                      duration: Object.prototype.hasOwnProperty.call(call, 'duration') ? call.duration : Math.round((Date.now() - call.startTime) / 1000),
+                      result: call.result || call.telephonyStatus
+                    }),
+                    name: name,
+                    fromEntity: fromEntity,
+                    toEntity: toEntity
+                  });
+                }));
 
               case 2:
               case 'end':
@@ -228,7 +264,7 @@ var CallLogger = function (_LoggerBase) {
       }));
 
       function _autoLogCall(_x3) {
-        return _ref6.apply(this, arguments);
+        return _ref7.apply(this, arguments);
       }
 
       return _autoLogCall;
@@ -236,7 +272,7 @@ var CallLogger = function (_LoggerBase) {
   }, {
     key: '_onNewCall',
     value: function () {
-      var _ref8 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee4(call) {
+      var _ref9 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee4(call) {
         var fromMatches, toMatches, fromEntity, toEntity;
         return _regenerator2.default.wrap(function _callee4$(_context4) {
           while (1) {
@@ -288,7 +324,7 @@ var CallLogger = function (_LoggerBase) {
       }));
 
       function _onNewCall(_x4) {
-        return _ref8.apply(this, arguments);
+        return _ref9.apply(this, arguments);
       }
 
       return _onNewCall;
@@ -296,7 +332,7 @@ var CallLogger = function (_LoggerBase) {
   }, {
     key: '_shouldLogUpdatedCall',
     value: function () {
-      var _ref9 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee5(call) {
+      var _ref10 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee5(call) {
         var activityMatches;
         return _regenerator2.default.wrap(function _callee5$(_context5) {
           while (1) {
@@ -334,7 +370,7 @@ var CallLogger = function (_LoggerBase) {
       }));
 
       function _shouldLogUpdatedCall(_x5) {
-        return _ref9.apply(this, arguments);
+        return _ref10.apply(this, arguments);
       }
 
       return _shouldLogUpdatedCall;
@@ -342,7 +378,7 @@ var CallLogger = function (_LoggerBase) {
   }, {
     key: '_onCallUpdated',
     value: function () {
-      var _ref10 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee6(call) {
+      var _ref11 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee6(call) {
         return _regenerator2.default.wrap(function _callee6$(_context6) {
           while (1) {
             switch (_context6.prev = _context6.next) {
@@ -368,7 +404,7 @@ var CallLogger = function (_LoggerBase) {
       }));
 
       function _onCallUpdated(_x6) {
-        return _ref10.apply(this, arguments);
+        return _ref11.apply(this, arguments);
       }
 
       return _onCallUpdated;
@@ -376,7 +412,7 @@ var CallLogger = function (_LoggerBase) {
   }, {
     key: '_processCalls',
     value: function _processCalls() {
-      var _this2 = this;
+      var _this3 = this;
 
       if (this.ready) {
         if (this._lastProcessedCalls !== this._callMonitor.calls) {
@@ -389,17 +425,17 @@ var CallLogger = function (_LoggerBase) {
             });
 
             if (oldCallIndex === -1) {
-              _this2._onNewCall(call);
+              _this3._onNewCall(call);
             } else {
               var oldCall = oldCalls[oldCallIndex];
               oldCalls.splice(oldCallIndex, 1);
               if (call.telephonyStatus !== oldCall.telephonyStatus) {
-                _this2._onCallUpdated(call);
+                _this3._onCallUpdated(call);
               }
             }
           });
           oldCalls.forEach(function (call) {
-            _this2._onCallUpdated(call);
+            _this3._onCallUpdated(call);
           });
         }
         if (this._callHistory && this._lastProcessedEndedCalls !== this._callHistory.recentlyEndedCalls) {
@@ -412,11 +448,11 @@ var CallLogger = function (_LoggerBase) {
           _oldCalls.forEach(function (call) {
             if (!currentSessions[call.sessionId]) {
               // call log updated
-              var callInfo = _this2._callHistory.calls.find(function (item) {
+              var callInfo = _this3._callHistory.calls.find(function (item) {
                 return item.sessionId === call.sessionId;
               });
               if (callInfo) {
-                _this2._onCallUpdated(callInfo);
+                _this3._onCallUpdated(callInfo);
               }
             }
           });
@@ -426,7 +462,7 @@ var CallLogger = function (_LoggerBase) {
   }, {
     key: '_onStateChange',
     value: function () {
-      var _ref11 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee7() {
+      var _ref12 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee7() {
         return _regenerator2.default.wrap(function _callee7$(_context7) {
           while (1) {
             switch (_context7.prev = _context7.next) {
@@ -446,7 +482,7 @@ var CallLogger = function (_LoggerBase) {
       }));
 
       function _onStateChange() {
-        return _ref11.apply(this, arguments);
+        return _ref12.apply(this, arguments);
       }
 
       return _onStateChange;

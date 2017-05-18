@@ -61,19 +61,9 @@ var _moduleStatuses = require('../../enums/moduleStatuses');
 
 var _moduleStatuses2 = _interopRequireDefault(_moduleStatuses);
 
-var _dndStatus = require('./dndStatus');
-
-var _dndStatus2 = _interopRequireDefault(_dndStatus);
-
-var _presenceStatus = require('./presenceStatus');
-
-var _presenceStatus2 = _interopRequireDefault(_presenceStatus);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var presenceEndPoint = /.*\/presence(\?.*)?/;
-
-var UPDATE_DELAY_TIME = 1000;
 
 var Presence = function (_RcModule) {
   (0, _inherits3.default)(Presence, _RcModule);
@@ -84,9 +74,7 @@ var Presence = function (_RcModule) {
         subscription = _ref.subscription,
         _ref$actionTypes = _ref.actionTypes,
         actionTypes = _ref$actionTypes === undefined ? _actionTypes2.default : _ref$actionTypes,
-        _ref$updateDelayTime = _ref.updateDelayTime,
-        updateDelayTime = _ref$updateDelayTime === undefined ? UPDATE_DELAY_TIME : _ref$updateDelayTime,
-        options = (0, _objectWithoutProperties3.default)(_ref, ['auth', 'client', 'subscription', 'actionTypes', 'updateDelayTime']);
+        options = (0, _objectWithoutProperties3.default)(_ref, ['auth', 'client', 'subscription', 'actionTypes']);
     (0, _classCallCheck3.default)(this, Presence);
 
     var _this = (0, _possibleConstructorReturn3.default)(this, (Presence.__proto__ || (0, _getPrototypeOf2.default)(Presence)).call(this, (0, _extends3.default)({}, options, {
@@ -95,9 +83,12 @@ var Presence = function (_RcModule) {
 
     _this._subscriptionHandler = function (message) {
       if (message && presenceEndPoint.test(message.event) && message.body) {
-        _this.store.dispatch((0, _extends3.default)({
-          type: _this.actionTypes.notification
-        }, message.body));
+        var dndStatus = message.body.dndStatus;
+
+        _this.store.dispatch({
+          type: _this.actionTypes.notification,
+          dndStatus: dndStatus
+        });
       }
     };
 
@@ -107,14 +98,6 @@ var Presence = function (_RcModule) {
 
     _this._reducer = (0, _getPresenceReducer2.default)(_this.actionTypes);
     _this._lastMessage = null;
-
-    _this.setAvailable = _this.setAvailable.bind(_this);
-    _this.setBusy = _this.setBusy.bind(_this);
-    _this.setDoNotDisturb = _this.setDoNotDisturb.bind(_this);
-    _this.setInvisible = _this.setInvisible.bind(_this);
-    _this.toggleAcceptCallQueueCalls = _this.toggleAcceptCallQueueCalls.bind(_this);
-    _this._updateDelayTime = updateDelayTime;
-    _this._delayTimeoutId = null;
     return _this;
   }
 
@@ -186,9 +169,10 @@ var Presence = function (_RcModule) {
                 data = _context2.sent;
 
                 if (ownerId === this._auth.ownerId) {
-                  this.store.dispatch((0, _extends3.default)({
-                    type: this.actionTypes.fetchSuccess
-                  }, data));
+                  this.store.dispatch({
+                    type: this.actionTypes.fetchSuccess,
+                    dndStatus: data.dndStatus
+                  });
                 }
                 this._promise = null;
                 _context2.next = 15;
@@ -228,179 +212,6 @@ var Presence = function (_RcModule) {
       return this._promise;
     }
   }, {
-    key: '_update',
-    value: function () {
-      var _ref4 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3(params) {
-        var oldStatus;
-        return _regenerator2.default.wrap(function _callee3$(_context3) {
-          while (1) {
-            switch (_context3.prev = _context3.next) {
-              case 0:
-                oldStatus = {
-                  dndStatus: this.dndStatus,
-                  userStatus: this.userStatus
-                };
-
-                this.store.dispatch((0, _extends3.default)({
-                  type: this.actionTypes.update
-                }, params));
-                _context3.next = 4;
-                return this._delayUpdate(params, oldStatus);
-
-              case 4:
-              case 'end':
-                return _context3.stop();
-            }
-          }
-        }, _callee3, this);
-      }));
-
-      function _update(_x) {
-        return _ref4.apply(this, arguments);
-      }
-
-      return _update;
-    }()
-  }, {
-    key: '_delayUpdate',
-    value: function () {
-      var _ref5 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee5(params, oldStatus) {
-        var _this3 = this;
-
-        return _regenerator2.default.wrap(function _callee5$(_context5) {
-          while (1) {
-            switch (_context5.prev = _context5.next) {
-              case 0:
-                this._clearDelayTimeout();
-                this._delayTimeoutId = setTimeout((0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee4() {
-                  var ownerId, platform, response, data;
-                  return _regenerator2.default.wrap(function _callee4$(_context4) {
-                    while (1) {
-                      switch (_context4.prev = _context4.next) {
-                        case 0:
-                          _this3._delayTimeoutId = null;
-                          _context4.prev = 1;
-                          ownerId = _this3._auth.ownerId;
-                          platform = _this3._client.service.platform();
-                          _context4.next = 6;
-                          return platform.put('/account/~/extension/~/presence', params);
-
-                        case 6:
-                          response = _context4.sent;
-                          data = response.json();
-
-                          if (ownerId === _this3._auth.ownerId) {
-                            _this3.store.dispatch((0, _extends3.default)({
-                              type: _this3.actionTypes.updateSuccess
-                            }, data));
-                          }
-                          _context4.next = 15;
-                          break;
-
-                        case 11:
-                          _context4.prev = 11;
-                          _context4.t0 = _context4['catch'](1);
-
-                          _this3.store.dispatch((0, _extends3.default)({
-                            type: _this3.actionTypes.updateError,
-                            error: _context4.t0
-                          }, oldStatus));
-                          console.error(_context4.t0);
-
-                        case 15:
-                        case 'end':
-                          return _context4.stop();
-                      }
-                    }
-                  }, _callee4, _this3, [[1, 11]]);
-                })), this._updateDelayTime);
-
-              case 2:
-              case 'end':
-                return _context5.stop();
-            }
-          }
-        }, _callee5, this);
-      }));
-
-      function _delayUpdate(_x2, _x3) {
-        return _ref5.apply(this, arguments);
-      }
-
-      return _delayUpdate;
-    }()
-  }, {
-    key: '_clearDelayTimeout',
-    value: function _clearDelayTimeout() {
-      if (this._delayTimeoutId) clearTimeout(this._delayTimeoutId);
-    }
-  }, {
-    key: '_getUpdateStatusParams',
-    value: function _getUpdateStatusParams(userStatusParams) {
-      var params = {
-        dndStatus: this.dndStatus,
-        userStatus: userStatusParams
-      };
-      if (params.dndStatus !== _dndStatus2.default.takeAllCalls && params.dndStatus !== _dndStatus2.default.doNotAcceptDepartmentCalls) {
-        params.dndStatus = _dndStatus2.default.takeAllCalls;
-      }
-      return params;
-    }
-  }, {
-    key: 'setAvailable',
-    value: function setAvailable() {
-      if (this.presenceStatus === _presenceStatus2.default.available) {
-        return;
-      }
-      var params = this._getUpdateStatusParams(_presenceStatus2.default.available);
-      this._update(params);
-    }
-  }, {
-    key: 'setBusy',
-    value: function setBusy() {
-      if (this.presenceStatus === _presenceStatus2.default.busy && this.dndStatus !== _dndStatus2.default.doNotAcceptAnyCalls) {
-        return;
-      }
-      var params = this._getUpdateStatusParams(_presenceStatus2.default.busy);
-      this._update(params);
-    }
-  }, {
-    key: 'setDoNotDisturb',
-    value: function setDoNotDisturb() {
-      if (this.presenceStatus === _presenceStatus2.default.busy && this.dndStatus === _dndStatus2.default.doNotAcceptAnyCalls) {
-        return;
-      }
-      var params = {
-        dndStatus: _dndStatus2.default.doNotAcceptAnyCalls,
-        userStatus: _presenceStatus2.default.busy
-      };
-      this._update(params);
-    }
-  }, {
-    key: 'setInvisible',
-    value: function setInvisible() {
-      if (this.presenceStatus === _presenceStatus2.default.offline) {
-        return;
-      }
-      var params = this._getUpdateStatusParams(_presenceStatus2.default.offline);
-      this._update(params);
-    }
-  }, {
-    key: 'toggleAcceptCallQueueCalls',
-    value: function toggleAcceptCallQueueCalls() {
-      var params = {
-        userStatus: this.userStatus
-      };
-      if (this.dndStatus === _dndStatus2.default.takeAllCalls) {
-        params.dndStatus = _dndStatus2.default.doNotAcceptDepartmentCalls;
-      } else if (this.dndStatus === _dndStatus2.default.doNotAcceptDepartmentCalls) {
-        params.dndStatus = _dndStatus2.default.takeAllCalls;
-      }
-      if (params.dndStatus) {
-        this._update(params);
-      }
-    }
-  }, {
     key: 'status',
     get: function get() {
       return this.state.status;
@@ -414,21 +225,6 @@ var Presence = function (_RcModule) {
     key: 'dndStatus',
     get: function get() {
       return this.state.dndStatus;
-    }
-  }, {
-    key: 'userStatus',
-    get: function get() {
-      return this.state.userStatus;
-    }
-  }, {
-    key: 'message',
-    get: function get() {
-      return this.state.message;
-    }
-  }, {
-    key: 'presenceStatus',
-    get: function get() {
-      return this.state.presenceStatus;
     }
   }]);
   return Presence;

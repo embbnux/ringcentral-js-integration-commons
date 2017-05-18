@@ -3,9 +3,12 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.getCurrentMessagesReducer = getCurrentMessagesReducer;
 exports.getCurrentPageReducer = getCurrentPageReducer;
-exports.getSearchInputReducer = getSearchInputReducer;
-exports.getPerPageReducer = getPerPageReducer;
+exports.getLastUpdatedAtReducer = getLastUpdatedAtReducer;
+exports.getMessageStoreUpdatedAt = getMessageStoreUpdatedAt;
+exports.getSearingStringReducer = getSearingStringReducer;
+exports.getSearchingResultsReducer = getSearchingResultsReducer;
 exports.default = getMessagesReducer;
 
 var _redux = require('redux');
@@ -16,41 +19,85 @@ var _getModuleStatusReducer2 = _interopRequireDefault(_getModuleStatusReducer);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function getCurrentPageReducer(types) {
+function getCurrentMessagesReducer(types) {
   return function () {
-    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
     var _ref = arguments[1];
     var type = _ref.type,
-        _ref$page = _ref.page,
-        page = _ref$page === undefined ? state : _ref$page;
+        messages = _ref.messages;
 
     switch (type) {
-      case types.previousPage:
-        return Math.max(state - 1, 0);
-      case types.nextPage:
-        return state + 1;
-      case types.setPage:
-        return page;
-      case types.resetSuccess:
-        return 0;
+      case types.updateMessages:
+        return messages;
+      case types.pushMessages:
+        return state.concat(messages);
       default:
         return state;
     }
   };
 }
 
-function getSearchInputReducer(types) {
+function getCurrentPageReducer(types) {
   return function () {
-    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
     var _ref2 = arguments[1];
-    var type = _ref2.type,
-        _ref2$input = _ref2.input,
-        input = _ref2$input === undefined ? '' : _ref2$input;
+    var type = _ref2.type;
 
     switch (type) {
-      case types.updateSearchInput:
-        return input;
-      case types.resetSuccess:
+      case types.nextPage:
+        return state + 1;
+      case types.resetPage:
+        return 1;
+      default:
+        return state;
+    }
+  };
+}
+
+function getLastUpdatedAtReducer(types) {
+  return function () {
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+    var _ref3 = arguments[1];
+    var type = _ref3.type;
+
+    switch (type) {
+      case types.pushMessages:
+      case types.updateMessages:
+        return Date.now();
+      default:
+        return state;
+    }
+  };
+}
+
+function getMessageStoreUpdatedAt(types) {
+  return function () {
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+    var _ref4 = arguments[1];
+    var type = _ref4.type,
+        messagesTimestamp = _ref4.messagesTimestamp;
+
+    switch (type) {
+      case types.pushMessages:
+      case types.updateMessages:
+        return messagesTimestamp;
+      default:
+        return state;
+    }
+  };
+}
+
+function getSearingStringReducer(types) {
+  return function () {
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+    var _ref5 = arguments[1];
+    var type = _ref5.type,
+        searchingString = _ref5.searchingString;
+
+    switch (type) {
+      case types.updateSearchingString:
+        return searchingString;
+      case types.cleanSearchingString:
         return '';
       default:
         return state;
@@ -58,31 +105,31 @@ function getSearchInputReducer(types) {
   };
 }
 
-function getPerPageReducer(types, defaultPerPage) {
+function getSearchingResultsReducer(types) {
   return function () {
-    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultPerPage;
-    var _ref3 = arguments[1];
-    var type = _ref3.type,
-        _ref3$perPage = _ref3.perPage,
-        perPage = _ref3$perPage === undefined ? defaultPerPage : _ref3$perPage;
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+    var _ref6 = arguments[1];
+    var type = _ref6.type,
+        searchResults = _ref6.searchResults;
 
     switch (type) {
-      case types.setPerPage:
-        return perPage;
-      case types.resetSuccess:
-        return defaultPerPage;
+      case types.updateSearchResults:
+        return searchResults;
       default:
         return state;
     }
   };
 }
 
-function getMessagesReducer(types, defaultPerPage) {
+function getMessagesReducer(types) {
   return (0, _redux.combineReducers)({
     status: (0, _getModuleStatusReducer2.default)(types),
+    messages: getCurrentMessagesReducer(types),
     currentPage: getCurrentPageReducer(types),
-    perPage: getPerPageReducer(types, defaultPerPage),
-    searchInput: getSearchInputReducer(types)
+    lastUpdatedAt: getLastUpdatedAtReducer(types),
+    messageStoreUpdatedAt: getMessageStoreUpdatedAt(types),
+    searchingString: getSearingStringReducer(types),
+    searchingResults: getSearchingResultsReducer(types)
   });
 }
 //# sourceMappingURL=getMessagesReducer.js.map
