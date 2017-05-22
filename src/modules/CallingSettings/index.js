@@ -277,6 +277,14 @@ export default class CallingSettings extends RcModule {
     }
   }
 
+  _warningEmergencyCallingNotAvailable() {
+    if (this.callWith === callingOptions.browser) {
+      this._alert.info({
+        message: callingSettingsMessages.emergencyCallingNotAvailable,
+      });
+    }
+  }
+
   get status() {
     return this.state.status;
   }
@@ -347,6 +355,7 @@ export default class CallingSettings extends RcModule {
         this._alert.info({
           message: callingSettingsMessages.saveSuccess,
         });
+        this._warningEmergencyCallingNotAvailable();
       }
     }
   }
