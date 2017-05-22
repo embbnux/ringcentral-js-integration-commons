@@ -5,10 +5,4 @@ export default new Enum([
   'initSuccess',
   'reset',
   'resetSuccess',
-  'search',
-  'nextPage',
-  'previousPage',
-  'setPage',
-  'setPerPage',
-  'updateSearchInput',
-], 'messages');
+], 'contacts');

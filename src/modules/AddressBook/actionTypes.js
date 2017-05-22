@@ -5,7 +5,8 @@ export default new Enum([
   'initSuccess',
   'reset',
   'resetSuccess',
-  'fetch',
-  'fetchError',
-  'fetchSuccess',
-], 'dateTimeIntl');
+  'sync',
+  'syncError',
+  'syncSuccess',
+  'cleanUp',
+], 'address-book');

@@ -1,6 +1,6 @@
 import Enum from '../../lib/Enum';
 
 export default new Enum([
-  'fetching',
+  'syncing',
   'idle',
-], 'dateTimeIntl');
+], 'address-book');
