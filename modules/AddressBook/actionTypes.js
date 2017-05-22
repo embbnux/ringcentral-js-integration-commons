@@ -10,5 +10,5 @@ var _Enum2 = _interopRequireDefault(_Enum);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = new _Enum2.default(['init', 'initSuccess', 'reset', 'resetSuccess', 'fetch', 'fetchError', 'fetchSuccess'], 'dateTimeIntl');
+exports.default = new _Enum2.default(['init', 'initSuccess', 'reset', 'resetSuccess', 'sync', 'syncError', 'syncSuccess', 'cleanUp'], 'address-book');
 //# sourceMappingURL=actionTypes.js.map

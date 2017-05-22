@@ -89,7 +89,10 @@ function simplifyExtensionData(ext) {
   return {
     ext: ext.extensionNumber,
     name: ext.name,
-    id: ext.id
+    id: ext.id,
+    status: ext.status,
+    type: ext.type,
+    contact: ext.contact
   };
 }
 

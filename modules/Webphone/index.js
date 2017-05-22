@@ -116,9 +116,7 @@ var Webphone = function (_RcModule) {
         _ref$webphoneLogLevel = _ref.webphoneLogLevel,
         webphoneLogLevel = _ref$webphoneLogLevel === undefined ? 3 : _ref$webphoneLogLevel,
         storage = _ref.storage,
-        onNewCall = _ref.onNewCall,
-        onCloseCall = _ref.onCloseCall,
-        options = (0, _objectWithoutProperties3.default)(_ref, ['appKey', 'appName', 'appVersion', 'alert', 'auth', 'client', 'rolesAndPermissions', 'webphoneLogLevel', 'storage', 'onNewCall', 'onCloseCall']);
+        options = (0, _objectWithoutProperties3.default)(_ref, ['appKey', 'appName', 'appVersion', 'alert', 'auth', 'client', 'rolesAndPermissions', 'webphoneLogLevel', 'storage']);
     (0, _classCallCheck3.default)(this, Webphone);
 
     var _this = (0, _possibleConstructorReturn3.default)(this, (Webphone.__proto__ || (0, _getPrototypeOf2.default)(Webphone)).call(this, (0, _extends3.default)({}, options, {
@@ -135,8 +133,6 @@ var Webphone = function (_RcModule) {
     _this._rolesAndPermissions = rolesAndPermissions;
     _this._storage = storage;
     _this._storageWebphoneCountsKey = 'webphoneCounts';
-    _this._onNewCall = onNewCall;
-    _this._onCloseCall = onCloseCall;
     _this._webphone = null;
     _this._remoteVideo = null;
     _this._localVideo = null;
@@ -289,6 +285,12 @@ var Webphone = function (_RcModule) {
         });
         _this3._webphone.userAgent.removeAllListeners();
         _this3._webphone = null;
+        if (error && error.reason_phrase && error.reason_phrase.indexOf('Too Many Contacts') > -1) {
+          _this3._alert.warning({
+            message: _webphoneErrors2.default.webphoneCountOverLimit
+          });
+          return;
+        }
         _this3._connect(true);
       };
       this._webphone.userAgent.audioHelper.setVolume(0.3);
@@ -427,7 +429,7 @@ var Webphone = function (_RcModule) {
 
               case 8:
                 if (!_context3.t0) {
-                  _context3.next = 20;
+                  _context3.next = 17;
                   break;
                 }
 
@@ -443,19 +445,8 @@ var Webphone = function (_RcModule) {
                 return _context3.abrupt('return');
 
               case 12:
-                if (!(this.webphoneCounts >= 5)) {
-                  _context3.next = 15;
-                  break;
-                }
-
-                this._alert.warning({
-                  message: _webphoneErrors2.default.webphoneCountOverLimit
-                });
-                return _context3.abrupt('return');
-
-              case 15:
                 if (hasFromNumber) {
-                  _context3.next = 18;
+                  _context3.next = 15;
                   break;
                 }
 
@@ -464,11 +455,11 @@ var Webphone = function (_RcModule) {
                 });
                 return _context3.abrupt('return');
 
-              case 18:
-                _context3.next = 20;
+              case 15:
+                _context3.next = 17;
                 return this._connect();
 
-              case 20:
+              case 17:
               case 'end':
                 return _context3.stop();
             }
@@ -585,17 +576,7 @@ var Webphone = function (_RcModule) {
       session.on('rejected', function () {
         console.log('Event: Rejected');
         _this6._removeSession(session);
-        if (_this6._onCloseCall) {
-          _this6._onCloseCall(session);
-        }
       });
-      if (this._onNewCall) {
-        this._onNewCall({
-          session: session,
-          currentSession: this.currentSession,
-          sessions: this.sessions
-        });
-      }
     }
   }, {
     key: 'answer',
@@ -1194,13 +1175,6 @@ var Webphone = function (_RcModule) {
       this._addSession(session);
       this._setActiveSession(session);
       this._resetMinimized();
-      if (this._onNewCall) {
-        this._onNewCall({
-          session: session,
-          currentSession: this.currentSession,
-          sessions: this.sessions
-        });
-      }
       return session;
     }
   }, {

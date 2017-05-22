@@ -120,6 +120,9 @@ var ExtensionInfo = function (_DataFetcher) {
     }, function (data) {
       return data || {};
     });
+    _this.addSelector('serviceFeatures', _this._selectors.info, function (info) {
+      return info.serviceFeatures || {};
+    });
     return _this;
   }
 
@@ -141,7 +144,7 @@ var ExtensionInfo = function (_DataFetcher) {
   }, {
     key: 'serviceFeatures',
     get: function get() {
-      return this.info.serviceFeatures;
+      return this._selectors.serviceFeatures();
     }
   }, {
     key: 'country',
