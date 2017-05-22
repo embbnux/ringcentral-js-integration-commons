@@ -176,6 +176,12 @@ export default class Webphone extends RcModule {
       });
       this._webphone.userAgent.removeAllListeners();
       this._webphone = null;
+      if (error && error.reason_phrase && error.reason_phrase.indexOf('Too Many Contacts') > -1) {
+        this._alert.warning({
+          message: webphoneErrors.webphoneCountOverLimit,
+        });
+        return;
+      }
       this._connect(true);
     };
     this._webphone.userAgent.audioHelper.setVolume(0.3);
@@ -246,12 +252,6 @@ export default class Webphone extends RcModule {
         this._alert.warning({
           message: webphoneErrors.browserNotSupported,
           ttl: 0,
-        });
-        return;
-      }
-      if (this.webphoneCounts >= 5) {
-        this._alert.warning({
-          message: webphoneErrors.webphoneCountOverLimit,
         });
         return;
       }
