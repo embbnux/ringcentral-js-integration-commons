@@ -332,6 +332,15 @@ var CallingSettings = function (_RcModule) {
       }
     }
   }, {
+    key: '_warningEmergencyCallingNotAvailable',
+    value: function _warningEmergencyCallingNotAvailable() {
+      if (this.callWith === _callingOptions2.default.browser) {
+        this._alert.info({
+          message: _callingSettingsMessages2.default.emergencyCallingNotAvailable
+        });
+      }
+    }
+  }, {
     key: 'setData',
     value: function setData(_ref4, withPrompt) {
       var callWith = _ref4.callWith,
@@ -355,6 +364,7 @@ var CallingSettings = function (_RcModule) {
           this._alert.info({
             message: _callingSettingsMessages2.default.saveSuccess
           });
+          this._warningEmergencyCallingNotAvailable();
         }
       }
     }
