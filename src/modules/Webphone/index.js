@@ -83,7 +83,7 @@ export default class Webphone extends RcModule {
       this._localVideo.setAttribute('muted', 'muted');
       document.body.appendChild(this._remoteVideo);
       document.body.appendChild(this._localVideo);
-      window.onbeforeunload = () => {
+      window.unload = () => {
         this.disconnect();
       };
       this.store.dispatch({
