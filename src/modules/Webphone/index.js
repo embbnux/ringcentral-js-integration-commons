@@ -138,8 +138,10 @@ export default class Webphone extends RcModule {
         });
       return response.json();
     } catch (error) {
-      console.error(error);
-      throw new Error(webphoneErrors.getSipProvisionError);
+      this._alert.warning({
+        message: webphoneErrors.getSipProvisionError,
+      });
+      throw error;
     }
   }
 
@@ -238,6 +240,13 @@ export default class Webphone extends RcModule {
         ttl: 0,
         allowDuplicates: false,
       });
+      if (
+        error && error.message &&
+        (error.message.indexOf('Feature [WebPhone] is not available') > -1)
+      ) {
+        this._rolesAndPermissions.refreshServiceFeatures();
+        return;
+      }
       await this._connect(true);
     }
   }
