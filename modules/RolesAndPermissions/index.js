@@ -173,6 +173,13 @@ var RolesAndPermissions = function (_DataFetcher) {
       return _onStateChange;
     }()
   }, {
+    key: 'refreshServiceFeatures',
+    value: function refreshServiceFeatures() {
+      if (this._extensionInfo.ready) {
+        this._extensionInfo.fetchData();
+      }
+    }
+  }, {
     key: 'serviceFeatures',
     get: function get() {
       return this._extensionInfo.serviceFeatures;

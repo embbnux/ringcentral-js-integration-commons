@@ -168,7 +168,7 @@ var Webphone = function (_RcModule) {
         this._localVideo.setAttribute('muted', 'muted');
         document.body.appendChild(this._remoteVideo);
         document.body.appendChild(this._localVideo);
-        window.onbeforeunload = function () {
+        window.unload = function () {
           _this2.disconnect();
         };
         this.store.dispatch({
@@ -232,8 +232,10 @@ var Webphone = function (_RcModule) {
                 _context.prev = 7;
                 _context.t0 = _context['catch'](0);
 
-                console.error(_context.t0);
-                throw new Error(_webphoneErrors2.default.getSipProvisionError);
+                this._alert.warning({
+                  message: _webphoneErrors2.default.getSipProvisionError
+                });
+                throw _context.t0;
 
               case 11:
               case 'end':
@@ -363,7 +365,7 @@ var Webphone = function (_RcModule) {
 
               case 15:
                 this._createWebphone(sipProvision);
-                _context2.next = 24;
+                _context2.next = 27;
                 break;
 
               case 18:
@@ -379,10 +381,20 @@ var Webphone = function (_RcModule) {
                   ttl: 0,
                   allowDuplicates: false
                 });
-                _context2.next = 24;
+
+                if (!(_context2.t0 && _context2.t0.message && _context2.t0.message.indexOf('Feature [WebPhone] is not available') > -1)) {
+                  _context2.next = 25;
+                  break;
+                }
+
+                this._rolesAndPermissions.refreshServiceFeatures();
+                return _context2.abrupt('return');
+
+              case 25:
+                _context2.next = 27;
                 return this._connect(true);
 
-              case 24:
+              case 27:
               case 'end':
                 return _context2.stop();
             }
