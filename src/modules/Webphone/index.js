@@ -131,18 +131,11 @@ export default class Webphone extends RcModule {
   }
 
   async _sipProvision() {
-    try {
-      const response = await this._client.service.platform()
-        .post('/client-info/sip-provision', {
-          sipInfo: [{ transport: 'WSS' }]
-        });
-      return response.json();
-    } catch (error) {
-      this._alert.warning({
-        message: webphoneErrors.getSipProvisionError,
+    const response = await this._client.service.platform()
+      .post('/client-info/sip-provision', {
+        sipInfo: [{ transport: 'WSS' }]
       });
-      throw error;
-    }
+    return response.json();
   }
 
   _createWebphone(provisionData) {
