@@ -21,12 +21,10 @@ export default (auth, client, regionSettings, account) => {
     it('Region Settings should be ready in 2 seconds after login', async () => {
       this.retries(2);
       await waitInSeconds(2);
-      clientHistoryRequest.debugHistoryRequest();
       expect(regionSettings.availableCountries).to.have.length.above(0);
     });
 
     it('Record fetched from SDK should be the same as RawData', () => {
-      clientHistoryRequest.debugHistoryRequest();
       expect(regionSettings.availableCountries.length).to.equal(clientHistoryRequest.getRawResponse(ClientHistoryRequest.endPoints.dialingPlan).records.length);
     });
   });
