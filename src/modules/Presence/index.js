@@ -33,6 +33,7 @@ export default class Presence extends RcModule {
 
     this._updateDelayTime = updateDelayTime;
     this._delayTimeoutId = null;
+    this._lastNotDisturbDndStatus = null;
   }
 
   _subscriptionHandler = (message) => {
@@ -87,6 +88,7 @@ export default class Presence extends RcModule {
       const ownerId = this._auth.ownerId;
       const data = await this._client.account().extension().presence().get();
       if (ownerId === this._auth.ownerId) {
+        this._rememberLastNotDisturbDndStatus(data.dndStatus);
         this.store.dispatch({
           type: this.actionTypes.fetchSuccess,
           ...data,
@@ -120,6 +122,7 @@ export default class Presence extends RcModule {
       );
       const data = response.json();
       if (ownerId === this._auth.ownerId) {
+        this._rememberLastNotDisturbDndStatus(data.dndStatus);
         this.store.dispatch({
           type: this.actionTypes.updateSuccess,
           ...data,
@@ -134,6 +137,15 @@ export default class Presence extends RcModule {
     }
   }
 
+  _rememberLastNotDisturbDndStatus(newDndStatus) {
+    if (
+      newDndStatus === dndStatus.doNotAcceptAnyCalls &&
+      this.dndStatus !== dndStatus.doNotAcceptAnyCalls
+    ) {
+      this._lastNotDisturbDndStatus = this.dndStatus;
+    }
+  }
+
   _getUpdateStatusParams(userStatusParams) {
     const params = {
       dndStatus: this.dndStatus,
@@ -143,7 +155,7 @@ export default class Presence extends RcModule {
       params.dndStatus !== dndStatus.takeAllCalls &&
       params.dndStatus !== dndStatus.doNotAcceptDepartmentCalls
     ) {
-      params.dndStatus = dndStatus.takeAllCalls;
+      params.dndStatus = this._lastNotDisturbDndStatus || dndStatus.takeAllCalls;
     }
     return params;
   }

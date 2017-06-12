@@ -261,6 +261,14 @@ export default class Phone extends RcModule {
       getState: () => this.state.subscription,
     }));
     reducers.subscription = this.subscription.reducer;
+    this.addModule('presence', new Presence({
+      auth: this.auth,
+      client: this.client,
+      subscription: this.subscription,
+      updateDelayTime: 2000,
+      getState: () => this.state.presence,
+    }));
+    reducers.presence = this.presence.reducer;
     this.addModule('detailedPresence', new DetailedPresence({
       auth: this.auth,
       client: this.client,
