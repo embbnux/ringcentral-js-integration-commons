@@ -5,6 +5,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = undefined;
 
+var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
+
+var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
+
 var _keys = require('babel-runtime/core-js/object/keys');
 
 var _keys2 = _interopRequireDefault(_keys);
@@ -64,7 +68,7 @@ var _getContactsReducer2 = _interopRequireDefault(_getContactsReducer);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function addPhoneToContact(contact, phone, type) {
-  var phoneNumber = (0, _normalizeNumber2.default)(phone);
+  var phoneNumber = (0, _normalizeNumber2.default)({ phoneNumber: phone });
   if ((0, _isBlank2.default)(phoneNumber)) {
     return;
   }
@@ -125,7 +129,7 @@ var Contacts = function (_RcModule) {
         var phones = extensionToPhoneNumberMap[contact.extensionNumber];
         if (phones && phones.length > 0) {
           phones.forEach(function (phone) {
-            addPhoneToContact(contact, phone, 'directPhone');
+            addPhoneToContact(contact, phone.phoneNumber, 'directPhone');
           });
         }
         newExtensions.push(contact);
@@ -196,14 +200,55 @@ var Contacts = function (_RcModule) {
       });
     }
   }, {
-    key: 'ready',
-    get: function get() {
-      return this.status === _moduleStatuses2.default.ready;
+    key: 'searchPhoneNumber',
+    value: function searchPhoneNumber(phone) {
+      var result = [];
+      var phoneNumber = (0, _normalizeNumber2.default)({ phoneNumber: phone });
+      var matchContact = function matchContact(contact) {
+        var found = contact.extensionNumber && contact.extensionNumber === phoneNumber;
+        if (!found) {
+          contact.phoneNumbers.forEach(function (contactPhoneNumber) {
+            if (!found && contactPhoneNumber.phoneNumber === phoneNumber) {
+              found = true;
+            }
+          });
+        }
+        if (!found) {
+          return;
+        }
+        var matchedContact = (0, _extends3.default)({}, contact, {
+          phoneNumbers: [].concat((0, _toConsumableArray3.default)(contact.phoneNumbers)),
+          name: contact.firstName + ' ' + contact.lastName
+        });
+        if (contact.extensionNumber) {
+          matchedContact.phoneNumbers.push({
+            phoneType: 'extension',
+            phoneNumber: contact.extensionNumber
+          });
+        }
+        result.push(matchedContact);
+      };
+      this.personalContacts.forEach(matchContact);
+      this.companyContacts.forEach(matchContact);
+      return result;
     }
   }, {
-    key: 'pending',
+    key: 'matchContacts',
+    value: function matchContacts(_ref2) {
+      var _this3 = this;
+
+      var phoneNumbers = _ref2.phoneNumbers;
+
+      var result = {};
+      phoneNumbers.forEach(function (phoneNumber) {
+        result[phoneNumber] = _this3.searchPhoneNumber(phoneNumber);
+      });
+      return result;
+    }
+  }, {
+    key: 'status',
     get: function get() {
-      return this.status === _moduleStatuses2.default.pending;
+      return this.state.status;
     }
   }, {
     key: 'companyContacts',

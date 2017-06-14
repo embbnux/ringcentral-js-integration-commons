@@ -5,6 +5,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = undefined;
 
+var _getOwnPropertyDescriptor = require('babel-runtime/core-js/object/get-own-property-descriptor');
+
+var _getOwnPropertyDescriptor2 = _interopRequireDefault(_getOwnPropertyDescriptor);
+
 var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
@@ -41,6 +45,8 @@ var _inherits2 = require('babel-runtime/helpers/inherits');
 
 var _inherits3 = _interopRequireDefault(_inherits2);
 
+var _desc, _value, _class;
+
 var _RcModule2 = require('../../lib/RcModule');
 
 var _RcModule3 = _interopRequireDefault(_RcModule2);
@@ -67,9 +73,42 @@ var _cleanNumber = require('../../lib/cleanNumber');
 
 var _cleanNumber2 = _interopRequireDefault(_cleanNumber);
 
+var _proxify = require('../../lib/proxy/proxify');
+
+var _proxify2 = _interopRequireDefault(_proxify);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var Messages = function (_RcModule) {
+function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
+  var desc = {};
+  Object['ke' + 'ys'](descriptor).forEach(function (key) {
+    desc[key] = descriptor[key];
+  });
+  desc.enumerable = !!desc.enumerable;
+  desc.configurable = !!desc.configurable;
+
+  if ('value' in desc || desc.initializer) {
+    desc.writable = true;
+  }
+
+  desc = decorators.slice().reverse().reduce(function (desc, decorator) {
+    return decorator(target, property, desc) || desc;
+  }, desc);
+
+  if (context && desc.initializer !== void 0) {
+    desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
+    desc.initializer = undefined;
+  }
+
+  if (desc.initializer === void 0) {
+    Object['define' + 'Property'](target, property, desc);
+    desc = null;
+  }
+
+  return desc;
+}
+
+var Messages = (_class = function (_RcModule) {
   (0, _inherits3.default)(Messages, _RcModule);
 
   function Messages(_ref) {
@@ -163,7 +202,8 @@ var Messages = function (_RcModule) {
           correspondentMatches: correspondentMatches,
           conversationLogId: conversationLogId,
           isLogging: isLogging,
-          conversationMatches: conversationMatches
+          conversationMatches: conversationMatches,
+          lastMatchedCorrespondentEntity: _this._conversationLogger && _this._conversationLogger.getLastMatchedCorrespondentEntity(message) || null
         });
       });
     });
@@ -254,39 +294,10 @@ var Messages = function (_RcModule) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                if (!this._shouldInit()) {
-                  _context.next = 8;
-                  break;
-                }
-
-                this.store.dispatch({
-                  type: this.actionTypes.init
-                });
-
-                if (!this._contactMatcher) {
-                  _context.next = 5;
-                  break;
-                }
-
-                _context.next = 5;
-                return this._contactMatcher.triggerMatch();
-
-              case 5:
-                this.store.dispatch({
-                  type: this.actionTypes.initSuccess
-                });
-                _context.next = 9;
-                break;
-
-              case 8:
-                if (this._shouldReset()) {
-                  this.store.dispatch({
-                    type: this.actionTypes.reset
-                  });
-                  this._lastProcessedNumbers = null;
-                  this.store.dispatch({
-                    type: this.actionTypes.resetSuccess
-                  });
+                if (this._shouldInit()) {
+                  this._init();
+                } else if (this._shouldReset()) {
+                  this._reset();
                 } else if (this._lastProcessedNumbers !== this.uniqueNumbers) {
                   this._lastProcessedNumbers = this.uniqueNumbers;
                   if (this._contactMatcher) {
@@ -294,7 +305,7 @@ var Messages = function (_RcModule) {
                   }
                 }
 
-              case 9:
+              case 1:
               case 'end':
                 return _context.stop();
             }
@@ -311,36 +322,117 @@ var Messages = function (_RcModule) {
   }, {
     key: '_shouldInit',
     value: function _shouldInit() {
-      return this._messageStore.ready && this._extensionInfo.ready && (!this._contactMatcher || this._contactMatcher.ready) && (!this._conversationLogger || this._conversationLogger.ready) && this.pending;
+      return !!(this._messageStore.ready && this._extensionInfo.ready && (!this._contactMatcher || this._contactMatcher.ready) && (!this._conversationLogger || this._conversationLogger.ready) && this.pending);
+    }
+  }, {
+    key: '_init',
+    value: function _init() {
+      this.store.dispatch({
+        type: this.actionTypes.init
+      });
+      if (this._contactMatcher) {
+        this._contactMatcher.triggerMatch();
+      }
+      this.store.dispatch({
+        type: this.actionTypes.initSuccess
+      });
     }
   }, {
     key: '_shouldReset',
     value: function _shouldReset() {
-      return (!this._messageStore.ready || !this._extensionInfo.ready || this._contactMatcher && !this._contactMatcher.ready || this._conversationLogger && !this._conversationLogger.ready) && this.ready;
+      return !!((!this._messageStore.ready || !this._extensionInfo.ready || this._contactMatcher && !this._contactMatcher.ready || this._conversationLogger && !this._conversationLogger.ready) && this.ready);
     }
   }, {
-    key: '_getCurrnetPageMessages',
-    value: function _getCurrnetPageMessages(page) {
+    key: '_reset',
+    value: function _reset() {
       this.store.dispatch({
-        type: this.actionTypes.setPage,
-        page: page
+        type: this.actionTypes.reset
+      });
+      this._lastProcessedNumbers = null;
+      this.store.dispatch({
+        type: this.actionTypes.resetSuccess
       });
     }
+  }, {
+    key: '_getCurrentPageMessages',
+    value: function () {
+      var _ref3 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2(page) {
+        return _regenerator2.default.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                this.store.dispatch({
+                  type: this.actionTypes.setPage,
+                  page: page
+                });
+
+              case 1:
+              case 'end':
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function _getCurrentPageMessages(_x4) {
+        return _ref3.apply(this, arguments);
+      }
+
+      return _getCurrentPageMessages;
+    }()
   }, {
     key: 'loadNextPageMessages',
-    value: function loadNextPageMessages() {
-      this.store.dispatch({
-        type: this.actionTypes.nextPage
-      });
-    }
+    value: function () {
+      var _ref4 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3() {
+        return _regenerator2.default.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                this.store.dispatch({
+                  type: this.actionTypes.nextPage
+                });
+
+              case 1:
+              case 'end':
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this);
+      }));
+
+      function loadNextPageMessages() {
+        return _ref4.apply(this, arguments);
+      }
+
+      return loadNextPageMessages;
+    }()
   }, {
     key: 'updateSearchInput',
-    value: function updateSearchInput(input) {
-      this.store.dispatch({
-        type: this.actionTypes.updateSearchInput,
-        input: input
-      });
-    }
+    value: function () {
+      var _ref5 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee4(input) {
+        return _regenerator2.default.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                this.store.dispatch({
+                  type: this.actionTypes.updateSearchInput,
+                  input: input
+                });
+
+              case 1:
+              case 'end':
+                return _context4.stop();
+            }
+          }
+        }, _callee4, this);
+      }));
+
+      function updateSearchInput(_x5) {
+        return _ref5.apply(this, arguments);
+      }
+
+      return updateSearchInput;
+    }()
   }, {
     key: 'status',
     get: function get() {
@@ -373,7 +465,6 @@ var Messages = function (_RcModule) {
     }
   }]);
   return Messages;
-}(_RcModule3.default);
-
+}(_RcModule3.default), (_applyDecoratedDescriptor(_class.prototype, '_getCurrentPageMessages', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, '_getCurrentPageMessages'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'loadNextPageMessages', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'loadNextPageMessages'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateSearchInput', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'updateSearchInput'), _class.prototype)), _class);
 exports.default = Messages;
 //# sourceMappingURL=index.js.map

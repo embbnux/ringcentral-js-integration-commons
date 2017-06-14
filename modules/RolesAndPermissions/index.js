@@ -57,6 +57,10 @@ var _loginStatus = require('../Auth/loginStatus');
 
 var _loginStatus2 = _interopRequireDefault(_loginStatus);
 
+var _ensureExist = require('../../lib/ensureExist');
+
+var _ensureExist2 = _interopRequireDefault(_ensureExist);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var DEFAULT_TTL = 24 * 60 * 60 * 1000;
@@ -123,7 +127,7 @@ var RolesAndPermissions = function (_DataFetcher) {
     _this._isCRM = !!isCRM;
     _this._flag = flag || 'SalesForce';
     _this._alert = alert;
-    _this._extensionInfo = extensionInfo;
+    _this._extensionInfo = (0, _ensureExist2.default)(extensionInfo, 'extensionInfo');
     _this.addSelector('permissions', function () {
       return _this.data;
     }, function (data) {

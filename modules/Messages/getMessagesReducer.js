@@ -58,7 +58,9 @@ function getSearchInputReducer(types) {
   };
 }
 
-function getPerPageReducer(types, defaultPerPage) {
+function getPerPageReducer(types) {
+  var defaultPerPage = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 20;
+
   return function () {
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultPerPage;
     var _ref3 = arguments[1];

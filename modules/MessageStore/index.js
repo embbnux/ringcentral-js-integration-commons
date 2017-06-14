@@ -5,6 +5,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = undefined;
 
+var _getOwnPropertyDescriptor = require('babel-runtime/core-js/object/get-own-property-descriptor');
+
+var _getOwnPropertyDescriptor2 = _interopRequireDefault(_getOwnPropertyDescriptor);
+
 var _keys = require('babel-runtime/core-js/object/keys');
 
 var _keys2 = _interopRequireDefault(_keys);
@@ -45,6 +49,8 @@ var _inherits2 = require('babel-runtime/helpers/inherits');
 
 var _inherits3 = _interopRequireDefault(_inherits2);
 
+var _desc, _value, _class;
+
 exports.processResponseData = processResponseData;
 
 var _RcModule2 = require('../../lib/RcModule');
@@ -81,9 +87,42 @@ var _sleep = require('../../lib/sleep');
 
 var _sleep2 = _interopRequireDefault(_sleep);
 
+var _proxify = require('../../lib/proxy/proxify');
+
+var _proxify2 = _interopRequireDefault(_proxify);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
+  var desc = {};
+  Object['ke' + 'ys'](descriptor).forEach(function (key) {
+    desc[key] = descriptor[key];
+  });
+  desc.enumerable = !!desc.enumerable;
+  desc.configurable = !!desc.configurable;
+
+  if ('value' in desc || desc.initializer) {
+    desc.writable = true;
+  }
+
+  desc = decorators.slice().reverse().reduce(function (desc, decorator) {
+    return decorator(target, property, desc) || desc;
+  }, desc);
+
+  if (context && desc.initializer !== void 0) {
+    desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
+    desc.initializer = undefined;
+  }
+
+  if (desc.initializer === void 0) {
+    Object['define' + 'Property'](target, property, desc);
+    desc = null;
+  }
+
+  return desc;
+}
 
 function processResponseData(data) {
   var records = data.records.slice();
@@ -94,7 +133,7 @@ function processResponseData(data) {
   };
 }
 
-var MessageStore = function (_RcModule) {
+var MessageStore = (_class = function (_RcModule) {
   (0, _inherits3.default)(MessageStore, _RcModule);
 
   function MessageStore(_ref) {
@@ -163,8 +202,6 @@ var MessageStore = function (_RcModule) {
         return messageHelper.messageIsVoicemail(conversation);
       });
     });
-
-    _this.syncConversation = _this.syncConversation.bind(_this);
     return _this;
   }
 
@@ -327,7 +364,7 @@ var MessageStore = function (_RcModule) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
-                MAX_MSG_LENGTH = 1000;
+                MAX_MSG_LENGTH = 500;
                 params = messageStoreHelper.getMessageSyncParams({
                   dateFrom: dateFrom,
                   dateTo: dateTo,
@@ -891,21 +928,59 @@ var MessageStore = function (_RcModule) {
     }
   }, {
     key: 'updateConversationRecipientList',
-    value: function updateConversationRecipientList(conversationId, recipients) {
-      this.store.dispatch({
-        type: this.actionTypes.updateConversationRecipients,
-        conversationId: conversationId,
-        recipients: recipients
-      });
-    }
+    value: function () {
+      var _ref18 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee16(conversationId, recipients) {
+        return _regenerator2.default.wrap(function _callee16$(_context16) {
+          while (1) {
+            switch (_context16.prev = _context16.next) {
+              case 0:
+                this.store.dispatch({
+                  type: this.actionTypes.updateConversationRecipients,
+                  conversationId: conversationId,
+                  recipients: recipients
+                });
+
+              case 1:
+              case 'end':
+                return _context16.stop();
+            }
+          }
+        }, _callee16, this);
+      }));
+
+      function updateConversationRecipientList(_x13, _x14) {
+        return _ref18.apply(this, arguments);
+      }
+
+      return updateConversationRecipientList;
+    }()
   }, {
     key: 'pushMessages',
-    value: function pushMessages(records) {
-      this.store.dispatch({
-        type: this.actionTypes.updateMessages,
-        records: records
-      });
-    }
+    value: function () {
+      var _ref19 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee17(records) {
+        return _regenerator2.default.wrap(function _callee17$(_context17) {
+          while (1) {
+            switch (_context17.prev = _context17.next) {
+              case 0:
+                this.store.dispatch({
+                  type: this.actionTypes.updateMessages,
+                  records: records
+                });
+
+              case 1:
+              case 'end':
+                return _context17.stop();
+            }
+          }
+        }, _callee17, this);
+      }));
+
+      function pushMessages(_x15) {
+        return _ref19.apply(this, arguments);
+      }
+
+      return pushMessages;
+    }()
   }, {
     key: 'pushMessage',
     value: function pushMessage(record) {
@@ -988,7 +1063,6 @@ var MessageStore = function (_RcModule) {
     }
   }]);
   return MessageStore;
-}(_RcModule3.default);
-
+}(_RcModule3.default), (_applyDecoratedDescriptor(_class.prototype, 'syncConversation', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'syncConversation'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'readMessages', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'readMessages'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateConversationRecipientList', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'updateConversationRecipientList'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'pushMessages', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'pushMessages'), _class.prototype)), _class);
 exports.default = MessageStore;
 //# sourceMappingURL=index.js.map

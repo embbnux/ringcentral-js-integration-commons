@@ -5,6 +5,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = undefined;
 
+var _getOwnPropertyDescriptor = require('babel-runtime/core-js/object/get-own-property-descriptor');
+
+var _getOwnPropertyDescriptor2 = _interopRequireDefault(_getOwnPropertyDescriptor);
+
 var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
@@ -41,6 +45,8 @@ var _inherits2 = require('babel-runtime/helpers/inherits');
 
 var _inherits3 = _interopRequireDefault(_inherits2);
 
+var _desc, _value, _class;
+
 var _RcModule2 = require('../../lib/RcModule');
 
 var _RcModule3 = _interopRequireDefault(_RcModule2);
@@ -69,9 +75,42 @@ var _messageSenderMessages = require('../MessageSender/messageSenderMessages');
 
 var _messageSenderMessages2 = _interopRequireDefault(_messageSenderMessages);
 
+var _proxify = require('../../lib/proxy/proxify');
+
+var _proxify2 = _interopRequireDefault(_proxify);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var ComposeText = function (_RcModule) {
+function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
+  var desc = {};
+  Object['ke' + 'ys'](descriptor).forEach(function (key) {
+    desc[key] = descriptor[key];
+  });
+  desc.enumerable = !!desc.enumerable;
+  desc.configurable = !!desc.configurable;
+
+  if ('value' in desc || desc.initializer) {
+    desc.writable = true;
+  }
+
+  desc = decorators.slice().reverse().reduce(function (desc, decorator) {
+    return decorator(target, property, desc) || desc;
+  }, desc);
+
+  if (context && desc.initializer !== void 0) {
+    desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
+    desc.initializer = undefined;
+  }
+
+  if (desc.initializer === void 0) {
+    Object['define' + 'Property'](target, property, desc);
+    desc = null;
+  }
+
+  return desc;
+}
+
+var ComposeText = (_class = function (_RcModule) {
   (0, _inherits3.default)(ComposeText, _RcModule);
 
   function ComposeText(_ref) {
@@ -95,14 +134,6 @@ var ComposeText = function (_RcModule) {
     _this._cacheReducer = (0, _getCacheReducer2.default)(_this.actionTypes);
     _this._messageSender = messageSender;
     _this._numberValidate = numberValidate;
-    _this.send = _this.send.bind(_this);
-    _this.updateSenderNumber = _this.updateSenderNumber.bind(_this);
-    _this.updateTypingToNumber = _this.updateTypingToNumber.bind(_this);
-    _this.cleanTypingToNumber = _this.cleanTypingToNumber.bind(_this);
-    _this.addToNumber = _this.addToNumber.bind(_this);
-    _this.removeToNumber = _this.removeToNumber.bind(_this);
-    _this.updateMessageText = _this.updateMessageText.bind(_this);
-    _this.clean = _this.clean.bind(_this);
     storage.registerReducer({ key: _this._storageKey, reducer: _this._cacheReducer });
     return _this;
   }
@@ -219,13 +250,9 @@ var ComposeText = function (_RcModule) {
                 return _context.abrupt('return', null);
 
               case 10:
-                _context.next = 12;
-                return this._messageSender.send({ fromNumber: fromNumber, toNumbers: toNumbers, text: text });
+                return _context.abrupt('return', this._messageSender.send({ fromNumber: fromNumber, toNumbers: toNumbers, text: text }));
 
-              case 12:
-                return _context.abrupt('return', _context.sent);
-
-              case 13:
+              case 11:
               case 'end':
                 return _context.stop();
             }
@@ -241,72 +268,225 @@ var ComposeText = function (_RcModule) {
     }()
   }, {
     key: 'updateSenderNumber',
-    value: function updateSenderNumber(number) {
-      this.store.dispatch({
-        type: this.actionTypes.updateSenderNumber,
-        number: number || ''
-      });
-    }
+    value: function () {
+      var _ref3 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2(number) {
+        return _regenerator2.default.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                this.store.dispatch({
+                  type: this.actionTypes.updateSenderNumber,
+                  number: number || ''
+                });
+
+              case 1:
+              case 'end':
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function updateSenderNumber(_x) {
+        return _ref3.apply(this, arguments);
+      }
+
+      return updateSenderNumber;
+    }()
   }, {
     key: 'updateTypingToNumber',
-    value: function updateTypingToNumber(number) {
-      if (number.length > 30) {
-        this._alertWarning(_messageSenderMessages2.default.recipientNumberInvalids);
-        return;
+    value: function () {
+      var _ref4 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3(number) {
+        return _regenerator2.default.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                if (!(number.length > 30)) {
+                  _context3.next = 3;
+                  break;
+                }
+
+                this._alertWarning(_messageSenderMessages2.default.recipientNumberInvalids);
+                return _context3.abrupt('return');
+
+              case 3:
+                this.store.dispatch({
+                  type: this.actionTypes.updateTypingToNumber,
+                  number: number
+                });
+
+              case 4:
+              case 'end':
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this);
+      }));
+
+      function updateTypingToNumber(_x2) {
+        return _ref4.apply(this, arguments);
       }
-      this.store.dispatch({
-        type: this.actionTypes.updateTypingToNumber,
-        number: number
-      });
-    }
+
+      return updateTypingToNumber;
+    }()
   }, {
     key: 'cleanTypingToNumber',
-    value: function cleanTypingToNumber() {
-      this.store.dispatch({
-        type: this.actionTypes.cleanTypingToNumber
-      });
-    }
+    value: function () {
+      var _ref5 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee4() {
+        return _regenerator2.default.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                this.store.dispatch({
+                  type: this.actionTypes.cleanTypingToNumber
+                });
+
+              case 1:
+              case 'end':
+                return _context4.stop();
+            }
+          }
+        }, _callee4, this);
+      }));
+
+      function cleanTypingToNumber() {
+        return _ref5.apply(this, arguments);
+      }
+
+      return cleanTypingToNumber;
+    }()
   }, {
     key: 'addToNumber',
-    value: function addToNumber(number) {
-      if ((0, _isBlank2.default)(number.phoneNumber)) {
-        return;
+    value: function () {
+      var _ref6 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee5(number) {
+        return _regenerator2.default.wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                if (!(0, _isBlank2.default)(number.phoneNumber)) {
+                  _context5.next = 2;
+                  break;
+                }
+
+                return _context5.abrupt('return');
+
+              case 2:
+                if (this._validatePhoneNumber(number.phoneNumber)) {
+                  _context5.next = 4;
+                  break;
+                }
+
+                return _context5.abrupt('return');
+
+              case 4:
+                this.store.dispatch({
+                  type: this.actionTypes.addToNumber,
+                  number: number
+                });
+
+              case 5:
+              case 'end':
+                return _context5.stop();
+            }
+          }
+        }, _callee5, this);
+      }));
+
+      function addToNumber(_x3) {
+        return _ref6.apply(this, arguments);
       }
-      if (!this._validatePhoneNumber(number.phoneNumber)) {
-        return;
-      }
-      this.store.dispatch({
-        type: this.actionTypes.addToNumber,
-        number: number
-      });
-    }
+
+      return addToNumber;
+    }()
   }, {
     key: 'removeToNumber',
-    value: function removeToNumber(number) {
-      this.store.dispatch({
-        type: this.actionTypes.removeToNumber,
-        number: number
-      });
-    }
+    value: function () {
+      var _ref7 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee6(number) {
+        return _regenerator2.default.wrap(function _callee6$(_context6) {
+          while (1) {
+            switch (_context6.prev = _context6.next) {
+              case 0:
+                this.store.dispatch({
+                  type: this.actionTypes.removeToNumber,
+                  number: number
+                });
+
+              case 1:
+              case 'end':
+                return _context6.stop();
+            }
+          }
+        }, _callee6, this);
+      }));
+
+      function removeToNumber(_x4) {
+        return _ref7.apply(this, arguments);
+      }
+
+      return removeToNumber;
+    }()
   }, {
     key: 'updateMessageText',
-    value: function updateMessageText(text) {
-      if (text.length > 1000) {
-        this._alertWarning(_messageSenderMessages2.default.textTooLong);
-        return;
+    value: function () {
+      var _ref8 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee7(text) {
+        return _regenerator2.default.wrap(function _callee7$(_context7) {
+          while (1) {
+            switch (_context7.prev = _context7.next) {
+              case 0:
+                if (!(text.length > 1000)) {
+                  _context7.next = 3;
+                  break;
+                }
+
+                this._alertWarning(_messageSenderMessages2.default.textTooLong);
+                return _context7.abrupt('return');
+
+              case 3:
+                this.store.dispatch({
+                  type: this.actionTypes.updateMessageText,
+                  text: text
+                });
+
+              case 4:
+              case 'end':
+                return _context7.stop();
+            }
+          }
+        }, _callee7, this);
+      }));
+
+      function updateMessageText(_x5) {
+        return _ref8.apply(this, arguments);
       }
-      this.store.dispatch({
-        type: this.actionTypes.updateMessageText,
-        text: text
-      });
-    }
+
+      return updateMessageText;
+    }()
   }, {
     key: 'clean',
-    value: function clean() {
-      this.store.dispatch({
-        type: this.actionTypes.clean
-      });
-    }
+    value: function () {
+      var _ref9 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee8() {
+        return _regenerator2.default.wrap(function _callee8$(_context8) {
+          while (1) {
+            switch (_context8.prev = _context8.next) {
+              case 0:
+                this.store.dispatch({
+                  type: this.actionTypes.clean
+                });
+
+              case 1:
+              case 'end':
+                return _context8.stop();
+            }
+          }
+        }, _callee8, this);
+      }));
+
+      function clean() {
+        return _ref9.apply(this, arguments);
+      }
+
+      return clean;
+    }()
   }, {
     key: 'cache',
     get: function get() {
@@ -344,7 +524,6 @@ var ComposeText = function (_RcModule) {
     }
   }]);
   return ComposeText;
-}(_RcModule3.default);
-
+}(_RcModule3.default), (_applyDecoratedDescriptor(_class.prototype, 'send', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'send'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateSenderNumber', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'updateSenderNumber'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateTypingToNumber', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'updateTypingToNumber'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'cleanTypingToNumber', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'cleanTypingToNumber'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'addToNumber', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'addToNumber'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'removeToNumber', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'removeToNumber'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateMessageText', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'updateMessageText'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'clean', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'clean'), _class.prototype)), _class);
 exports.default = ComposeText;
 //# sourceMappingURL=index.js.map

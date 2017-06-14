@@ -5,6 +5,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = undefined;
 
+var _getOwnPropertyDescriptor = require('babel-runtime/core-js/object/get-own-property-descriptor');
+
+var _getOwnPropertyDescriptor2 = _interopRequireDefault(_getOwnPropertyDescriptor);
+
 var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
@@ -45,6 +49,8 @@ var _inherits2 = require('babel-runtime/helpers/inherits');
 
 var _inherits3 = _interopRequireDefault(_inherits2);
 
+var _desc, _value, _class;
+
 exports.callIdentityFunction = callIdentityFunction;
 
 var _LoggerBase2 = require('../../lib/LoggerBase');
@@ -65,7 +71,40 @@ var _getDataReducer = require('./getDataReducer');
 
 var _getDataReducer2 = _interopRequireDefault(_getDataReducer);
 
+var _proxify = require('../../lib/proxy/proxify');
+
+var _proxify2 = _interopRequireDefault(_proxify);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
+  var desc = {};
+  Object['ke' + 'ys'](descriptor).forEach(function (key) {
+    desc[key] = descriptor[key];
+  });
+  desc.enumerable = !!desc.enumerable;
+  desc.configurable = !!desc.configurable;
+
+  if ('value' in desc || desc.initializer) {
+    desc.writable = true;
+  }
+
+  desc = decorators.slice().reverse().reduce(function (desc, decorator) {
+    return decorator(target, property, desc) || desc;
+  }, desc);
+
+  if (context && desc.initializer !== void 0) {
+    desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
+    desc.initializer = undefined;
+  }
+
+  if (desc.initializer === void 0) {
+    Object['define' + 'Property'](target, property, desc);
+    desc = null;
+  }
+
+  return desc;
+}
 
 /**
  * @function
@@ -77,7 +116,7 @@ function callIdentityFunction(call) {
   return call.sessionId;
 }
 
-var CallLogger = function (_LoggerBase) {
+var CallLogger = (_class = function (_LoggerBase) {
   (0, _inherits3.default)(CallLogger, _LoggerBase);
 
   function CallLogger(_ref) {
@@ -453,24 +492,62 @@ var CallLogger = function (_LoggerBase) {
     }()
   }, {
     key: 'setAutoLog',
-    value: function setAutoLog(autoLog) {
-      if (this.ready && autoLog !== this.autoLog) {
-        this.store.dispatch({
-          type: this.actionTypes.setAutoLog,
-          autoLog: autoLog
-        });
+    value: function () {
+      var _ref12 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee8(autoLog) {
+        return _regenerator2.default.wrap(function _callee8$(_context8) {
+          while (1) {
+            switch (_context8.prev = _context8.next) {
+              case 0:
+                if (this.ready && autoLog !== this.autoLog) {
+                  this.store.dispatch({
+                    type: this.actionTypes.setAutoLog,
+                    autoLog: autoLog
+                  });
+                }
+
+              case 1:
+              case 'end':
+                return _context8.stop();
+            }
+          }
+        }, _callee8, this);
+      }));
+
+      function setAutoLog(_x7) {
+        return _ref12.apply(this, arguments);
       }
-    }
+
+      return setAutoLog;
+    }()
   }, {
     key: 'setLogOnRinging',
-    value: function setLogOnRinging(logOnRinging) {
-      if (this.ready && logOnRinging !== this.logOnRinging) {
-        this.store.dispatch({
-          type: this.actionTypes.setLogOnRinging,
-          logOnRinging: logOnRinging
-        });
+    value: function () {
+      var _ref13 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee9(logOnRinging) {
+        return _regenerator2.default.wrap(function _callee9$(_context9) {
+          while (1) {
+            switch (_context9.prev = _context9.next) {
+              case 0:
+                if (this.ready && logOnRinging !== this.logOnRinging) {
+                  this.store.dispatch({
+                    type: this.actionTypes.setLogOnRinging,
+                    logOnRinging: logOnRinging
+                  });
+                }
+
+              case 1:
+              case 'end':
+                return _context9.stop();
+            }
+          }
+        }, _callee9, this);
+      }));
+
+      function setLogOnRinging(_x8) {
+        return _ref13.apply(this, arguments);
       }
-    }
+
+      return setLogOnRinging;
+    }()
   }, {
     key: 'autoLog',
     get: function get() {
@@ -483,7 +560,6 @@ var CallLogger = function (_LoggerBase) {
     }
   }]);
   return CallLogger;
-}(_LoggerBase3.default);
-
+}(_LoggerBase3.default), (_applyDecoratedDescriptor(_class.prototype, 'log', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'log'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'logCall', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'logCall'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setAutoLog', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'setAutoLog'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setLogOnRinging', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'setLogOnRinging'), _class.prototype)), _class);
 exports.default = CallLogger;
 //# sourceMappingURL=index.js.map

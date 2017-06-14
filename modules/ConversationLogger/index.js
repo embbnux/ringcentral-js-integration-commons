@@ -5,13 +5,17 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = undefined;
 
-var _promise = require('babel-runtime/core-js/promise');
+var _getOwnPropertyDescriptor = require('babel-runtime/core-js/object/get-own-property-descriptor');
 
-var _promise2 = _interopRequireDefault(_promise);
+var _getOwnPropertyDescriptor2 = _interopRequireDefault(_getOwnPropertyDescriptor);
 
 var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
+
+var _promise = require('babel-runtime/core-js/promise');
+
+var _promise2 = _interopRequireDefault(_promise);
 
 var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
@@ -53,6 +57,8 @@ var _inherits2 = require('babel-runtime/helpers/inherits');
 
 var _inherits3 = _interopRequireDefault(_inherits2);
 
+var _desc, _value, _class;
+
 exports.getLogId = getLogId;
 exports.conversationLogIdentityFunction = conversationLogIdentityFunction;
 
@@ -78,7 +84,44 @@ var _messageTypes2 = _interopRequireDefault(_messageTypes);
 
 var _messageHelper = require('../../lib/messageHelper');
 
+var _sleep = require('../../lib/sleep');
+
+var _sleep2 = _interopRequireDefault(_sleep);
+
+var _proxify = require('../../lib/proxy/proxify');
+
+var _proxify2 = _interopRequireDefault(_proxify);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
+  var desc = {};
+  Object['ke' + 'ys'](descriptor).forEach(function (key) {
+    desc[key] = descriptor[key];
+  });
+  desc.enumerable = !!desc.enumerable;
+  desc.configurable = !!desc.configurable;
+
+  if ('value' in desc || desc.initializer) {
+    desc.writable = true;
+  }
+
+  desc = decorators.slice().reverse().reduce(function (desc, decorator) {
+    return decorator(target, property, desc) || desc;
+  }, desc);
+
+  if (context && desc.initializer !== void 0) {
+    desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
+    desc.initializer = undefined;
+  }
+
+  if (desc.initializer === void 0) {
+    Object['define' + 'Property'](target, property, desc);
+    desc = null;
+  }
+
+  return desc;
+}
 
 function getLogId(_ref) {
   var conversationId = _ref.conversationId,
@@ -91,11 +134,12 @@ function conversationLogIdentityFunction(conversation) {
   return conversation.conversationLogId;
 }
 
-var ConversationLogger = function (_LoggerBase) {
+var ConversationLogger = (_class = function (_LoggerBase) {
   (0, _inherits3.default)(ConversationLogger, _LoggerBase);
 
   function ConversationLogger(_ref2) {
-    var contactMatcher = _ref2.contactMatcher,
+    var auth = _ref2.auth,
+        contactMatcher = _ref2.contactMatcher,
         conversationMatcher = _ref2.conversationMatcher,
         dateTimeFormat = _ref2.dateTimeFormat,
         extensionInfo = _ref2.extensionInfo,
@@ -111,7 +155,7 @@ var ConversationLogger = function (_LoggerBase) {
         formatDateTime = _ref2$formatDateTime === undefined ? function () {
       return dateTimeFormat.formatDateTime.apply(dateTimeFormat, arguments);
     } : _ref2$formatDateTime,
-        options = (0, _objectWithoutProperties3.default)(_ref2, ['contactMatcher', 'conversationMatcher', 'dateTimeFormat', 'extensionInfo', 'messageStore', 'rolesAndPermissions', 'storage', 'tabManager', 'isLoggedContact', 'formatDateTime']);
+        options = (0, _objectWithoutProperties3.default)(_ref2, ['auth', 'contactMatcher', 'conversationMatcher', 'dateTimeFormat', 'extensionInfo', 'messageStore', 'rolesAndPermissions', 'storage', 'tabManager', 'isLoggedContact', 'formatDateTime']);
     (0, _classCallCheck3.default)(this, ConversationLogger);
 
     var _this = (0, _possibleConstructorReturn3.default)(this, (ConversationLogger.__proto__ || (0, _getPrototypeOf2.default)(ConversationLogger)).call(this, (0, _extends3.default)({}, options, {
@@ -120,6 +164,7 @@ var ConversationLogger = function (_LoggerBase) {
       identityFunction: conversationLogIdentityFunction
     })));
 
+    _this._auth = _ensureExist2.default.call(_this, auth, 'auth');
     _this._contactMatcher = _ensureExist2.default.call(_this, contactMatcher, 'contactMatcher');
     _this._conversationMatcher = _ensureExist2.default.call(_this, conversationMatcher, 'conversationMatcher');
     _this._dateTimeFormat = _ensureExist2.default.call(_this, dateTimeFormat, 'dateTimeFormat');
@@ -127,7 +172,7 @@ var ConversationLogger = function (_LoggerBase) {
     _this._messageStore = _ensureExist2.default.call(_this, messageStore, 'messageStore');
     _this._rolesAndPermissions = _ensureExist2.default.call(_this, rolesAndPermissions, 'rolesAndPermissions');
     _this._storage = _ensureExist2.default.call(_this, storage, 'storage');
-    _this._tabManager = _ensureExist2.default.call(_this, tabManager, 'tabManager');
+    _this._tabManager = tabManager;
     _this._isLoggedContact = isLoggedContact;
     _this._formatDateTime = formatDateTime;
     _this._storageKey = _this._name + 'Data';
@@ -140,7 +185,11 @@ var ConversationLogger = function (_LoggerBase) {
       return _this._messageStore.messages;
     }, function () {
       return _this._extensionInfo.extensionNumber;
+    }, function () {
+      return _this._conversationMatcher.dataMapping;
     }, function (messages, extensionNumber) {
+      var conversationLogMapping = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
       var mapping = {};
       messages.slice().sort(_messageHelper.sortByDate).forEach(function (message) {
         var conversationId = message.conversationId;
@@ -152,13 +201,15 @@ var ConversationLogger = function (_LoggerBase) {
           mapping[conversationId] = {};
         }
         if (!mapping[conversationId][date]) {
+          var conversationLogId = getLogId({ conversationId: conversationId, date: date });
           mapping[conversationId][date] = (0, _extends3.default)({
-            conversationLogId: getLogId({ conversationId: conversationId, date: date }),
+            conversationLogId: conversationLogId,
             conversationId: conversationId,
             creationTime: message.createTime, // for sorting
             date: date,
             type: message.type,
-            messages: []
+            messages: [],
+            conversationLogMatches: conversationLogMapping[conversationLogId] || []
           }, (0, _messageHelper.getNumbersFromMessage)({ extensionNumber: extensionNumber, message: message }));
         }
         mapping[conversationId][date].messages.push(message);
@@ -209,94 +260,66 @@ var ConversationLogger = function (_LoggerBase) {
     });
 
     _this._lastProcessedConversationLogMap = null;
+    _this._autoLogQueue = [];
+    _this._autoLogPromise = null;
     return _this;
   }
 
   (0, _createClass3.default)(ConversationLogger, [{
     key: '_shouldInit',
     value: function _shouldInit() {
-      return this.pending && this._contactMatcher.ready && this._conversationMatcher.ready && this._dateTimeFormat.ready && this._extensionInfo.ready && this._messageStore.ready && this._rolesAndPermissions.ready && this._storage.ready && this._tabManager.ready && this._readyCheckFunction();
+      return this.pending && this._contactMatcher.ready && this._conversationMatcher.ready && this._dateTimeFormat.ready && this._extensionInfo.ready && this._messageStore.ready && this._rolesAndPermissions.ready && this._storage.ready && (!this._tabManager || this._tabManager.ready) && this._readyCheckFunction();
     }
   }, {
     key: '_shouldReset',
     value: function _shouldReset() {
-      return this.ready && (!this._contactMatcher.ready || !this._conversationMatcher.ready || !this._dateTimeFormat.ready || !this._extensionInfo.ready || !this._messageStore.ready || !this._rolesAndPermissions.ready || !this._storage.ready || !this._tabManager.ready || !this._readyCheckFunction());
+      return this.ready && (!this._contactMatcher.ready || !this._conversationMatcher.ready || !this._dateTimeFormat.ready || !this._extensionInfo.ready || !this._messageStore.ready || !this._rolesAndPermissions.ready || !this._storage.ready || this._tabManager && !this._tabManager.ready || !this._readyCheckFunction());
     }
   }, {
     key: '_onReset',
     value: function _onReset() {
       this._lastProcessedConversations = null;
       this._lastAutoLog = null;
+      this._autoLogPromise = null;
+      this._autoLogQueue = [];
     }
   }, {
-    key: '_processConversationLog',
+    key: '_processQueue',
     value: function () {
-      var _ref3 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee(_ref4) {
+      var _ref3 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
         var _this2 = this;
 
-        var conversation = _ref4.conversation;
-        var selfNumber, selfMatches, correspondentMatches, selfEntity, lastRecord, correspondentEntity, lastActivity;
+        var ownerId;
         return _regenerator2.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                _context.next = 2;
-                return this._conversationMatcher.triggerMatch();
+                ownerId = this._auth.ownerId;
+                _context.next = 3;
+                return (0, _sleep2.default)(300);
 
-              case 2:
-                if (!(this._conversationMatcher.dataMapping[conversation.conversationLogId] && this._conversationMatcher.dataMapping[conversation.conversationLogId].length)) {
-                  _context.next = 6;
+              case 3:
+                if (!(ownerId !== this._auth.ownerId)) {
+                  _context.next = 5;
                   break;
                 }
 
-                // update conversation
-                this._autoLogConversation({
-                  conversation: conversation
-                });
-                _context.next = 19;
-                break;
+                return _context.abrupt('return');
 
-              case 6:
-                if (!(this.autoLog && conversation.type === _messageTypes2.default.sms)) {
-                  _context.next = 19;
-                  break;
+              case 5:
+                _context.next = 7;
+                return _promise2.default.all(this._autoLogQueue.splice(0, 10).map(function (conversation) {
+                  return _this2._processConversationLog({ conversation: conversation });
+                }));
+
+              case 7:
+                if (ownerId === this._auth.ownerId && this._autoLogQueue.length > 0) {
+                  this._autoLogPromise = this._processQueue();
+                } else {
+                  this._autoLogPromise = null;
                 }
 
-                _context.next = 9;
-                return this._contactMatcher.triggerMatch();
-
-              case 9:
-                selfNumber = conversation.self && (conversation.self.phoneNumber || conversation.self.extensionNumber);
-                selfMatches = selfNumber && this._contactMatcher.dataMapping[conversation.self] || [];
-                correspondentMatches = conversation.correspondents && conversation.correspondents.reduce(function (result, contact) {
-                  var number = contact.phoneNumber || contact.extensionNumber;
-                  return number && _this2._contactMatcher.dataMapping[number] ? result.concat(_this2._contactMatcher.dataMapping[number]) : result;
-                }, []) || [];
-                selfEntity = selfMatches && selfMatches.length === 1 && selfMatches[0] || null;
-
-                // check older dates for existing selected entity match
-
-                lastRecord = (0, _keys2.default)(this.conversationLogMap[conversation.conversationId]).map(function (date) {
-                  return _this2.conversationLogMap[conversation.conversationId][date];
-                }).sort(_messageHelper.sortByDate)[1];
-                correspondentEntity = void 0;
-
-                if (lastRecord && this._conversationMatcher.dataMapping[lastRecord.conversationLogId] && this._conversationMatcher.dataMapping[lastRecord.conversationLogId].length) {
-                  lastActivity = this._conversationMatcher.dataMapping[lastRecord.conversationLogId][0];
-
-                  correspondentEntity = correspondentMatches.find(function (item) {
-                    return _this2._isLoggedContact(conversation, lastActivity, item);
-                  });
-                }
-                correspondentEntity = correspondentEntity || correspondentMatches && correspondentMatches.length === 1 && correspondentMatches[0] || null;
-                _context.next = 19;
-                return this._autoLogConversation({
-                  conversation: conversation,
-                  selfEntity: selfEntity,
-                  correspondentEntity: correspondentEntity
-                });
-
-              case 19:
+              case 8:
               case 'end':
                 return _context.stop();
             }
@@ -304,8 +327,128 @@ var ConversationLogger = function (_LoggerBase) {
         }, _callee, this);
       }));
 
-      function _processConversationLog(_x) {
+      function _processQueue() {
         return _ref3.apply(this, arguments);
+      }
+
+      return _processQueue;
+    }()
+  }, {
+    key: '_queueAutoLogConversation',
+    value: function _queueAutoLogConversation(_ref4) {
+      var conversation = _ref4.conversation;
+
+      this._autoLogQueue.push(conversation);
+      if (!this._autoLogPromise) {
+        this._autoLogPromise = this._processQueue();
+      }
+    }
+  }, {
+    key: '_getCorrespondentMatches',
+    value: function _getCorrespondentMatches(conversation) {
+      var _this3 = this;
+
+      return conversation.correspondents && conversation.correspondents.reduce(function (result, contact) {
+        var number = contact.phoneNumber || contact.extensionNumber;
+        return number && _this3._contactMatcher.dataMapping[number] ? result.concat(_this3._contactMatcher.dataMapping[number]) : result;
+      }, []) || [];
+    }
+  }, {
+    key: 'getLastMatchedCorrespondentEntity',
+    value: function getLastMatchedCorrespondentEntity(conversation) {
+      var _this4 = this;
+
+      var lastRecord = (0, _keys2.default)(this.conversationLogMap[conversation.conversationId]).map(function (date) {
+        return _this4.conversationLogMap[conversation.conversationId][date];
+      }).sort(_messageHelper.sortByDate).find(function (item) {
+        return item.conversationLogMatches.length > 0;
+      });
+      if (lastRecord && this._conversationMatcher.dataMapping[lastRecord.conversationLogId] && this._conversationMatcher.dataMapping[lastRecord.conversationLogId].length) {
+        var lastActivity = this._conversationMatcher.dataMapping[lastRecord.conversationLogId][0];
+        var correspondentMatches = this._getCorrespondentMatches(lastRecord);
+        return correspondentMatches.find(function (item) {
+          return _this4._isLoggedContact(conversation, lastActivity, item);
+        });
+      }
+      return null;
+    }
+  }, {
+    key: '_processConversationLog',
+    value: function () {
+      var _ref5 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2(_ref6) {
+        var conversation = _ref6.conversation;
+        var addIfNotExist, numbers, numberMap, selfNumber, selfMatches, correspondentMatches, selfEntity, correspondentEntity;
+        return _regenerator2.default.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                _context2.next = 2;
+                return this._conversationMatcher.match({ queries: [conversation.conversationLogId] });
+
+              case 2:
+                if (!(this._conversationMatcher.dataMapping[conversation.conversationLogId] && this._conversationMatcher.dataMapping[conversation.conversationLogId].length)) {
+                  _context2.next = 7;
+                  break;
+                }
+
+                _context2.next = 5;
+                return this._autoLogConversation({
+                  conversation: conversation
+                });
+
+              case 5:
+                _context2.next = 23;
+                break;
+
+              case 7:
+                if (!(this.autoLog && conversation.type === _messageTypes2.default.sms)) {
+                  _context2.next = 23;
+                  break;
+                }
+
+                addIfNotExist = function addIfNotExist(contact) {
+                  var number = contact.phoneNumber || contact.extensionNumber;
+                  if (number && !numberMap[number]) {
+                    numbers.push(number);
+                    numberMap[number] = true;
+                  }
+                };
+
+                // new entry
+                numbers = [];
+                numberMap = {};
+
+                addIfNotExist(conversation.self);
+                conversation.correspondents.forEach(addIfNotExist);
+                _context2.next = 15;
+                return this._contactMatcher.match({ queries: numbers });
+
+              case 15:
+                selfNumber = conversation.self && (conversation.self.phoneNumber || conversation.self.extensionNumber);
+                selfMatches = selfNumber && this._contactMatcher.dataMapping[conversation.self] || [];
+                correspondentMatches = this._getCorrespondentMatches(conversation);
+                selfEntity = selfMatches && selfMatches.length === 1 && selfMatches[0] || null;
+                correspondentEntity = this.getLastMatchedCorrespondentEntity(conversation);
+
+
+                correspondentEntity = correspondentEntity || correspondentMatches && correspondentMatches.length === 1 && correspondentMatches[0] || null;
+                _context2.next = 23;
+                return this._autoLogConversation({
+                  conversation: conversation,
+                  selfEntity: selfEntity,
+                  correspondentEntity: correspondentEntity
+                });
+
+              case 23:
+              case 'end':
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function _processConversationLog(_x2) {
+        return _ref5.apply(this, arguments);
       }
 
       return _processConversationLog;
@@ -313,13 +456,13 @@ var ConversationLogger = function (_LoggerBase) {
   }, {
     key: '_processConversationLogMap',
     value: function _processConversationLogMap() {
-      var _this3 = this;
+      var _this5 = this;
 
       if (this.ready && this._lastAutoLog !== this.autoLog) {
         this._lastAutoLog = this.autoLog;
         if (this.autoLog) {
           // force conversation log checking when switch auto log to on
-          this._lastProcessedConversationLogMap = null;
+          this._lastProcessedConversations = null;
         }
       }
       if (this.ready && this._lastProcessedConversations !== this.conversationLogMap) {
@@ -327,12 +470,12 @@ var ConversationLogger = function (_LoggerBase) {
         this._contactMatcher.triggerMatch();
         var oldMap = this._lastProcessedConversations || {};
         this._lastProcessedConversations = this.conversationLogMap;
-        if (this._tabManager.active) {
+        if (!this._tabManager || this._tabManager.active) {
           (0, _keys2.default)(this._lastProcessedConversations).forEach(function (conversationId) {
-            (0, _keys2.default)(_this3._lastProcessedConversations[conversationId]).forEach(function (date) {
-              var conversation = _this3._lastProcessedConversations[conversationId][date];
+            (0, _keys2.default)(_this5._lastProcessedConversations[conversationId]).forEach(function (date) {
+              var conversation = _this5._lastProcessedConversations[conversationId][date];
               if (!oldMap[conversationId] || !oldMap[conversationId][date] || conversation.messages[0].id !== oldMap[conversationId][date].messages[0].id) {
-                _this3._processConversationLog({
+                _this5._queueAutoLogConversation({
                   conversation: conversation
                 });
               }
@@ -344,12 +487,12 @@ var ConversationLogger = function (_LoggerBase) {
   }, {
     key: '_onStateChange',
     value: function () {
-      var _ref5 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2() {
-        return _regenerator2.default.wrap(function _callee2$(_context2) {
+      var _ref7 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3() {
+        return _regenerator2.default.wrap(function _callee3$(_context3) {
           while (1) {
-            switch (_context2.prev = _context2.next) {
+            switch (_context3.prev = _context3.next) {
               case 0:
-                _context2.next = 2;
+                _context3.next = 2;
                 return (0, _get3.default)(ConversationLogger.prototype.__proto__ || (0, _getPrototypeOf2.default)(ConversationLogger.prototype), '_onStateChange', this).call(this);
 
               case 2:
@@ -357,14 +500,14 @@ var ConversationLogger = function (_LoggerBase) {
 
               case 3:
               case 'end':
-                return _context2.stop();
+                return _context3.stop();
             }
           }
-        }, _callee2, this);
+        }, _callee3, this);
       }));
 
       function _onStateChange() {
-        return _ref5.apply(this, arguments);
+        return _ref7.apply(this, arguments);
       }
 
       return _onStateChange;
@@ -372,15 +515,15 @@ var ConversationLogger = function (_LoggerBase) {
   }, {
     key: '_autoLogConversation',
     value: function () {
-      var _ref6 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3(_ref7) {
-        var conversation = _ref7.conversation,
-            selfEntity = _ref7.selfEntity,
-            correspondentEntity = _ref7.correspondentEntity;
-        return _regenerator2.default.wrap(function _callee3$(_context3) {
+      var _ref8 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee4(_ref9) {
+        var conversation = _ref9.conversation,
+            selfEntity = _ref9.selfEntity,
+            correspondentEntity = _ref9.correspondentEntity;
+        return _regenerator2.default.wrap(function _callee4$(_context4) {
           while (1) {
-            switch (_context3.prev = _context3.next) {
+            switch (_context4.prev = _context4.next) {
               case 0:
-                _context3.next = 2;
+                _context4.next = 2;
                 return this.log({
                   conversation: conversation,
                   selfEntity: selfEntity,
@@ -389,14 +532,14 @@ var ConversationLogger = function (_LoggerBase) {
 
               case 2:
               case 'end':
-                return _context3.stop();
+                return _context4.stop();
             }
           }
-        }, _callee3, this);
+        }, _callee4, this);
       }));
 
-      function _autoLogConversation(_x2) {
-        return _ref6.apply(this, arguments);
+      function _autoLogConversation(_x3) {
+        return _ref8.apply(this, arguments);
       }
 
       return _autoLogConversation;
@@ -404,60 +547,16 @@ var ConversationLogger = function (_LoggerBase) {
   }, {
     key: 'log',
     value: function () {
-      var _ref8 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee4(_ref9) {
-        var conversation = _ref9.conversation,
-            options = (0, _objectWithoutProperties3.default)(_ref9, ['conversation']);
-        return _regenerator2.default.wrap(function _callee4$(_context4) {
-          while (1) {
-            switch (_context4.prev = _context4.next) {
-              case 0:
-                (0, _get3.default)(ConversationLogger.prototype.__proto__ || (0, _getPrototypeOf2.default)(ConversationLogger.prototype), 'log', this).call(this, (0, _extends3.default)({ item: conversation }, options));
-
-              case 1:
-              case 'end':
-                return _context4.stop();
-            }
-          }
-        }, _callee4, this);
-      }));
-
-      function log(_x3) {
-        return _ref8.apply(this, arguments);
-      }
-
-      return log;
-    }()
-  }, {
-    key: 'logConversation',
-    value: function () {
       var _ref10 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee5(_ref11) {
-        var _this4 = this;
-
-        var conversationId = _ref11.conversationId,
-            correspondentEntity = _ref11.correspondentEntity,
-            redirect = _ref11.redirect,
-            options = (0, _objectWithoutProperties3.default)(_ref11, ['conversationId', 'correspondentEntity', 'redirect']);
+        var conversation = _ref11.conversation,
+            options = (0, _objectWithoutProperties3.default)(_ref11, ['conversation']);
         return _regenerator2.default.wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
               case 0:
-                if (!this.conversationLogMap[conversationId]) {
-                  _context5.next = 3;
-                  break;
-                }
+                (0, _get3.default)(ConversationLogger.prototype.__proto__ || (0, _getPrototypeOf2.default)(ConversationLogger.prototype), 'log', this).call(this, (0, _extends3.default)({ item: conversation }, options));
 
-                _context5.next = 3;
-                return _promise2.default.all((0, _keys2.default)(this.conversationLogMap[conversationId]).map(function (date) {
-                  return _this4.conversationLogMap[conversationId][date];
-                }).sort(_messageHelper.sortByDate).reverse() // reverse to get the last items first
-                .map(function (conversation, idx) {
-                  return _this4.log((0, _extends3.default)({}, options, {
-                    conversation: conversation,
-                    correspondentEntity: correspondentEntity,
-                    redirect: redirect && idx === 0 }));
-                }));
-
-              case 3:
+              case 1:
               case 'end':
                 return _context5.stop();
             }
@@ -465,22 +564,92 @@ var ConversationLogger = function (_LoggerBase) {
         }, _callee5, this);
       }));
 
-      function logConversation(_x4) {
+      function log(_x4) {
         return _ref10.apply(this, arguments);
+      }
+
+      return log;
+    }()
+  }, {
+    key: 'logConversation',
+    value: function () {
+      var _ref12 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee6(_ref13) {
+        var _this6 = this;
+
+        var conversationId = _ref13.conversationId,
+            correspondentEntity = _ref13.correspondentEntity,
+            redirect = _ref13.redirect,
+            options = (0, _objectWithoutProperties3.default)(_ref13, ['conversationId', 'correspondentEntity', 'redirect']);
+        return _regenerator2.default.wrap(function _callee6$(_context6) {
+          while (1) {
+            switch (_context6.prev = _context6.next) {
+              case 0:
+                if (!this.conversationLogMap[conversationId]) {
+                  _context6.next = 3;
+                  break;
+                }
+
+                _context6.next = 3;
+                return _promise2.default.all((0, _keys2.default)(this.conversationLogMap[conversationId]).map(function (date) {
+                  return _this6.conversationLogMap[conversationId][date];
+                }).sort(_messageHelper.sortByDate).reverse // reverse to get the last items first
+                ().map(function (conversation, idx) {
+                  var queueIndex = _this6._autoLogQueue.find(function (item) {
+                    return item.conversationLogId === conversation.conversationLogId;
+                  });
+                  if (queueIndex > -1) {
+                    _this6._autoLogQueue.splice(queueIndex, 1);
+                  }
+                  return _this6.log((0, _extends3.default)({}, options, {
+                    conversation: conversation,
+                    correspondentEntity: correspondentEntity,
+                    redirect: redirect && idx === 0 // only direct on the first item
+                  }));
+                }));
+
+              case 3:
+              case 'end':
+                return _context6.stop();
+            }
+          }
+        }, _callee6, this);
+      }));
+
+      function logConversation(_x5) {
+        return _ref12.apply(this, arguments);
       }
 
       return logConversation;
     }()
   }, {
     key: 'setAutoLog',
-    value: function setAutoLog(autoLog) {
-      if (this.ready && autoLog !== this.autoLog) {
-        this.store.dispatch({
-          type: this.actionTypes.setAutoLog,
-          autoLog: autoLog
-        });
+    value: function () {
+      var _ref14 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee7(autoLog) {
+        return _regenerator2.default.wrap(function _callee7$(_context7) {
+          while (1) {
+            switch (_context7.prev = _context7.next) {
+              case 0:
+                if (this.ready && autoLog !== this.autoLog) {
+                  this.store.dispatch({
+                    type: this.actionTypes.setAutoLog,
+                    autoLog: autoLog
+                  });
+                }
+
+              case 1:
+              case 'end':
+                return _context7.stop();
+            }
+          }
+        }, _callee7, this);
+      }));
+
+      function setAutoLog(_x6) {
+        return _ref14.apply(this, arguments);
       }
-    }
+
+      return setAutoLog;
+    }()
   }, {
     key: 'getConversationLogId',
     value: function getConversationLogId(message) {
@@ -525,7 +694,6 @@ var ConversationLogger = function (_LoggerBase) {
     }
   }]);
   return ConversationLogger;
-}(_LoggerBase3.default);
-
+}(_LoggerBase3.default), (_applyDecoratedDescriptor(_class.prototype, 'log', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'log'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'logConversation', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'logConversation'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setAutoLog', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'setAutoLog'), _class.prototype)), _class);
 exports.default = ConversationLogger;
 //# sourceMappingURL=index.js.map

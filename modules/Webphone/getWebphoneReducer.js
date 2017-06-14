@@ -18,8 +18,6 @@ var _getModuleStatusReducer = require('../../lib/getModuleStatusReducer');
 
 var _getModuleStatusReducer2 = _interopRequireDefault(_getModuleStatusReducer);
 
-var _webphoneHelper = require('./webphoneHelper');
-
 var _connectionStatus = require('./connectionStatus');
 
 var _connectionStatus2 = _interopRequireDefault(_connectionStatus);
@@ -30,11 +28,9 @@ function getVideoElementPreparedReducer(types) {
   return function () {
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
     var _ref = arguments[1];
-    var type = _ref.type,
-        _ref$videoElementPrep = _ref.videoElementPrepared,
-        videoElementPrepared = _ref$videoElementPrep === undefined ? state : _ref$videoElementPrep;
+    var type = _ref.type;
 
-    if (type === types.init) return videoElementPrepared;
+    if (type === types.videoElementPrepared) return true;
     return state;
   };
 }
@@ -111,7 +107,7 @@ function getCurrentSessionReducer(types) {
 
     switch (type) {
       case types.updateCurrentSession:
-        return (0, _webphoneHelper.normalizeSession)(session);
+        return session;
       case types.destroyCurrentSession:
         return null;
       default:
@@ -127,13 +123,9 @@ function getSessionsReducer(types) {
     var type = _ref6.type,
         sessions = _ref6.sessions;
 
-    var newSessions = [];
     switch (type) {
       case types.updateSessions:
-        sessions.forEach(function (session) {
-          newSessions.push((0, _webphoneHelper.normalizeSession)(session));
-        });
-        return newSessions;
+        return sessions;
       case types.destroySessions:
         return [];
       default:

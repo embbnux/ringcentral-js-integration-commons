@@ -5,6 +5,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = undefined;
 
+var _getOwnPropertyDescriptor = require('babel-runtime/core-js/object/get-own-property-descriptor');
+
+var _getOwnPropertyDescriptor2 = _interopRequireDefault(_getOwnPropertyDescriptor);
+
 var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
@@ -41,6 +45,8 @@ var _inherits2 = require('babel-runtime/helpers/inherits');
 
 var _inherits3 = _interopRequireDefault(_inherits2);
 
+var _desc, _value, _class;
+
 var _Pollable2 = require('../../lib/Pollable');
 
 var _Pollable3 = _interopRequireDefault(_Pollable2);
@@ -61,11 +67,44 @@ var _actionTypes = require('./actionTypes');
 
 var _actionTypes2 = _interopRequireDefault(_actionTypes);
 
+var _proxify = require('../../lib/proxy/proxify');
+
+var _proxify2 = _interopRequireDefault(_proxify);
+
 var _getAddressBookReducer = require('./getAddressBookReducer');
 
 var _getAddressBookReducer2 = _interopRequireDefault(_getAddressBookReducer);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
+  var desc = {};
+  Object['ke' + 'ys'](descriptor).forEach(function (key) {
+    desc[key] = descriptor[key];
+  });
+  desc.enumerable = !!desc.enumerable;
+  desc.configurable = !!desc.configurable;
+
+  if ('value' in desc || desc.initializer) {
+    desc.writable = true;
+  }
+
+  desc = decorators.slice().reverse().reduce(function (desc, decorator) {
+    return decorator(target, property, desc) || desc;
+  }, desc);
+
+  if (context && desc.initializer !== void 0) {
+    desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
+    desc.initializer = undefined;
+  }
+
+  if (desc.initializer === void 0) {
+    Object['define' + 'Property'](target, property, desc);
+    desc = null;
+  }
+
+  return desc;
+}
 
 var CONTACTS_PER_PAGE = 250;
 var DEFAULT_TTL = 30 * 60 * 1000;
@@ -87,7 +126,7 @@ function getSyncParams(syncToken, pageId) {
   return query;
 }
 
-var AddressBook = function (_Pollable) {
+var AddressBook = (_class = function (_Pollable) {
   (0, _inherits3.default)(AddressBook, _Pollable);
 
   function AddressBook(_ref) {
@@ -428,18 +467,33 @@ var AddressBook = function (_Pollable) {
     }
   }, {
     key: 'fetchData',
-    value: function fetchData() {
-      this.sync();
-    }
+    value: function () {
+      var _ref8 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee7() {
+        return _regenerator2.default.wrap(function _callee7$(_context7) {
+          while (1) {
+            switch (_context7.prev = _context7.next) {
+              case 0:
+                _context7.next = 2;
+                return this.sync();
+
+              case 2:
+              case 'end':
+                return _context7.stop();
+            }
+          }
+        }, _callee7, this);
+      }));
+
+      function fetchData() {
+        return _ref8.apply(this, arguments);
+      }
+
+      return fetchData;
+    }()
   }, {
-    key: 'ready',
+    key: 'status',
     get: function get() {
-      return this.state.status === _moduleStatuses2.default.ready;
-    }
-  }, {
-    key: 'pending',
-    get: function get() {
-      return this.state.status === _moduleStatuses2.default.pending;
+      return this.state.status;
     }
   }, {
     key: 'syncToken',
@@ -468,7 +522,6 @@ var AddressBook = function (_Pollable) {
     }
   }]);
   return AddressBook;
-}(_Pollable3.default);
-
+}(_Pollable3.default), (_applyDecoratedDescriptor(_class.prototype, 'sync', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'sync'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, '_sync', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, '_sync'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, '_syncAddressBookApi', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, '_syncAddressBookApi'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'fetchData', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'fetchData'), _class.prototype)), _class);
 exports.default = AddressBook;
 //# sourceMappingURL=index.js.map

@@ -47,9 +47,9 @@ function getDataReducer(types) {
             if (!existingCall) return (0, _extends3.default)({}, (0, _callLogHelpers.normalizeFromTo)(activeCall), { startTime: timestamp });
             if ((0, _callLogHelpers.isIntermediateCall)(activeCall)) return existingCall;
             return (0, _extends3.default)({}, existingCall, (0, _callLogHelpers.normalizeFromTo)(activeCall));
-          })
+          }
           // [RCINT-3558] should ignore intermediate call states
-          .filter(function (activeCall) {
+          ).filter(function (activeCall) {
             return !(0, _callLogHelpers.isIntermediateCall)(activeCall);
           });
         }

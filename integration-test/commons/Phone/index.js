@@ -655,6 +655,7 @@ var Phone = function (_RcModule) {
       messageStore: _this.messageStore.reducer,
       conversation: _this.conversation.reducer,
       messages: _this.messages.reducer
+      // adapter: this.adapter.reducer,
     });
     return _this;
   }
