@@ -2,7 +2,6 @@ import RcModule from '../../lib/RcModule';
 import isBlank from '../../lib/isBlank';
 import normalizeNumber from '../../lib/normalizeNumber';
 import actionTypes from './actionTypes';
-import moduleStatuses from '../../enums/moduleStatuses';
 import getContactsReducer from './getContactsReducer';
 
 function addPhoneToContact(contact, phone, type) {
@@ -141,7 +140,7 @@ export default class Contacts extends RcModule {
     });
   }
 
-  searchPhoneNumber(phone) {
+  matchPhoneNumber(phone) {
     const result = [];
     const phoneNumber = normalizeNumber({ phoneNumber: phone });
     const matchContact = (contact) => {
@@ -171,15 +170,15 @@ export default class Contacts extends RcModule {
       }
       result.push(matchedContact);
     };
-    this.personalContacts.forEach(matchContact);
     this.companyContacts.forEach(matchContact);
+    this.personalContacts.forEach(matchContact);
     return result;
   }
 
   matchContacts({ phoneNumbers }) {
     const result = {};
     phoneNumbers.forEach((phoneNumber) => {
-      result[phoneNumber] = this.searchPhoneNumber(phoneNumber);
+      result[phoneNumber] = this.matchPhoneNumber(phoneNumber);
     });
     return result;
   }
