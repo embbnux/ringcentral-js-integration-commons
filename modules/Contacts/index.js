@@ -218,6 +218,7 @@ var Contacts = function (_RcModule) {
         }
         var matchedContact = (0, _extends3.default)({}, contact, {
           phoneNumbers: [].concat((0, _toConsumableArray3.default)(contact.phoneNumbers)),
+          entityType: 'contact',
           name: contact.firstName + ' ' + contact.lastName
         });
         if (contact.extensionNumber) {
