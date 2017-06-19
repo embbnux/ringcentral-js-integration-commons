@@ -83,11 +83,16 @@ function getTelephonyStatusReducer(types) {
 
 /* istanbul ignore next: unnecessary to test combineReducers */
 function getDetailedPresenceReducer(types) {
-  return (0, _redux.combineReducers)({
+  var reducers = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+  return (0, _redux.combineReducers)((0, _extends3.default)({}, reducers, {
     status: (0, _getModuleStatusReducer2.default)(types),
     data: getDataReducer(types),
     dndStatus: (0, _getPresenceReducer.getDndStatusReducer)(types),
+    presenceStatus: (0, _getPresenceReducer.getPresenceStatusReducer)(types),
+    userStatus: (0, _getPresenceReducer.getUserStatusReducer)(types),
+    message: (0, _getPresenceReducer.getMessageReducer)(types),
     telephonyStatus: getTelephonyStatusReducer(types)
-  });
+  }));
 }
 //# sourceMappingURL=getDetailedPresenceReducer.js.map

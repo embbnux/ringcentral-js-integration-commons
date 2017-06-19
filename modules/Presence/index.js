@@ -120,12 +120,13 @@ var Presence = (_class = function (_RcModule) {
   function Presence(_ref) {
     var auth = _ref.auth,
         client = _ref.client,
+        storage = _ref.storage,
         subscription = _ref.subscription,
         _ref$actionTypes = _ref.actionTypes,
         actionTypes = _ref$actionTypes === undefined ? _actionTypes2.default : _ref$actionTypes,
         _ref$updateDelayTime = _ref.updateDelayTime,
         updateDelayTime = _ref$updateDelayTime === undefined ? UPDATE_DELAY_TIME : _ref$updateDelayTime,
-        options = (0, _objectWithoutProperties3.default)(_ref, ['auth', 'client', 'subscription', 'actionTypes', 'updateDelayTime']);
+        options = (0, _objectWithoutProperties3.default)(_ref, ['auth', 'client', 'storage', 'subscription', 'actionTypes', 'updateDelayTime']);
     (0, _classCallCheck3.default)(this, Presence);
 
     var _this = (0, _possibleConstructorReturn3.default)(this, (Presence.__proto__ || (0, _getPrototypeOf2.default)(Presence)).call(this, (0, _extends3.default)({}, options, {
@@ -143,12 +144,23 @@ var Presence = (_class = function (_RcModule) {
     _this._auth = auth;
     _this._client = client;
     _this._subscription = subscription;
-
-    _this._reducer = (0, _getPresenceReducer2.default)(_this.actionTypes);
+    _this._storage = storage;
     _this._lastMessage = null;
 
     _this._updateDelayTime = updateDelayTime;
     _this._delayTimeoutId = null;
+    _this._lastNotDisturbDndStatusStorageKey = 'lastNotDisturbDndStatus';
+    if (_this._storage) {
+      _this._reducer = (0, _getPresenceReducer2.default)(_this.actionTypes);
+      _this._storage.registerReducer({
+        key: _this._lastNotDisturbDndStatusStorageKey,
+        reducer: (0, _getPresenceReducer.getLastNotDisturbDndStatusReducer)(_this.actionTypes)
+      });
+    } else {
+      _this._reducer = (0, _getPresenceReducer2.default)(_this.actionTypes, {
+        lastNotDisturbDndStatus: (0, _getPresenceReducer.getLastNotDisturbDndStatusReducer)(_this.actionTypes)
+      });
+    }
     return _this;
   }
 
@@ -222,7 +234,9 @@ var Presence = (_class = function (_RcModule) {
                 if (ownerId === this._auth.ownerId) {
                   this.store.dispatch((0, _extends3.default)({
                     type: this.actionTypes.fetchSuccess
-                  }, data));
+                  }, data, {
+                    lastDndStatus: this.dndStatus
+                  }));
                 }
                 this._promise = null;
                 _context2.next = 15;
@@ -302,7 +316,9 @@ var Presence = (_class = function (_RcModule) {
                 if (ownerId === this._auth.ownerId) {
                   this.store.dispatch((0, _extends3.default)({
                     type: this.actionTypes.updateSuccess
-                  }, data));
+                  }, data, {
+                    lastDndStatus: this.dndStatus
+                  }));
                 }
                 _context4.next = 14;
                 break;
@@ -339,7 +355,7 @@ var Presence = (_class = function (_RcModule) {
         userStatus: userStatusParams
       };
       if (params.dndStatus !== _dndStatus2.default.takeAllCalls && params.dndStatus !== _dndStatus2.default.doNotAcceptDepartmentCalls) {
-        params.dndStatus = _dndStatus2.default.takeAllCalls;
+        params.dndStatus = this.lastNotDisturbDndStatus || _dndStatus2.default.takeAllCalls;
       }
       return params;
     }
@@ -541,6 +557,14 @@ var Presence = (_class = function (_RcModule) {
     key: 'dndStatus',
     get: function get() {
       return this.state.dndStatus;
+    }
+  }, {
+    key: 'lastNotDisturbDndStatus',
+    get: function get() {
+      if (this._storage) {
+        return this._storage.getItem(this._lastNotDisturbDndStatusStorageKey);
+      }
+      return this.state.lastNotDisturbDndStatus;
     }
   }, {
     key: 'userStatus',
