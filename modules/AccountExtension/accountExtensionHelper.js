@@ -28,7 +28,7 @@ function simplifyExtensionData(ext) {
     status: ext.status,
     type: ext.type,
     contact: ext.contact,
-    profileImageUrl: ext.profileImage && ext.profileImage.uri
+    hasProfileImage: ext.profileImage && ext.profileImage.etag
   };
 }
 //# sourceMappingURL=accountExtensionHelper.js.map
