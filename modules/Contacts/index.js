@@ -121,6 +121,7 @@ var Contacts = function (_RcModule) {
           lastName: extension.contact && extension.contact.lastName,
           email: extension.contact && extension.contact.email,
           extensionNumber: extension.ext,
+          profileImageUrl: extension.profileImageUrl,
           phoneNumbers: []
         };
         if ((0, _isBlank2.default)(contact.extensionNumber)) {
