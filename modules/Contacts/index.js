@@ -245,8 +245,8 @@ var Contacts = function (_RcModule) {
         }
         result.push(matchedContact);
       };
-      this.personalContacts.forEach(matchContact);
       this.companyContacts.forEach(matchContact);
+      this.personalContacts.forEach(matchContact);
       return result;
     }
   }, {
