@@ -272,7 +272,7 @@ var Contacts = function (_RcModule) {
             switch (_context.prev = _context.next) {
               case 0:
                 if (!(contact.type === 'company' && contact.id && contact.hasProfileImage)) {
-                  _context.next = 20;
+                  _context.next = 22;
                   break;
                 }
 
@@ -292,11 +292,13 @@ var Contacts = function (_RcModule) {
 
               case 7:
                 response = _context.sent;
-                _context.next = 10;
+                _context.t0 = URL;
+                _context.next = 11;
                 return response._response.blob();
 
-              case 10:
-                imageUrl = _context.sent;
+              case 11:
+                _context.t1 = _context.sent;
+                imageUrl = _context.t0.createObjectURL.call(_context.t0, _context.t1);
                 image = {
                   id: imageId,
                   url: imageUrl
@@ -308,22 +310,22 @@ var Contacts = function (_RcModule) {
                 });
                 return _context.abrupt('return', image.url);
 
-              case 16:
-                _context.prev = 16;
-                _context.t0 = _context['catch'](4);
+              case 18:
+                _context.prev = 18;
+                _context.t2 = _context['catch'](4);
 
-                console.error(_context.t0);
+                console.error(_context.t2);
                 return _context.abrupt('return', null);
 
-              case 20:
+              case 22:
                 return _context.abrupt('return', null);
 
-              case 21:
+              case 23:
               case 'end':
                 return _context.stop();
             }
           }
-        }, _callee, this, [[4, 16]]);
+        }, _callee, this, [[4, 18]]);
       }));
 
       function getImageProfile(_x) {
