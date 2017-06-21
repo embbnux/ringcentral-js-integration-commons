@@ -266,13 +266,13 @@ var Contacts = function (_RcModule) {
     key: 'getImageProfile',
     value: function () {
       var _ref3 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee(contact) {
-        var imageId, response, image;
+        var imageId, response, imageUrl, image;
         return _regenerator2.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
                 if (!(contact.type === 'company' && contact.id && contact.hasProfileImage)) {
-                  _context.next = 17;
+                  _context.next = 20;
                   break;
                 }
 
@@ -292,9 +292,14 @@ var Contacts = function (_RcModule) {
 
               case 7:
                 response = _context.sent;
+                _context.next = 10;
+                return response._response.blob();
+
+              case 10:
+                imageUrl = _context.sent;
                 image = {
                   id: imageId,
-                  url: response._response.body
+                  url: imageUrl
                 };
 
                 this.store.dispatch({
@@ -303,22 +308,22 @@ var Contacts = function (_RcModule) {
                 });
                 return _context.abrupt('return', image.url);
 
-              case 13:
-                _context.prev = 13;
+              case 16:
+                _context.prev = 16;
                 _context.t0 = _context['catch'](4);
 
                 console.error(_context.t0);
                 return _context.abrupt('return', null);
 
-              case 17:
+              case 20:
                 return _context.abrupt('return', null);
 
-              case 18:
+              case 21:
               case 'end':
                 return _context.stop();
             }
           }
-        }, _callee, this, [[4, 13]]);
+        }, _callee, this, [[4, 16]]);
       }));
 
       function getImageProfile(_x) {
