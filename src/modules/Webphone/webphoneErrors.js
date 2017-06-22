@@ -5,5 +5,7 @@ export default new Enum([
   'browserNotSupported',
   'webphoneCountOverLimit',
   'notOutboundCallWithoutDL',
+  'notWebphonePermission',
   'getSipProvisionError',
+  'registerError',
 ], 'webphone');
