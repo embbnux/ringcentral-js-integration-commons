@@ -182,7 +182,7 @@ var Call = (_class = function (_RcModule) {
                 }
 
                 _context.next = 6;
-                return _this2._webphone.connect(_this2._callingSettings.fromNumbers.length > 0);
+                return _this2._webphone.connect();
 
               case 6:
                 _this2.store.dispatch({
@@ -238,7 +238,7 @@ var Call = (_class = function (_RcModule) {
                 }
 
                 _context.next = 26;
-                return _this2._webphone.connect(_this2._callingSettings.fromNumbers.length > 0);
+                return _this2._webphone.connect();
 
               case 26:
               case 'end':

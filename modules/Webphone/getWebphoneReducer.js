@@ -5,6 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.getVideoElementPreparedReducer = getVideoElementPreparedReducer;
 exports.getConnectionStatusReducer = getConnectionStatusReducer;
+exports.getErrorCodeReducer = getErrorCodeReducer;
 exports.getConnectRetryCountsReducer = getConnectRetryCountsReducer;
 exports.getWebphoneCountsReducer = getWebphoneCountsReducer;
 exports.getCurrentSessionReducer = getCurrentSessionReducer;
@@ -60,11 +61,29 @@ function getConnectionStatusReducer(types) {
   };
 }
 
+function getErrorCodeReducer(types) {
+  return function () {
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+    var _ref3 = arguments[1];
+    var type = _ref3.type,
+        _ref3$errorCode = _ref3.errorCode,
+        errorCode = _ref3$errorCode === undefined ? state : _ref3$errorCode;
+
+    switch (type) {
+      case types.connectError:
+      case types.registrationFailed:
+        return errorCode;
+      default:
+        return state;
+    }
+  };
+}
+
 function getConnectRetryCountsReducer(types) {
   return function () {
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    var _ref3 = arguments[1];
-    var type = _ref3.type;
+    var _ref4 = arguments[1];
+    var type = _ref4.type;
 
     switch (type) {
       case types.reconnect:
@@ -81,8 +100,8 @@ function getConnectRetryCountsReducer(types) {
 function getWebphoneCountsReducer(types) {
   return function () {
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    var _ref4 = arguments[1];
-    var type = _ref4.type;
+    var _ref5 = arguments[1];
+    var type = _ref5.type;
 
     switch (type) {
       case types.reconnect:
@@ -101,9 +120,9 @@ function getWebphoneCountsReducer(types) {
 function getCurrentSessionReducer(types) {
   return function () {
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-    var _ref5 = arguments[1];
-    var type = _ref5.type,
-        session = _ref5.session;
+    var _ref6 = arguments[1];
+    var type = _ref6.type,
+        session = _ref6.session;
 
     switch (type) {
       case types.updateCurrentSession:
@@ -119,9 +138,9 @@ function getCurrentSessionReducer(types) {
 function getSessionsReducer(types) {
   return function () {
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
-    var _ref6 = arguments[1];
-    var type = _ref6.type,
-        sessions = _ref6.sessions;
+    var _ref7 = arguments[1];
+    var type = _ref7.type,
+        sessions = _ref7.sessions;
 
     switch (type) {
       case types.updateSessions:
@@ -137,8 +156,8 @@ function getSessionsReducer(types) {
 function getMinimizedReducer(types) {
   return function () {
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-    var _ref7 = arguments[1];
-    var type = _ref7.type;
+    var _ref8 = arguments[1];
+    var type = _ref8.type;
 
     switch (type) {
       case types.toggleMinimized:
@@ -157,6 +176,7 @@ function getWebphoneReducer(types) {
     videoElementPrepared: getVideoElementPreparedReducer(types),
     connectionStatus: getConnectionStatusReducer(types),
     connectRetryCounts: getConnectRetryCountsReducer(types),
+    errorCode: getErrorCodeReducer(types),
     webphoneCounts: getWebphoneCountsReducer(types),
     currentSession: getCurrentSessionReducer(types),
     sessions: getSessionsReducer(types),
