@@ -705,6 +705,13 @@ export default class Webphone extends RcModule {
 
   @proxify
   async makeCall({ toNumber, fromNumber, homeCountryId }) {
+    if (!this._webphone) {
+      this._alert.warning({
+        message: this.errorCode,
+        ttl: 0,
+      });
+      return;
+    }
     const session = this._webphone.userAgent.invite(toNumber, {
       media: this.acceptOptions.media,
       fromNumber,
@@ -869,5 +876,9 @@ export default class Webphone extends RcModule {
         }
       }
     };
+  }
+
+  get errorCode() {
+    return this.state.errorCode;
   }
 }
