@@ -427,7 +427,7 @@ var Webphone = (_class = function (_RcModule) {
               case 12:
                 sipProvision = _context2.sent;
 
-                if (!(this.connectionStatus === _connectionStatus2.default.disconnecting)) {
+                if (!this.disconnecting) {
                   _context2.next = 15;
                   break;
                 }
@@ -1546,8 +1546,7 @@ var Webphone = (_class = function (_RcModule) {
                 }
 
                 this._alert.warning({
-                  message: this.errorCode,
-                  ttl: 0
+                  message: this.errorCode
                 });
                 return _context26.abrupt('return');
 
@@ -1830,6 +1829,21 @@ var Webphone = (_class = function (_RcModule) {
     key: 'errorCode',
     get: function get() {
       return this.state.errorCode;
+    }
+  }, {
+    key: 'disconnecting',
+    get: function get() {
+      return this.connectionStatus === _connectionStatus2.default.disconnecting;
+    }
+  }, {
+    key: 'connected',
+    get: function get() {
+      return this.connectionStatus === _connectionStatus2.default.connected;
+    }
+  }, {
+    key: 'connectFailed',
+    get: function get() {
+      return this.connectionStatus === _connectionStatus2.default.connectFailed;
     }
   }]);
   return Webphone;
