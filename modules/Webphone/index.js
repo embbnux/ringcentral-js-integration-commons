@@ -704,6 +704,7 @@ var Webphone = (_class = function (_RcModule) {
       session.callStatus = _sessionStatus2.default.connecting;
       if (!this._activeSession) {
         this._activeSession = session;
+        this._resetMinimized();
         this.store.dispatch({
           type: this.actionTypes.updateCurrentSession,
           session: (0, _webphoneHelper.normalizeSession)(session)
@@ -1545,7 +1546,8 @@ var Webphone = (_class = function (_RcModule) {
                 }
 
                 this._alert.warning({
-                  message: this.errorCode
+                  message: this.errorCode,
+                  ttl: 0
                 });
                 return _context26.abrupt('return');
 
