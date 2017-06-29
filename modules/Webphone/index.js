@@ -350,7 +350,7 @@ var Webphone = (_class = function (_RcModule) {
         console.error(error);
         _this3._webphone.userAgent.removeAllListeners();
         _this3._webphone = null;
-        if (error && error.reason_phrase && error.reason_phrase.indexOf('Too Many Contacts') > -1) {
+        if (error && error.status_code === 503) {
           errorCode = _webphoneErrors2.default.webphoneCountOverLimit;
           _this3._alert.warning({
             message: errorCode
@@ -524,7 +524,7 @@ var Webphone = (_class = function (_RcModule) {
 
               case 8:
                 if (!_context3.t0) {
-                  _context3.next = 19;
+                  _context3.next = 16;
                   break;
                 }
 
@@ -544,25 +544,19 @@ var Webphone = (_class = function (_RcModule) {
                 return _context3.abrupt('return');
 
               case 13:
-                if (!(this._extensionDevice.phoneLines.length === 0)) {
-                  _context3.next = 17;
-                  break;
+                if (this._extensionDevice.phoneLines.length === 0) {
+                  this.store.dispatch({
+                    type: this.actionTypes.connectError,
+                    errorCode: _webphoneErrors2.default.notOutboundCallWithoutDL
+                  });
+                  this._alert.warning({
+                    message: _webphoneErrors2.default.notOutboundCallWithoutDL
+                  });
                 }
-
-                this.store.dispatch({
-                  type: this.actionTypes.connectError,
-                  errorCode: _webphoneErrors2.default.notOutboundCallWithoutDL
-                });
-                this._alert.warning({
-                  message: _webphoneErrors2.default.notOutboundCallWithoutDL
-                });
-                return _context3.abrupt('return');
-
-              case 17:
-                _context3.next = 19;
+                _context3.next = 16;
                 return this._connect();
 
-              case 19:
+              case 16:
               case 'end':
                 return _context3.stop();
             }
@@ -1551,12 +1545,22 @@ var Webphone = (_class = function (_RcModule) {
                 }
 
                 this._alert.warning({
-                  message: this.errorCode,
-                  ttl: 0
+                  message: this.errorCode
                 });
                 return _context26.abrupt('return');
 
               case 3:
+                if (!(this._extensionDevice.phoneLines.length === 0)) {
+                  _context26.next = 6;
+                  break;
+                }
+
+                this._alert.warning({
+                  message: _webphoneErrors2.default.notOutboundCallWithoutDL
+                });
+                return _context26.abrupt('return');
+
+              case 6:
                 session = this._webphone.userAgent.invite(toNumber, {
                   media: this.acceptOptions.media,
                   fromNumber: fromNumber,
@@ -1576,7 +1580,7 @@ var Webphone = (_class = function (_RcModule) {
                 this._onNewCall();
                 return _context26.abrupt('return', session);
 
-              case 14:
+              case 17:
               case 'end':
                 return _context26.stop();
             }

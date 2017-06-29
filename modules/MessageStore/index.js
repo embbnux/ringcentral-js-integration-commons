@@ -999,7 +999,7 @@ var MessageStore = (_class = function (_RcModule) {
   }, {
     key: 'allConversations',
     get: function get() {
-      return this.cache.data.conversations;
+      return this.cache && this.cache.data.conversations || [];
     }
   }, {
     key: 'voicemailMessages',
