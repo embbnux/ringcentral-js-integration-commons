@@ -891,6 +891,10 @@ export default class Webphone extends RcModule {
     return this.connectionStatus === connectionStatus.disconnecting;
   }
 
+  get connecting() {
+    return this.connectionStatus === connectionStatus.connecting;
+  }
+
   get connected() {
     return this.connectionStatus === connectionStatus.connected;
   }
