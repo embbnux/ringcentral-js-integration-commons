@@ -1836,6 +1836,11 @@ var Webphone = (_class = function (_RcModule) {
       return this.connectionStatus === _connectionStatus2.default.disconnecting;
     }
   }, {
+    key: 'connecting',
+    get: function get() {
+      return this.connectionStatus === _connectionStatus2.default.connecting;
+    }
+  }, {
     key: 'connected',
     get: function get() {
       return this.connectionStatus === _connectionStatus2.default.connected;
