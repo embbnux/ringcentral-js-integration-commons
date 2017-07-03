@@ -37,7 +37,6 @@ export default class Webphone extends RcModule {
     webphoneLogLevel = 3,
     storage,
     contactMatcher,
-    extensionDevice,
     ...options,
   }) {
     super({
@@ -52,7 +51,6 @@ export default class Webphone extends RcModule {
     this._auth = ensureExist(auth, 'auth');
     this._client = ensureExist(client, 'client');
     this._rolesAndPermissions = ensureExist(rolesAndPermissions, 'rolesAndPermissions');
-    this._extensionDevice = ensureExist(extensionDevice, 'extensionDevice');
     this._storage = storage;
     this._storageWebphoneCountsKey = 'webphoneCounts';
     this._contactMatcher = contactMatcher;
@@ -144,7 +142,6 @@ export default class Webphone extends RcModule {
     return (
       this._auth.loggedIn &&
       this._rolesAndPermissions.ready &&
-      this._extensionDevice.ready &&
       !this.ready
     );
   }
@@ -153,8 +150,7 @@ export default class Webphone extends RcModule {
     return (
       (
         !this._auth.loggedIn ||
-        !this._rolesAndPermissions.ready ||
-        !this._extensionDevice.ready
+        !this._rolesAndPermissions.ready
       ) &&
       this.ready
     );
