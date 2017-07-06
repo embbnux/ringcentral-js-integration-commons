@@ -159,102 +159,179 @@ var Call = (_class = function (_RcModule) {
     value: function initialize() {
       var _this2 = this;
 
-      this.store.subscribe((0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
-        var oldCallSettingMode;
+      this.store.subscribe(function () {
+        return _this2._onStateChange();
+      });
+    }
+  }, {
+    key: '_onStateChange',
+    value: function () {
+      var _ref2 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
         return _regenerator2.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                if (!(_this2._numberValidate.ready && _this2._callingSettings.ready && _this2._storage.ready && _this2._regionSettings.ready && (!_this2._webphone || _this2._webphone.ready) && _this2._ringout.ready && _this2._softphone.ready && _this2.status === _moduleStatuses2.default.pending)) {
-                  _context.next = 9;
+                if (!this._shouldInit()) {
+                  _context.next = 7;
                   break;
                 }
 
-                _this2.store.dispatch({
-                  type: _this2.actionTypes.init
+                this.store.dispatch({
+                  type: this.actionTypes.init
                 });
-                // init webphone
-                _this2._callSettingMode = _this2._callingSettings.callingMode;
+                _context.next = 4;
+                return this._initCallModule();
 
-                if (!(_this2._callSettingMode === _callingModes2.default.webphone)) {
-                  _context.next = 6;
-                  break;
-                }
-
-                _context.next = 6;
-                return _this2._webphone.connect();
-
-              case 6:
-                _this2.store.dispatch({
-                  type: _this2.actionTypes.initSuccess
+              case 4:
+                this.store.dispatch({
+                  type: this.actionTypes.initSuccess
                 });
-                _context.next = 26;
+                _context.next = 14;
                 break;
 
-              case 9:
-                if (!((!_this2._numberValidate.ready || !_this2._callingSettings.ready || !_this2._regionSettings.ready || !!_this2._webphone && !_this2._webphone.ready || !_this2._ringout.ready || !_this2._softphone.ready || !_this2._storage.ready) && _this2.ready)) {
-                  _context.next = 15;
+              case 7:
+                if (!this._shouldReset()) {
+                  _context.next = 11;
                   break;
                 }
 
-                _this2.store.dispatch({
-                  type: _this2.actionTypes.resetSuccess
-                });
-                _this2._callSettingMode = _this2._callingSettings.callingMode;
-                if (_this2._callSettingMode === _callingModes2.default.webphone && _this2._webphone) {
-                  _this2._webphone.disconnect();
-                }
-                _context.next = 26;
+                this._resetCallModule();
+                _context.next = 14;
                 break;
 
-              case 15:
-                if (!_this2.ready) {
-                  _context.next = 26;
+              case 11:
+                if (!this.ready) {
+                  _context.next = 14;
                   break;
                 }
 
-                oldCallSettingMode = _this2._callSettingMode;
+                _context.next = 14;
+                return this._processCall();
 
-                if (!(_this2._callingSettings.callingMode !== oldCallSettingMode && _this2._webphone)) {
-                  _context.next = 26;
-                  break;
-                }
-
-                _this2._callSettingMode = _this2._callingSettings.callingMode;
-
-                if (!(oldCallSettingMode === _callingModes2.default.webphone)) {
-                  _context.next = 23;
-                  break;
-                }
-
-                _this2._webphone.disconnect();
-                _context.next = 26;
-                break;
-
-              case 23:
-                if (!(_this2._callSettingMode === _callingModes2.default.webphone)) {
-                  _context.next = 26;
-                  break;
-                }
-
-                _context.next = 26;
-                return _this2._webphone.connect();
-
-              case 26:
+              case 14:
               case 'end':
                 return _context.stop();
             }
           }
-        }, _callee, _this2);
-      })));
+        }, _callee, this);
+      }));
+
+      function _onStateChange() {
+        return _ref2.apply(this, arguments);
+      }
+
+      return _onStateChange;
+    }()
+  }, {
+    key: '_shouldInit',
+    value: function _shouldInit() {
+      return this._numberValidate.ready && this._callingSettings.ready && this._storage.ready && this._regionSettings.ready && (!this._webphone || this._webphone.ready) && this._ringout.ready && this._softphone.ready && this.pending;
     }
   }, {
-    key: 'onToNumberChange',
+    key: '_shouldReset',
+    value: function _shouldReset() {
+      return (!this._numberValidate.ready || !this._callingSettings.ready || !this._regionSettings.ready || !!this._webphone && !this._webphone.ready || !this._ringout.ready || !this._softphone.ready || !this._storage.ready) && this.ready;
+    }
+  }, {
+    key: '_initCallModule',
     value: function () {
-      var _ref3 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2(value) {
+      var _ref3 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2() {
         return _regenerator2.default.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
+              case 0:
+                this._callSettingMode = this._callingSettings.callingMode;
+
+                if (!(this._callSettingMode === _callingModes2.default.webphone && this._webphone)) {
+                  _context2.next = 4;
+                  break;
+                }
+
+                _context2.next = 4;
+                return this._webphone.connect();
+
+              case 4:
+              case 'end':
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function _initCallModule() {
+        return _ref3.apply(this, arguments);
+      }
+
+      return _initCallModule;
+    }()
+  }, {
+    key: '_resetCallModule',
+    value: function _resetCallModule() {
+      this.store.dispatch({
+        type: this.actionTypes.resetSuccess
+      });
+      this._callSettingMode = this._callingSettings.callingMode;
+      if (this._callSettingMode === _callingModes2.default.webphone && this._webphone) {
+        this._webphone.disconnect();
+      }
+    }
+  }, {
+    key: '_processCall',
+    value: function () {
+      var _ref4 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3() {
+        var oldCallSettingMode;
+        return _regenerator2.default.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                oldCallSettingMode = this._callSettingMode;
+
+                if (!(this._callingSettings.callingMode !== oldCallSettingMode && this._webphone)) {
+                  _context3.next = 10;
+                  break;
+                }
+
+                this._callSettingMode = this._callingSettings.callingMode;
+
+                if (!(oldCallSettingMode === _callingModes2.default.webphone)) {
+                  _context3.next = 7;
+                  break;
+                }
+
+                this._webphone.disconnect();
+                _context3.next = 10;
+                break;
+
+              case 7:
+                if (!(this._callSettingMode === _callingModes2.default.webphone)) {
+                  _context3.next = 10;
+                  break;
+                }
+
+                _context3.next = 10;
+                return this._webphone.connect();
+
+              case 10:
+              case 'end':
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this);
+      }));
+
+      function _processCall() {
+        return _ref4.apply(this, arguments);
+      }
+
+      return _processCall;
+    }()
+  }, {
+    key: 'onToNumberChange',
+    value: function () {
+      var _ref5 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee4(value) {
+        return _regenerator2.default.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
               case 0:
                 this.store.dispatch({
                   type: this.actionTypes.toNumberChanged,
@@ -263,14 +340,14 @@ var Call = (_class = function (_RcModule) {
 
               case 1:
               case 'end':
-                return _context2.stop();
+                return _context4.stop();
             }
           }
-        }, _callee2, this);
+        }, _callee4, this);
       }));
 
       function onToNumberChange(_x) {
-        return _ref3.apply(this, arguments);
+        return _ref5.apply(this, arguments);
       }
 
       return onToNumberChange;
@@ -278,19 +355,19 @@ var Call = (_class = function (_RcModule) {
   }, {
     key: 'onCall',
     value: function () {
-      var _ref4 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3() {
+      var _ref6 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee5() {
         var validatedNumbers;
-        return _regenerator2.default.wrap(function _callee3$(_context3) {
+        return _regenerator2.default.wrap(function _callee5$(_context5) {
           while (1) {
-            switch (_context3.prev = _context3.next) {
+            switch (_context5.prev = _context5.next) {
               case 0:
-                if (!(this.callStatus === _callStatus2.default.idle)) {
-                  _context3.next = 23;
+                if (!this.isIdle) {
+                  _context5.next = 23;
                   break;
                 }
 
                 if (!(('' + this.toNumber).trim().length === 0)) {
-                  _context3.next = 5;
+                  _context5.next = 5;
                   break;
                 }
 
@@ -301,7 +378,7 @@ var Call = (_class = function (_RcModule) {
                     message: _callErrors2.default.noToNumber
                   });
                 }
-                _context3.next = 23;
+                _context5.next = 23;
                 break;
 
               case 5:
@@ -309,26 +386,26 @@ var Call = (_class = function (_RcModule) {
                   type: this.actionTypes.connect,
                   number: this.toNumber
                 });
-                _context3.prev = 6;
-                _context3.next = 9;
+                _context5.prev = 6;
+                _context5.next = 9;
                 return this._getValidatedNumbers();
 
               case 9:
-                validatedNumbers = _context3.sent;
+                validatedNumbers = _context5.sent;
 
                 if (!validatedNumbers) {
-                  _context3.next = 16;
+                  _context5.next = 16;
                   break;
                 }
 
-                _context3.next = 13;
+                _context5.next = 13;
                 return this._makeCall(validatedNumbers);
 
               case 13:
                 this.store.dispatch({
                   type: this.actionTypes.connectSuccess
                 });
-                _context3.next = 17;
+                _context5.next = 17;
                 break;
 
               case 16:
@@ -337,27 +414,27 @@ var Call = (_class = function (_RcModule) {
                 });
 
               case 17:
-                _context3.next = 23;
+                _context5.next = 23;
                 break;
 
               case 19:
-                _context3.prev = 19;
-                _context3.t0 = _context3['catch'](6);
+                _context5.prev = 19;
+                _context5.t0 = _context5['catch'](6);
 
-                if (_context3.t0.message === _ringoutErrors2.default.firstLegConnectFailed) {
+                if (_context5.t0.message === _ringoutErrors2.default.firstLegConnectFailed) {
                   this._alert.warning({
                     message: _callErrors2.default.connectFailed,
-                    payload: _context3.t0
+                    payload: _context5.t0
                   });
-                } else if (_context3.t0.message === 'Failed to fetch') {
+                } else if (_context5.t0.message === 'Failed to fetch') {
                   this._alert.danger({
                     message: _callErrors2.default.networkError,
-                    payload: _context3.t0
+                    payload: _context5.t0
                   });
-                } else if (_context3.t0.message !== 'Refresh token has expired') {
+                } else if (_context5.t0.message !== 'Refresh token has expired') {
                   this._alert.danger({
                     message: _callErrors2.default.internalError,
-                    payload: _context3.t0
+                    payload: _context5.t0
                   });
                 }
                 this.store.dispatch({
@@ -366,14 +443,14 @@ var Call = (_class = function (_RcModule) {
 
               case 23:
               case 'end':
-                return _context3.stop();
+                return _context5.stop();
             }
           }
-        }, _callee3, this, [[6, 19]]);
+        }, _callee5, this, [[6, 19]]);
       }));
 
       function onCall() {
-        return _ref4.apply(this, arguments);
+        return _ref6.apply(this, arguments);
       }
 
       return onCall;
@@ -381,33 +458,33 @@ var Call = (_class = function (_RcModule) {
   }, {
     key: '_getValidatedNumbers',
     value: function () {
-      var _ref5 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee4() {
+      var _ref7 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee6() {
         var _this3 = this;
 
         var fromNumber, isWebphone, waitingValidateNumbers, validatedResult, parsedNumbers, parsedFromNumber;
-        return _regenerator2.default.wrap(function _callee4$(_context4) {
+        return _regenerator2.default.wrap(function _callee6$(_context6) {
           while (1) {
-            switch (_context4.prev = _context4.next) {
+            switch (_context6.prev = _context6.next) {
               case 0:
                 fromNumber = void 0;
                 isWebphone = this._callingSettings.callingMode === _callingModes2.default.webphone;
 
                 if (!isWebphone) {
-                  _context4.next = 8;
+                  _context6.next = 8;
                   break;
                 }
 
                 fromNumber = this._callingSettings.fromNumber;
 
                 if (!(fromNumber === null || fromNumber === '')) {
-                  _context4.next = 6;
+                  _context6.next = 6;
                   break;
                 }
 
-                return _context4.abrupt('return', null);
+                return _context6.abrupt('return', null);
 
               case 6:
-                _context4.next = 9;
+                _context6.next = 9;
                 break;
 
               case 8:
@@ -419,14 +496,14 @@ var Call = (_class = function (_RcModule) {
                 if (fromNumber && fromNumber.length > 0 && !(isWebphone && fromNumber === 'anonymous')) {
                   waitingValidateNumbers.push(fromNumber);
                 }
-                _context4.next = 13;
+                _context6.next = 13;
                 return this._numberValidate.validateNumbers(waitingValidateNumbers);
 
               case 13:
-                validatedResult = _context4.sent;
+                validatedResult = _context6.sent;
 
                 if (validatedResult.result) {
-                  _context4.next = 17;
+                  _context6.next = 17;
                   break;
                 }
 
@@ -435,7 +512,7 @@ var Call = (_class = function (_RcModule) {
                     message: _callErrors2.default[error.type]
                   });
                 });
-                return _context4.abrupt('return', null);
+                return _context6.abrupt('return', null);
 
               case 17:
                 parsedNumbers = validatedResult.numbers;
@@ -450,21 +527,21 @@ var Call = (_class = function (_RcModule) {
                 if (isWebphone && fromNumber === 'anonymous') {
                   parsedFromNumber = 'anonymous';
                 }
-                return _context4.abrupt('return', {
+                return _context6.abrupt('return', {
                   toNumber: parsedNumbers[0].e164,
                   fromNumber: parsedFromNumber
                 });
 
               case 22:
               case 'end':
-                return _context4.stop();
+                return _context6.stop();
             }
           }
-        }, _callee4, this);
+        }, _callee6, this);
       }));
 
       function _getValidatedNumbers() {
-        return _ref5.apply(this, arguments);
+        return _ref7.apply(this, arguments);
       }
 
       return _getValidatedNumbers;
@@ -472,13 +549,13 @@ var Call = (_class = function (_RcModule) {
   }, {
     key: '_makeCall',
     value: function () {
-      var _ref6 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee5(_ref7) {
-        var toNumber = _ref7.toNumber,
-            fromNumber = _ref7.fromNumber;
+      var _ref8 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee7(_ref9) {
+        var toNumber = _ref9.toNumber,
+            fromNumber = _ref9.fromNumber;
         var callingMode, countryCode, homeCountry, homeCountryId;
-        return _regenerator2.default.wrap(function _callee5$(_context5) {
+        return _regenerator2.default.wrap(function _callee7$(_context7) {
           while (1) {
-            switch (_context5.prev = _context5.next) {
+            switch (_context7.prev = _context7.next) {
               case 0:
                 callingMode = this._callingSettings.callingMode;
                 countryCode = this._regionSettings.countryCode;
@@ -486,16 +563,16 @@ var Call = (_class = function (_RcModule) {
                   return country.isoCode === countryCode;
                 });
                 homeCountryId = homeCountry && homeCountry.callingCode || '1';
-                _context5.t0 = callingMode;
-                _context5.next = _context5.t0 === _callingModes2.default.softphone ? 7 : _context5.t0 === _callingModes2.default.ringout ? 9 : _context5.t0 === _callingModes2.default.webphone ? 12 : 16;
+                _context7.t0 = callingMode;
+                _context7.next = _context7.t0 === _callingModes2.default.softphone ? 7 : _context7.t0 === _callingModes2.default.ringout ? 9 : _context7.t0 === _callingModes2.default.webphone ? 12 : 16;
                 break;
 
               case 7:
                 this._softphone.makeCall(toNumber);
-                return _context5.abrupt('break', 17);
+                return _context7.abrupt('break', 17);
 
               case 9:
-                _context5.next = 11;
+                _context7.next = 11;
                 return this._ringout.makeCall({
                   fromNumber: fromNumber,
                   toNumber: toNumber,
@@ -503,15 +580,15 @@ var Call = (_class = function (_RcModule) {
                 });
 
               case 11:
-                return _context5.abrupt('break', 17);
+                return _context7.abrupt('break', 17);
 
               case 12:
                 if (!this._webphone) {
-                  _context5.next = 15;
+                  _context7.next = 15;
                   break;
                 }
 
-                _context5.next = 15;
+                _context7.next = 15;
                 return this._webphone.makeCall({
                   fromNumber: fromNumber,
                   toNumber: toNumber,
@@ -519,21 +596,21 @@ var Call = (_class = function (_RcModule) {
                 });
 
               case 15:
-                return _context5.abrupt('break', 17);
+                return _context7.abrupt('break', 17);
 
               case 16:
-                return _context5.abrupt('break', 17);
+                return _context7.abrupt('break', 17);
 
               case 17:
               case 'end':
-                return _context5.stop();
+                return _context7.stop();
             }
           }
-        }, _callee5, this);
+        }, _callee7, this);
       }));
 
       function _makeCall(_x2) {
-        return _ref6.apply(this, arguments);
+        return _ref8.apply(this, arguments);
       }
 
       return _makeCall;
@@ -547,6 +624,11 @@ var Call = (_class = function (_RcModule) {
     key: 'ready',
     get: function get() {
       return this.state.status === _moduleStatuses2.default.ready;
+    }
+  }, {
+    key: 'pending',
+    get: function get() {
+      return this.state.status === _moduleStatuses2.default.pending;
     }
   }, {
     key: 'callStatus',

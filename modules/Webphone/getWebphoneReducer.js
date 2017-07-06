@@ -11,6 +11,7 @@ exports.getWebphoneCountsReducer = getWebphoneCountsReducer;
 exports.getCurrentSessionReducer = getCurrentSessionReducer;
 exports.getSessionsReducer = getSessionsReducer;
 exports.getMinimizedReducer = getMinimizedReducer;
+exports.getUserMediaReducer = getUserMediaReducer;
 exports.default = getWebphoneReducer;
 
 var _redux = require('redux');
@@ -164,6 +165,21 @@ function getMinimizedReducer(types) {
         return !state;
       case types.resetMinimized:
         return false;
+      default:
+        return state;
+    }
+  };
+}
+
+function getUserMediaReducer(types) {
+  return function () {
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+    var _ref9 = arguments[1];
+    var type = _ref9.type;
+
+    switch (type) {
+      case types.getUserMediaSuccess:
+        return true;
       default:
         return state;
     }
