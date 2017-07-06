@@ -935,7 +935,7 @@ var Webphone = (_class = function (_RcModule) {
                   break;
                 }
 
-                return _context9.abrupt('return');
+                return _context9.abrupt('return', false);
 
               case 3:
                 _context9.prev = 3;
@@ -955,7 +955,7 @@ var Webphone = (_class = function (_RcModule) {
                     message: _callErrors2.default[error.type]
                   });
                 });
-                return _context9.abrupt('return');
+                return _context9.abrupt('return', false);
 
               case 10:
                 _context9.next = 12;
@@ -964,21 +964,24 @@ var Webphone = (_class = function (_RcModule) {
               case 12:
                 console.log('Forwarded');
                 this._removeSession(session);
-                _context9.next = 19;
-                break;
+                return _context9.abrupt('return', true);
 
-              case 16:
-                _context9.prev = 16;
+              case 17:
+                _context9.prev = 17;
                 _context9.t0 = _context9['catch'](3);
 
                 console.error(_context9.t0);
+                this._alert.warning({
+                  message: _webphoneErrors2.default.forwardError
+                });
+                return _context9.abrupt('return', false);
 
-              case 19:
+              case 22:
               case 'end':
                 return _context9.stop();
             }
           }
-        }, _callee9, this, [[3, 16]]);
+        }, _callee9, this, [[3, 17]]);
       }));
 
       function forward(_x5, _x6) {
