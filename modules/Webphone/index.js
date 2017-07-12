@@ -742,7 +742,7 @@ var Webphone = (_class = function (_RcModule) {
         session.callStatus = _sessionStatus2.default.connected;
         _this6._updateCurrentSessionAndSessions(session);
         if (typeof _this6._onCallStart === 'function') {
-          _this6._onCallStart(session);
+          _this6._onCallStart(session, _this6.currentSession);
         }
       });
       session.on('progress', function () {
@@ -755,7 +755,7 @@ var Webphone = (_class = function (_RcModule) {
         session.callStatus = _sessionStatus2.default.finished;
         _this6._removeSession(session);
         if (typeof _this6._onCallEnd === 'function') {
-          _this6._onCallEnd(session);
+          _this6._onCallEnd(session, _this6.currentSession);
         }
       });
       session.on('failed', function (response, cause) {
@@ -764,7 +764,7 @@ var Webphone = (_class = function (_RcModule) {
         session.callStatus = _sessionStatus2.default.finished;
         _this6._removeSession(session);
         if (typeof _this6._onCallEnd === 'function') {
-          _this6._onCallEnd(session);
+          _this6._onCallEnd(session, _this6.currentSession);
         }
       });
       session.on('terminated', function () {
@@ -772,7 +772,7 @@ var Webphone = (_class = function (_RcModule) {
         session.callStatus = _sessionStatus2.default.finished;
         _this6._removeSession(session);
         if (typeof _this6._onCallEnd === 'function') {
-          _this6._onCallEnd(session);
+          _this6._onCallEnd(session, _this6.currentSession);
         }
       });
       session.on('cancel', function () {
@@ -780,7 +780,7 @@ var Webphone = (_class = function (_RcModule) {
         session.callStatus = _sessionStatus2.default.finished;
         _this6._removeSession(session);
         if (typeof _this6._onCallEnd === 'function') {
-          _this6._onCallEnd(session);
+          _this6._onCallEnd(session, _this6.currentSession);
         }
       });
       session.on('refer', function () {
@@ -834,9 +834,12 @@ var Webphone = (_class = function (_RcModule) {
         console.log('Event: Rejected');
         _this7._removeSession(session);
         if (typeof _this7._onCallEnd === 'function') {
-          _this7._onCallEnd(session);
+          _this7._onCallEnd(session, _this7.currentSession);
         }
       });
+      if (typeof this._onCallRing === 'function') {
+        this._onCallRing(session, this.currentSession);
+      }
       this._onNewCall();
     }
   }, {
@@ -871,7 +874,7 @@ var Webphone = (_class = function (_RcModule) {
               case 9:
                 this._resetMinimized();
                 if (typeof this._onCallStart === 'function') {
-                  this._onCallStart(session);
+                  this._onCallStart(session, this.currentSession);
                 }
                 _context6.next = 19;
                 break;
@@ -998,7 +1001,7 @@ var Webphone = (_class = function (_RcModule) {
                 console.log('Forwarded');
                 this._removeSession(session);
                 if (typeof this._onCallEnd === 'function') {
-                  this._onCallEnd(session);
+                  this._onCallEnd(session, this.currentSession);
                 }
                 return _context9.abrupt('return', true);
 
@@ -1659,7 +1662,7 @@ var Webphone = (_class = function (_RcModule) {
                     console.error(e);
                     _this15._removeSession(session);
                     if (typeof _this15._onCallEnd === 'function') {
-                      _this15._onCallEnd(session);
+                      _this15._onCallEnd(session, _this15.currentSession);
                     }
                   }
                 });
@@ -1745,7 +1748,7 @@ var Webphone = (_class = function (_RcModule) {
                 this._resetMinimized();
                 this._onNewCall();
                 if (typeof this._onCallStart === 'function') {
-                  this._onCallStart(session);
+                  this._onCallStart(session, this.currentSession);
                 }
                 return _context27.abrupt('return', session);
 
