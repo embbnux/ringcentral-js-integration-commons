@@ -171,7 +171,10 @@ var Webphone = (_class = function (_RcModule) {
         contactMatcher = _ref.contactMatcher,
         extensionDevice = _ref.extensionDevice,
         numberValidate = _ref.numberValidate,
-        options = (0, _objectWithoutProperties3.default)(_ref, ['appKey', 'appName', 'appVersion', 'alert', 'auth', 'client', 'rolesAndPermissions', 'webphoneLogLevel', 'storage', 'globalStorage', 'contactMatcher', 'extensionDevice', 'numberValidate']);
+        onCallEnd = _ref.onCallEnd,
+        onCallRing = _ref.onCallRing,
+        onCallStart = _ref.onCallStart,
+        options = (0, _objectWithoutProperties3.default)(_ref, ['appKey', 'appName', 'appVersion', 'alert', 'auth', 'client', 'rolesAndPermissions', 'webphoneLogLevel', 'storage', 'globalStorage', 'contactMatcher', 'extensionDevice', 'numberValidate', 'onCallEnd', 'onCallRing', 'onCallStart']);
     (0, _classCallCheck3.default)(this, Webphone);
 
     var _this = (0, _possibleConstructorReturn3.default)(this, (Webphone.__proto__ || (0, _getPrototypeOf2.default)(Webphone)).call(this, (0, _extends3.default)({}, options, {
@@ -193,6 +196,9 @@ var Webphone = (_class = function (_RcModule) {
     _this._storageWebphoneCountsKey = 'webphoneCounts';
     _this._userMediaStorageKey = 'userMadia';
     _this._contactMatcher = contactMatcher;
+    _this._onCallEnd = onCallEnd;
+    _this._onCallRing = onCallRing;
+    _this._onCallStart = onCallStart;
     _this._webphone = null;
     _this._remoteVideo = null;
     _this._localVideo = null;
@@ -735,6 +741,9 @@ var Webphone = (_class = function (_RcModule) {
         console.log('accepted');
         session.callStatus = _sessionStatus2.default.connected;
         _this6._updateCurrentSessionAndSessions(session);
+        if (typeof _this6._onCallStart === 'function') {
+          _this6._onCallStart(session);
+        }
       });
       session.on('progress', function () {
         console.log('progress...');
@@ -745,22 +754,34 @@ var Webphone = (_class = function (_RcModule) {
         console.log('rejected');
         session.callStatus = _sessionStatus2.default.finished;
         _this6._removeSession(session);
+        if (typeof _this6._onCallEnd === 'function') {
+          _this6._onCallEnd(session);
+        }
       });
       session.on('failed', function (response, cause) {
         console.log('Event: Failed');
         console.log(cause);
         session.callStatus = _sessionStatus2.default.finished;
         _this6._removeSession(session);
+        if (typeof _this6._onCallEnd === 'function') {
+          _this6._onCallEnd(session);
+        }
       });
       session.on('terminated', function () {
         console.log('Event: Terminated');
         session.callStatus = _sessionStatus2.default.finished;
         _this6._removeSession(session);
+        if (typeof _this6._onCallEnd === 'function') {
+          _this6._onCallEnd(session);
+        }
       });
       session.on('cancel', function () {
         console.log('Event: Cancel');
         session.callStatus = _sessionStatus2.default.finished;
         _this6._removeSession(session);
+        if (typeof _this6._onCallEnd === 'function') {
+          _this6._onCallEnd(session);
+        }
       });
       session.on('refer', function () {
         console.log('Event: Refer');
@@ -812,6 +833,9 @@ var Webphone = (_class = function (_RcModule) {
       session.on('rejected', function () {
         console.log('Event: Rejected');
         _this7._removeSession(session);
+        if (typeof _this7._onCallEnd === 'function') {
+          _this7._onCallEnd(session);
+        }
       });
       this._onNewCall();
     }
@@ -846,24 +870,27 @@ var Webphone = (_class = function (_RcModule) {
 
               case 9:
                 this._resetMinimized();
-                _context6.next = 18;
+                if (typeof this._onCallStart === 'function') {
+                  this._onCallStart(session);
+                }
+                _context6.next = 19;
                 break;
 
-              case 12:
-                _context6.prev = 12;
+              case 13:
+                _context6.prev = 13;
                 _context6.t0 = _context6['catch'](3);
 
                 console.log('Accept failed');
+                console.error(_context6.t0);
                 this._removeSession(session);
                 this._removeActiveSession();
-                throw _context6.t0;
 
-              case 18:
+              case 19:
               case 'end':
                 return _context6.stop();
             }
           }
-        }, _callee6, this, [[3, 12]]);
+        }, _callee6, this, [[3, 13]]);
       }));
 
       function answer(_x2) {
@@ -970,10 +997,13 @@ var Webphone = (_class = function (_RcModule) {
               case 12:
                 console.log('Forwarded');
                 this._removeSession(session);
+                if (typeof this._onCallEnd === 'function') {
+                  this._onCallEnd(session);
+                }
                 return _context9.abrupt('return', true);
 
-              case 17:
-                _context9.prev = 17;
+              case 18:
+                _context9.prev = 18;
                 _context9.t0 = _context9['catch'](3);
 
                 console.error(_context9.t0);
@@ -982,12 +1012,12 @@ var Webphone = (_class = function (_RcModule) {
                 });
                 return _context9.abrupt('return', false);
 
-              case 22:
+              case 23:
               case 'end':
                 return _context9.stop();
             }
           }
-        }, _callee9, this, [[3, 17]]);
+        }, _callee9, this, [[3, 18]]);
       }));
 
       function forward(_x5, _x6) {
@@ -1628,6 +1658,9 @@ var Webphone = (_class = function (_RcModule) {
                   } catch (e) {
                     console.error(e);
                     _this15._removeSession(session);
+                    if (typeof _this15._onCallEnd === 'function') {
+                      _this15._onCallEnd(session);
+                    }
                   }
                 });
 
@@ -1711,9 +1744,12 @@ var Webphone = (_class = function (_RcModule) {
                 this._setActiveSession(session);
                 this._resetMinimized();
                 this._onNewCall();
+                if (typeof this._onCallStart === 'function') {
+                  this._onCallStart(session);
+                }
                 return _context27.abrupt('return', session);
 
-              case 20:
+              case 21:
               case 'end':
                 return _context27.stop();
             }
