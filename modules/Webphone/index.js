@@ -274,14 +274,20 @@ var Webphone = (_class = function (_RcModule) {
     value: function initializeProxy() {
       var _this3 = this;
 
-      // TODO enhance to only try to get userMedia on webphone register?
       if (!this.userMedia) {
         navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
         if (navigator.getUserMedia) {
           navigator.getUserMedia({
             audio: true
-          }, function () {
+          }, function (stream) {
             _this3._onGetUserMediaSuccess();
+            if (typeof stream.stop === 'function') {
+              stream.stop();
+            } else {
+              stream.getTracks().forEach(function (track) {
+                track.stop();
+              });
+            }
           }, function (error) {
             _this3._onGetUserMediaError(error);
           });
@@ -426,8 +432,7 @@ var Webphone = (_class = function (_RcModule) {
         }
         _this4.store.dispatch({
           type: _this4.actionTypes.registrationFailed,
-          errorCode: errorCode,
-          error: error
+          errorCode: errorCode
         });
         if (needToReconnect) {
           _this4._connect(needToReconnect);
@@ -841,7 +846,7 @@ var Webphone = (_class = function (_RcModule) {
 
               case 9:
                 this._resetMinimized();
-                _context6.next = 17;
+                _context6.next = 18;
                 break;
 
               case 12:
@@ -851,8 +856,9 @@ var Webphone = (_class = function (_RcModule) {
                 console.log('Accept failed');
                 this._removeSession(session);
                 this._removeActiveSession();
+                throw _context6.t0;
 
-              case 17:
+              case 18:
               case 'end':
                 return _context6.stop();
             }
