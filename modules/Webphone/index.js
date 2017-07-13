@@ -959,7 +959,7 @@ var Webphone = (_class = function (_RcModule) {
       var _ref10 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee9(sessionId, forwardNumber) {
         var _this8 = this;
 
-        var session, validatedResult;
+        var session, validatedResult, validPhoneNumber;
         return _regenerator2.default.wrap(function _callee9$(_context9) {
           while (1) {
             switch (_context9.prev = _context9.next) {
@@ -994,10 +994,11 @@ var Webphone = (_class = function (_RcModule) {
                 return _context9.abrupt('return', false);
 
               case 10:
-                _context9.next = 12;
-                return session.forward(forwardNumber, this.acceptOptions);
+                validPhoneNumber = validatedResult.numbers[0] && validatedResult.numbers[0].e164;
+                _context9.next = 13;
+                return session.forward(validPhoneNumber, this.acceptOptions);
 
-              case 12:
+              case 13:
                 console.log('Forwarded');
                 this._removeSession(session);
                 if (typeof this._onCallEnd === 'function') {
@@ -1005,8 +1006,8 @@ var Webphone = (_class = function (_RcModule) {
                 }
                 return _context9.abrupt('return', true);
 
-              case 18:
-                _context9.prev = 18;
+              case 19:
+                _context9.prev = 19;
                 _context9.t0 = _context9['catch'](3);
 
                 console.error(_context9.t0);
@@ -1015,12 +1016,12 @@ var Webphone = (_class = function (_RcModule) {
                 });
                 return _context9.abrupt('return', false);
 
-              case 23:
+              case 24:
               case 'end':
                 return _context9.stop();
             }
           }
-        }, _callee9, this, [[3, 18]]);
+        }, _callee9, this, [[3, 19]]);
       }));
 
       function forward(_x5, _x6) {
