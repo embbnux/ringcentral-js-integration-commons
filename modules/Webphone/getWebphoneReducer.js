@@ -3,6 +3,11 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _extends2 = require('babel-runtime/helpers/extends');
+
+var _extends3 = _interopRequireDefault(_extends2);
+
 exports.getVideoElementPreparedReducer = getVideoElementPreparedReducer;
 exports.getConnectionStatusReducer = getConnectionStatusReducer;
 exports.getErrorCodeReducer = getErrorCodeReducer;
@@ -127,7 +132,7 @@ function getCurrentSessionReducer(types) {
 
     switch (type) {
       case types.updateCurrentSession:
-        return session;
+        return (0, _extends3.default)({}, state, session);
       case types.destroyCurrentSession:
         return null;
       default:

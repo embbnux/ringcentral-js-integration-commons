@@ -223,7 +223,7 @@ var RegionSettings = (_class = function (_RcModule) {
       var _ref3 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2() {
         var _this3 = this;
 
-        var countryCode;
+        var countryCode, country;
         return _regenerator2.default.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
@@ -240,9 +240,11 @@ var RegionSettings = (_class = function (_RcModule) {
                   });
                 }
                 if (!countryCode) {
-                  countryCode = this._dialingPlan.plans.find(function (plan) {
+                  country = this._dialingPlan.plans.find(function (plan) {
                     return plan.isoCode === _this3._extensionInfo.country.isoCode;
-                  }).isoCode;
+                  }) || this._dialingPlan.plans[0];
+
+                  countryCode = country && country.isoCode;
                   this.store.dispatch({
                     type: this.actionTypes.setData,
                     countryCode: countryCode,

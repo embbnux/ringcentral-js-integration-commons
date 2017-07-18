@@ -1092,18 +1092,31 @@ var Webphone = (_class = function (_RcModule) {
           while (1) {
             switch (_context12.prev = _context12.next) {
               case 0:
+                _context12.prev = 0;
+
                 this._sessionHandleWithId(sessionId, function (session) {
                   session.isOnMute = true;
                   session.mute();
                   _this9._updateCurrentSessionAndSessions(session);
                 });
+                return _context12.abrupt('return', true);
 
-              case 1:
+              case 5:
+                _context12.prev = 5;
+                _context12.t0 = _context12['catch'](0);
+
+                console.error(_context12.t0);
+                this._alert.warning({
+                  message: _webphoneErrors2.default.muteError
+                });
+                return _context12.abrupt('return', false);
+
+              case 10:
               case 'end':
                 return _context12.stop();
             }
           }
-        }, _callee12, this);
+        }, _callee12, this, [[0, 5]]);
       }));
 
       function mute(_x9) {
@@ -1152,17 +1165,30 @@ var Webphone = (_class = function (_RcModule) {
           while (1) {
             switch (_context14.prev = _context14.next) {
               case 0:
+                _context14.prev = 0;
+
                 this._sessionHandleWithId(sessionId, function (session) {
                   session.hold();
                   _this11._updateCurrentSessionAndSessions(session);
                 });
+                return _context14.abrupt('return', true);
 
-              case 1:
+              case 5:
+                _context14.prev = 5;
+                _context14.t0 = _context14['catch'](0);
+
+                console.log(_context14.t0);
+                this._alert.warning({
+                  message: _webphoneErrors2.default.holdError
+                });
+                return _context14.abrupt('return', false);
+
+              case 10:
               case 'end':
                 return _context14.stop();
             }
           }
-        }, _callee14, this);
+        }, _callee14, this, [[0, 5]]);
       }));
 
       function hold(_x11) {
@@ -1768,6 +1794,46 @@ var Webphone = (_class = function (_RcModule) {
       return makeCall;
     }()
   }, {
+    key: 'updateCurrentSessionMatchedContact',
+    value: function () {
+      var _ref30 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee28(contact) {
+        var session;
+        return _regenerator2.default.wrap(function _callee28$(_context28) {
+          while (1) {
+            switch (_context28.prev = _context28.next) {
+              case 0:
+                if (this.currentSession) {
+                  _context28.next = 2;
+                  break;
+                }
+
+                return _context28.abrupt('return');
+
+              case 2:
+                session = (0, _extends3.default)({}, this.currentSession, {
+                  contactMatch: contact
+                });
+
+                this.store.dispatch({
+                  type: this.actionTypes.updateCurrentSession,
+                  session: session
+                });
+
+              case 4:
+              case 'end':
+                return _context28.stop();
+            }
+          }
+        }, _callee28, this);
+      }));
+
+      function updateCurrentSessionMatchedContact(_x29) {
+        return _ref30.apply(this, arguments);
+      }
+
+      return updateCurrentSessionMatchedContact;
+    }()
+  }, {
     key: '_addSession',
     value: function _addSession(session) {
       this._sessions.set(session.id, session);
@@ -1838,10 +1904,10 @@ var Webphone = (_class = function (_RcModule) {
   }, {
     key: 'toggleMinimized',
     value: function () {
-      var _ref30 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee28() {
-        return _regenerator2.default.wrap(function _callee28$(_context28) {
+      var _ref31 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee29() {
+        return _regenerator2.default.wrap(function _callee29$(_context29) {
           while (1) {
-            switch (_context28.prev = _context28.next) {
+            switch (_context29.prev = _context29.next) {
               case 0:
                 this.store.dispatch({
                   type: this.actionTypes.toggleMinimized
@@ -1849,14 +1915,14 @@ var Webphone = (_class = function (_RcModule) {
 
               case 1:
               case 'end':
-                return _context28.stop();
+                return _context29.stop();
             }
           }
-        }, _callee28, this);
+        }, _callee29, this);
       }));
 
       function toggleMinimized() {
-        return _ref30.apply(this, arguments);
+        return _ref31.apply(this, arguments);
       }
 
       return toggleMinimized;
@@ -1871,73 +1937,47 @@ var Webphone = (_class = function (_RcModule) {
   }, {
     key: '_retrySleep',
     value: function () {
-      var _ref31 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee29() {
-        return _regenerator2.default.wrap(function _callee29$(_context29) {
-          while (1) {
-            switch (_context29.prev = _context29.next) {
-              case 0:
-                if (!(this.connectRetryCounts < 3)) {
-                  _context29.next = 3;
-                  break;
-                }
-
-                _context29.next = 3;
-                return (0, _sleep2.default)(FIRST_THREE_RETRIES_DELAY);
-
-              case 3:
-                if (!(this.connectRetryCounts === 3)) {
-                  _context29.next = 6;
-                  break;
-                }
-
-                _context29.next = 6;
-                return (0, _sleep2.default)(FOURTH_RETRIES_DELAY);
-
-              case 6:
-                if (!(this.connectRetryCounts === 4)) {
-                  _context29.next = 9;
-                  break;
-                }
-
-                _context29.next = 9;
-                return (0, _sleep2.default)(FIFTH_RETRIES_DELAY);
-
-              case 9:
-                if (!(this.connectRetryCounts > 4)) {
-                  _context29.next = 12;
-                  break;
-                }
-
-                _context29.next = 12;
-                return (0, _sleep2.default)(MAX_RETRIES_DELAY);
-
-              case 12:
-              case 'end':
-                return _context29.stop();
-            }
-          }
-        }, _callee29, this);
-      }));
-
-      function _retrySleep() {
-        return _ref31.apply(this, arguments);
-      }
-
-      return _retrySleep;
-    }()
-  }, {
-    key: '_onGetUserMediaSuccess',
-    value: function () {
       var _ref32 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee30() {
         return _regenerator2.default.wrap(function _callee30$(_context30) {
           while (1) {
             switch (_context30.prev = _context30.next) {
               case 0:
-                this.store.dispatch({
-                  type: this.actionTypes.getUserMediaSuccess
-                });
+                if (!(this.connectRetryCounts < 3)) {
+                  _context30.next = 3;
+                  break;
+                }
 
-              case 1:
+                _context30.next = 3;
+                return (0, _sleep2.default)(FIRST_THREE_RETRIES_DELAY);
+
+              case 3:
+                if (!(this.connectRetryCounts === 3)) {
+                  _context30.next = 6;
+                  break;
+                }
+
+                _context30.next = 6;
+                return (0, _sleep2.default)(FOURTH_RETRIES_DELAY);
+
+              case 6:
+                if (!(this.connectRetryCounts === 4)) {
+                  _context30.next = 9;
+                  break;
+                }
+
+                _context30.next = 9;
+                return (0, _sleep2.default)(FIFTH_RETRIES_DELAY);
+
+              case 9:
+                if (!(this.connectRetryCounts > 4)) {
+                  _context30.next = 12;
+                  break;
+                }
+
+                _context30.next = 12;
+                return (0, _sleep2.default)(MAX_RETRIES_DELAY);
+
+              case 12:
               case 'end':
                 return _context30.stop();
             }
@@ -1945,23 +1985,22 @@ var Webphone = (_class = function (_RcModule) {
         }, _callee30, this);
       }));
 
-      function _onGetUserMediaSuccess() {
+      function _retrySleep() {
         return _ref32.apply(this, arguments);
       }
 
-      return _onGetUserMediaSuccess;
+      return _retrySleep;
     }()
   }, {
-    key: '_onGetUserMediaError',
+    key: '_onGetUserMediaSuccess',
     value: function () {
-      var _ref33 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee31(error) {
+      var _ref33 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee31() {
         return _regenerator2.default.wrap(function _callee31$(_context31) {
           while (1) {
             switch (_context31.prev = _context31.next) {
               case 0:
                 this.store.dispatch({
-                  type: this.actionTypes.getUserMediaError,
-                  error: error
+                  type: this.actionTypes.getUserMediaSuccess
                 });
 
               case 1:
@@ -1972,8 +2011,35 @@ var Webphone = (_class = function (_RcModule) {
         }, _callee31, this);
       }));
 
-      function _onGetUserMediaError(_x29) {
+      function _onGetUserMediaSuccess() {
         return _ref33.apply(this, arguments);
+      }
+
+      return _onGetUserMediaSuccess;
+    }()
+  }, {
+    key: '_onGetUserMediaError',
+    value: function () {
+      var _ref34 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee32(error) {
+        return _regenerator2.default.wrap(function _callee32$(_context32) {
+          while (1) {
+            switch (_context32.prev = _context32.next) {
+              case 0:
+                this.store.dispatch({
+                  type: this.actionTypes.getUserMediaError,
+                  error: error
+                });
+
+              case 1:
+              case 'end':
+                return _context32.stop();
+            }
+          }
+        }, _callee32, this);
+      }));
+
+      function _onGetUserMediaError(_x30) {
+        return _ref34.apply(this, arguments);
       }
 
       return _onGetUserMediaError;
@@ -2082,6 +2148,6 @@ var Webphone = (_class = function (_RcModule) {
     }
   }]);
   return Webphone;
-}(_RcModule3.default), (_applyDecoratedDescriptor(_class.prototype, '_sipProvision', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, '_sipProvision'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, '_connect', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, '_connect'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'connect', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'connect'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'disconnect', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'disconnect'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'answer', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'answer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'reject', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'reject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'resume', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'resume'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'forward', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'forward'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'increaseVolume', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'increaseVolume'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'decreaseVolume', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'decreaseVolume'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'mute', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'mute'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'unmute', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'unmute'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'hold', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'hold'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'unhold', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'unhold'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'startRecord', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'startRecord'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'stopRecord', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'stopRecord'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'park', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'park'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'transfer', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'transfer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'transferWarm', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'transferWarm'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'flip', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'flip'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'sendDTMF', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'sendDTMF'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'hangup', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'hangup'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'toVoiceMail', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'toVoiceMail'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'replyWithMessage', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'replyWithMessage'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'makeCall', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'makeCall'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'toggleMinimized', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'toggleMinimized'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, '_onGetUserMediaSuccess', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, '_onGetUserMediaSuccess'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, '_onGetUserMediaError', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, '_onGetUserMediaError'), _class.prototype)), _class);
+}(_RcModule3.default), (_applyDecoratedDescriptor(_class.prototype, '_sipProvision', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, '_sipProvision'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, '_connect', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, '_connect'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'connect', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'connect'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'disconnect', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'disconnect'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'answer', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'answer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'reject', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'reject'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'resume', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'resume'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'forward', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'forward'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'increaseVolume', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'increaseVolume'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'decreaseVolume', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'decreaseVolume'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'mute', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'mute'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'unmute', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'unmute'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'hold', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'hold'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'unhold', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'unhold'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'startRecord', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'startRecord'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'stopRecord', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'stopRecord'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'park', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'park'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'transfer', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'transfer'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'transferWarm', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'transferWarm'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'flip', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'flip'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'sendDTMF', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'sendDTMF'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'hangup', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'hangup'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'toVoiceMail', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'toVoiceMail'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'replyWithMessage', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'replyWithMessage'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'makeCall', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'makeCall'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'updateCurrentSessionMatchedContact', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'updateCurrentSessionMatchedContact'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'toggleMinimized', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'toggleMinimized'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, '_onGetUserMediaSuccess', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, '_onGetUserMediaSuccess'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, '_onGetUserMediaError', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, '_onGetUserMediaError'), _class.prototype)), _class);
 exports.default = Webphone;
 //# sourceMappingURL=index.js.map
