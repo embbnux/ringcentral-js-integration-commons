@@ -44,7 +44,8 @@ function normalizeSession(session) {
     creationTime: session.creationTime,
     isOnHold: !!session.isOnHold().local,
     isOnMute: !!session.isOnMute,
-    isOnRecord: !!session.isOnRecord
+    isOnRecord: !!session.isOnRecord,
+    contactMatch: session.contactMatch
   };
 }
 
