@@ -1796,7 +1796,7 @@ var Webphone = (_class = function (_RcModule) {
   }, {
     key: 'updateSessionMatchedContact',
     value: function () {
-      var _ref30 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee28(sessionId, phoneNumber, contact) {
+      var _ref30 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee28(sessionId, contact) {
         var _this16 = this;
 
         return _regenerator2.default.wrap(function _callee28$(_context28) {
@@ -1816,7 +1816,7 @@ var Webphone = (_class = function (_RcModule) {
         }, _callee28, this);
       }));
 
-      function updateSessionMatchedContact(_x29, _x30, _x31) {
+      function updateSessionMatchedContact(_x29, _x30) {
         return _ref30.apply(this, arguments);
       }
 
@@ -2027,7 +2027,7 @@ var Webphone = (_class = function (_RcModule) {
         }, _callee32, this);
       }));
 
-      function _onGetUserMediaError(_x32) {
+      function _onGetUserMediaError(_x31) {
         return _ref34.apply(this, arguments);
       }
 
