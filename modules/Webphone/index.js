@@ -1217,19 +1217,19 @@ var Webphone = (_class = function (_RcModule) {
 
               case 3:
                 if (session.isOnHold().local) {
+                  this._sessions.forEach(function (sessionItem, sessionItemId) {
+                    if (session.id !== sessionItemId) {
+                      if (!sessionItem.isOnHold().local) {
+                        sessionItem.hold();
+                      }
+                    }
+                  });
                   session.unhold();
                 }
-                this._sessions.forEach(function (sessionItem, sessionItemId) {
-                  if (session.id !== sessionItemId) {
-                    if (!sessionItem.isOnHold().local) {
-                      sessionItem.hold();
-                    }
-                  }
-                });
                 this._setActiveSession(session);
                 this._updateCurrentSessionAndSessions(session);
 
-              case 7:
+              case 6:
               case 'end':
                 return _context15.stop();
             }
