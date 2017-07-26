@@ -452,7 +452,6 @@ var Webphone = (_class = function (_RcModule) {
         console.debug('UA invite');
         _this4._onInvite(session);
       });
-      (0, _webphoneHelper.patchUserAgent)(this._webphone.userAgent);
     }
   }, {
     key: '_connect',
@@ -828,7 +827,6 @@ var Webphone = (_class = function (_RcModule) {
           session: (0, _webphoneHelper.normalizeSession)(session)
         });
       }
-      (0, _webphoneHelper.patchIncomingSession)(session);
       this._addSession(session);
       session.on('rejected', function () {
         console.log('Event: Rejected');
