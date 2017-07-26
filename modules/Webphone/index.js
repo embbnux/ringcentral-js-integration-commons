@@ -1646,7 +1646,7 @@ var Webphone = (_class = function (_RcModule) {
               case 0:
                 this._sessionHandleWithId(sessionId, function (session) {
                   try {
-                    session.toVoiceMail();
+                    session.toVoicemail();
                   } catch (e) {
                     console.error(e);
                     // this._removeSession(session);
