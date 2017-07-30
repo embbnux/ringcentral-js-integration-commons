@@ -84,11 +84,11 @@ function addPhoneToContact(contact, phone, type) {
     return number && number.phoneNumber === phone;
   });
   if (existedPhone) {
-    existedPhone.type = type;
+    existedPhone.phoneType = type;
   } else {
     contact.phoneNumbers.push({
       phoneNumber: phone,
-      type: type
+      phoneType: type
     });
   }
 }
@@ -232,10 +232,11 @@ var Contacts = function (_RcModule) {
         if (!found) {
           return;
         }
+        var name = (contact.firstName ? contact.firstName : '') + ' ' + (contact.lastName ? contact.lastName : '');
         var matchedContact = (0, _extends3.default)({}, contact, {
           phoneNumbers: [].concat((0, _toConsumableArray3.default)(contact.phoneNumbers)),
           entityType: 'rcContact',
-          name: contact.firstName + ' ' + contact.lastName
+          name: name
         });
         if (contact.extensionNumber) {
           matchedContact.phoneNumbers.push({

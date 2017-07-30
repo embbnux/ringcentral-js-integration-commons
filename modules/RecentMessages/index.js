@@ -9,10 +9,6 @@ var _getOwnPropertyDescriptor = require('babel-runtime/core-js/object/get-own-pr
 
 var _getOwnPropertyDescriptor2 = _interopRequireDefault(_getOwnPropertyDescriptor);
 
-var _promise = require('babel-runtime/core-js/promise');
-
-var _promise2 = _interopRequireDefault(_promise);
-
 var _assign = require('babel-runtime/core-js/object/assign');
 
 var _assign2 = _interopRequireDefault(_assign);
@@ -82,6 +78,10 @@ var _getRecentMessagesReducer2 = _interopRequireDefault(_getRecentMessagesReduce
 var _getDateFrom = require('../../lib/getDateFrom');
 
 var _getDateFrom2 = _interopRequireDefault(_getDateFrom);
+
+var _concurrentExecute = require('../../lib/concurrentExecute');
+
+var _concurrentExecute2 = _interopRequireDefault(_concurrentExecute);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -158,58 +158,39 @@ var RecentMessages = (_class = function (_RcModule) {
     }
   }, {
     key: '_onStateChange',
+    value: function _onStateChange() {
+      if (this.pending && this._messageStore.ready) {
+        this.store.dispatch({
+          type: this.actionTypes.initSuccess
+        });
+      } else if (this.ready && !this._messageStore.ready) {
+        this.store.dispatch({
+          type: this.actionTypes.resetSuccess
+        });
+      } else if (this._currentContact !== null) {
+        // Listen to messageStore state changes
+        if (this._messageStore.updatedTimestamp !== this._prevMessageStoreTimestamp) {
+          this._prevMessageStoreTimestamp = this._messageStore.updatedTimestamp;
+          this.getMessages(this._currentContact, true);
+        }
+      }
+    }
+  }, {
+    key: 'getMessages',
     value: function () {
-      var _ref2 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
+      var _ref2 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee(currentContact) {
+        var forceUpdate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+        var messages;
         return _regenerator2.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                if (this.pending && this._messageStore.ready) {
-                  this.store.dispatch({
-                    type: this.actionTypes.initSuccess
-                  });
-                } else if (this.ready && !this._messageStore.ready) {
-                  this.store.dispatch({
-                    type: this.actionTypes.resetSuccess
-                  });
-                } else if (this._currentContact !== null) {
-                  // Listen to messageStore state changes
-                  if (this._messageStore.updatedTimestamp !== this._prevMessageStoreTimestamp) {
-                    this._prevMessageStoreTimestamp = this._messageStore.updatedTimestamp;
-                    this.getMessages(this._currentContact, true);
-                  }
-                }
-
-              case 1:
-              case 'end':
-                return _context.stop();
-            }
-          }
-        }, _callee, this);
-      }));
-
-      function _onStateChange() {
-        return _ref2.apply(this, arguments);
-      }
-
-      return _onStateChange;
-    }()
-  }, {
-    key: 'getMessages',
-    value: function () {
-      var _ref3 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2(currentContact) {
-        var forceUpdate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-        var messages;
-        return _regenerator2.default.wrap(function _callee2$(_context2) {
-          while (1) {
-            switch (_context2.prev = _context2.next) {
-              case 0:
                 if (!(!forceUpdate && !!currentContact && currentContact === this._currentContact)) {
-                  _context2.next = 2;
+                  _context.next = 2;
                   break;
                 }
 
-                return _context2.abrupt('return');
+                return _context.abrupt('return');
 
               case 2:
                 this._currentContact = currentContact;
@@ -219,21 +200,21 @@ var RecentMessages = (_class = function (_RcModule) {
                 });
 
                 if (currentContact) {
-                  _context2.next = 8;
+                  _context.next = 8;
                   break;
                 }
 
                 this.store.dispatch({
                   type: this.actionTypes.loadReset
                 });
-                return _context2.abrupt('return');
+                return _context.abrupt('return');
 
               case 8:
-                _context2.next = 10;
+                _context.next = 10;
                 return this._getRecentMessages(currentContact, this._messageStore.messages);
 
               case 10:
-                messages = _context2.sent;
+                messages = _context.sent;
 
                 this.store.dispatch({
                   type: this.actionTypes.loadSuccess,
@@ -242,14 +223,14 @@ var RecentMessages = (_class = function (_RcModule) {
 
               case 12:
               case 'end':
-                return _context2.stop();
+                return _context.stop();
             }
           }
-        }, _callee2, this);
+        }, _callee, this);
       }));
 
       function getMessages(_x) {
-        return _ref3.apply(this, arguments);
+        return _ref2.apply(this, arguments);
       }
 
       return getMessages;
@@ -276,14 +257,14 @@ var RecentMessages = (_class = function (_RcModule) {
      * @private
      */
     value: function () {
-      var _ref4 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3(currentContact) {
+      var _ref3 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2(currentContact) {
         var messages = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
         var daySpan = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 60;
         var length = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 5;
         var dateFrom, recentMessages, dateTo;
-        return _regenerator2.default.wrap(function _callee3$(_context3) {
+        return _regenerator2.default.wrap(function _callee2$(_context2) {
           while (1) {
-            switch (_context3.prev = _context3.next) {
+            switch (_context2.prev = _context2.next) {
               case 0:
                 dateFrom = (0, _getDateFrom2.default)(daySpan);
                 recentMessages = this._getLocalRecentMessages(currentContact, messages, dateFrom, length);
@@ -292,7 +273,7 @@ var RecentMessages = (_class = function (_RcModule) {
                 // we need to search for messages on server.
 
                 if (!(recentMessages.length < length)) {
-                  _context3.next = 9;
+                  _context2.next = 9;
                   break;
                 }
 
@@ -300,29 +281,29 @@ var RecentMessages = (_class = function (_RcModule) {
 
                 // This will always be sorted
 
-                _context3.t0 = recentMessages;
-                _context3.next = 7;
+                _context2.t0 = recentMessages;
+                _context2.next = 7;
                 return this._fetchRemoteRecentMessages(currentContact, dateFrom.toISOString(), dateTo, length);
 
               case 7:
-                _context3.t1 = _context3.sent;
-                recentMessages = _context3.t0.concat.call(_context3.t0, _context3.t1);
+                _context2.t1 = _context2.sent;
+                recentMessages = _context2.t0.concat.call(_context2.t0, _context2.t1);
 
               case 9:
 
                 recentMessages = this._dedup(recentMessages);
-                return _context3.abrupt('return', recentMessages.length > length ? recentMessages.slice(0, length) : recentMessages);
+                return _context2.abrupt('return', recentMessages.length > length ? recentMessages.slice(0, length) : recentMessages);
 
               case 11:
               case 'end':
-                return _context3.stop();
+                return _context2.stop();
             }
           }
-        }, _callee3, this);
+        }, _callee2, this);
       }));
 
       function _getRecentMessages(_x3) {
-        return _ref4.apply(this, arguments);
+        return _ref3.apply(this, arguments);
       }
 
       return _getRecentMessages;
@@ -339,7 +320,7 @@ var RecentMessages = (_class = function (_RcModule) {
   }, {
     key: '_getLocalRecentMessages',
     value: function _getLocalRecentMessages(currentContact, messages, dateFrom, length) {
-      // Get all messages related to this contacts
+      // Get all messages related to this contact
       var phoneNumbers = currentContact.phoneNumbers;
       var recentMessages = [];
       var message = void 0;
@@ -359,21 +340,18 @@ var RecentMessages = (_class = function (_RcModule) {
   }, {
     key: '_filterPhoneNumber',
     value: function _filterPhoneNumber(message) {
-      return function (_ref5) {
-        var phoneNumber = _ref5.phoneNumber,
-            extensionNumber = _ref5.extensionNumber;
-        return phoneNumber && (phoneNumber === message.from.phoneNumber || !!message.to.find(function (to) {
+      return function (_ref4) {
+        var phoneNumber = _ref4.phoneNumber;
+        return phoneNumber === message.from.phoneNumber || !!message.to.find(function (to) {
           return to.phoneNumber === phoneNumber;
-        })) || extensionNumber && (extensionNumber === message.from.extensionNumber || !!message.to.find(function (to) {
-          return to.extensionNumber === extensionNumber;
-        }));
+        }) || phoneNumber === message.from.extensionNumber || !!message.to.find(function (to) {
+          return to.extensionNumber === phoneNumber;
+        });
       };
     }
 
     /**
      * Fetch recent messages from server by given current contact.
-     * It will iterate through all phoneNumbers of this contact and
-     * get specific number of latest messsages.
      * @param {Object} currentContact
      * @param {String} dateFrom
      * @param {String} dateTo
@@ -396,12 +374,12 @@ var RecentMessages = (_class = function (_RcModule) {
         perPage: length
       };
       var phoneNumbers = currentContact.phoneNumbers;
-      var recentMessagesPromise = phoneNumbers.reduce(function (acc, _ref6) {
-        var phoneNumber = _ref6.phoneNumber;
+      var recentMessagesPromise = phoneNumbers.reduce(function (acc, _ref5) {
+        var phoneNumber = _ref5.phoneNumber;
 
         // Cannot filter out by extensionNumber
         if (phoneNumber) {
-          var promise = _this3._fetchMessageList((0, _assign2.default)(params, {
+          var promise = _this3._fetchMessageList((0, _assign2.default)({}, params, {
             phoneNumber: phoneNumber
           }));
           return acc.concat(promise);
@@ -411,14 +389,18 @@ var RecentMessages = (_class = function (_RcModule) {
 
       // TODO: Because we need to navigate to the message page,
       // So we may need to push new messages to messageStore
-      return _promise2.default.all(recentMessagesPromise).then(this._flattenToMessageRecords).then(this._markAsRemoteMessage).then(function (messages) {
+      return (0, _concurrentExecute2.default)(recentMessagesPromise, 5, 500).then(this._flattenToMessageRecords).then(this._markAsRemoteMessage).then(function (messages) {
         return _this3._sortMessages(messages);
       });
     }
   }, {
     key: '_fetchMessageList',
     value: function _fetchMessageList(params) {
-      return this._client.account().extension().messageStore().list(params);
+      var _this4 = this;
+
+      return function () {
+        return _this4._client.account().extension().messageStore().list(params);
+      };
     }
   }, {
     key: '_countUnreadMessages',
@@ -430,8 +412,8 @@ var RecentMessages = (_class = function (_RcModule) {
   }, {
     key: '_flattenToMessageRecords',
     value: function _flattenToMessageRecords(allMessages) {
-      return allMessages.reduce(function (acc, _ref7) {
-        var records = _ref7.records;
+      return allMessages.reduce(function (acc, _ref6) {
+        var records = _ref6.records;
         return acc.concat(records);
       }, []);
     }

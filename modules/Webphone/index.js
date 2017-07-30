@@ -196,14 +196,13 @@ var Webphone = (_class = function (_RcModule) {
     _this._storageWebphoneCountsKey = 'webphoneCounts';
     _this._userMediaStorageKey = 'userMadia';
     _this._contactMatcher = contactMatcher;
-    _this._onCallEnd = onCallEnd;
-    _this._onCallRing = onCallRing;
-    _this._onCallStart = onCallStart;
+    _this._onCallEndFunc = onCallEnd;
+    _this._onCallRingFunc = onCallRing;
+    _this._onCallStartFunc = onCallStart;
     _this._webphone = null;
     _this._remoteVideo = null;
     _this._localVideo = null;
 
-    _this._activeSession = null;
     _this._sessions = new _map2.default();
 
     _this._reducer = (0, _getWebphoneReducer2.default)(_this.actionTypes);
@@ -226,6 +225,34 @@ var Webphone = (_class = function (_RcModule) {
         outputs.push(session.from);
       });
       return outputs;
+    });
+
+    _this.addSelector('ringSession', function () {
+      return _this.ringSessionId;
+    }, function () {
+      return _this.sessions;
+    }, function (ringSessionId, sessions) {
+      if (!ringSessionId) {
+        return null;
+      }
+      var ringSession = sessions.find(function (session) {
+        return session.id === ringSessionId;
+      });
+      return ringSession;
+    });
+
+    _this.addSelector('activeSession', function () {
+      return _this.activeSessionId;
+    }, function () {
+      return _this.sessions;
+    }, function (activeSessionId, sessions) {
+      if (!activeSessionId) {
+        return null;
+      }
+      var activeSession = sessions.find(function (session) {
+        return session.id === activeSessionId;
+      });
+      return activeSession;
     });
 
     if (_this._contactMatcher) {
@@ -690,9 +717,7 @@ var Webphone = (_class = function (_RcModule) {
             this._webphone.userAgent.unregister();
           }
           this._webphone = null;
-          this._activeSession = null;
           this._sessions = new _map2.default();
-          this._removeActiveSession();
           this._updateSessions();
         }
         this.store.dispatch({
@@ -725,13 +750,6 @@ var Webphone = (_class = function (_RcModule) {
       return disconnect;
     }()
   }, {
-    key: '_onNewCall',
-    value: function _onNewCall() {
-      if (this._contactMatcher) {
-        this._contactMatcher.triggerMatch();
-      }
-    }
-  }, {
     key: '_onAccepted',
     value: function _onAccepted(session) {
       var _this6 = this;
@@ -739,48 +757,33 @@ var Webphone = (_class = function (_RcModule) {
       session.on('accepted', function () {
         console.log('accepted');
         session.callStatus = _sessionStatus2.default.connected;
-        _this6._updateCurrentSessionAndSessions(session);
-        if (typeof _this6._onCallStart === 'function') {
-          _this6._onCallStart(session, _this6.currentSession);
-        }
+        _this6._onCallStart(session);
       });
       session.on('progress', function () {
         console.log('progress...');
         session.callStatus = _sessionStatus2.default.connecting;
-        _this6._updateCurrentSessionAndSessions(session);
+        _this6._updateSessions();
       });
       session.on('rejected', function () {
         console.log('rejected');
         session.callStatus = _sessionStatus2.default.finished;
-        _this6._removeSession(session);
-        if (typeof _this6._onCallEnd === 'function') {
-          _this6._onCallEnd(session, _this6.currentSession);
-        }
+        _this6._onCallEnd(session);
       });
       session.on('failed', function (response, cause) {
         console.log('Event: Failed');
         console.log(cause);
         session.callStatus = _sessionStatus2.default.finished;
-        _this6._removeSession(session);
-        if (typeof _this6._onCallEnd === 'function') {
-          _this6._onCallEnd(session, _this6.currentSession);
-        }
+        _this6._onCallEnd(session);
       });
       session.on('terminated', function () {
         console.log('Event: Terminated');
         session.callStatus = _sessionStatus2.default.finished;
-        _this6._removeSession(session);
-        if (typeof _this6._onCallEnd === 'function') {
-          _this6._onCallEnd(session, _this6.currentSession);
-        }
+        _this6._onCallEnd(session);
       });
       session.on('cancel', function () {
         console.log('Event: Cancel');
         session.callStatus = _sessionStatus2.default.finished;
-        _this6._removeSession(session);
-        if (typeof _this6._onCallEnd === 'function') {
-          _this6._onCallEnd(session, _this6.currentSession);
-        }
+        _this6._onCallEnd(session);
       });
       session.on('refer', function () {
         console.log('Event: Refer');
@@ -790,25 +793,29 @@ var Webphone = (_class = function (_RcModule) {
         newSession.callStatus = _sessionStatus2.default.connected;
         newSession.direction = _callDirections2.default.inbound;
         _this6._addSession(newSession);
-        _this6.onAccepted(newSession);
+        _this6._onAccepted(newSession);
       });
       session.on('muted', function () {
         console.log('Event: Muted');
         session.isOnMute = true;
         session.callStatus = _sessionStatus2.default.onMute;
+        _this6._updateSessions();
       });
       session.on('unmuted', function () {
         console.log('Event: Unmuted');
         session.isOnMute = false;
         session.callStatus = _sessionStatus2.default.connected;
+        _this6._updateSessions();
       });
       session.on('hold', function () {
         console.log('Event: hold');
         session.callStatus = _sessionStatus2.default.onHold;
+        _this6._updateSessions();
       });
       session.on('unhold', function () {
         console.log('Event: unhold');
         session.callStatus = _sessionStatus2.default.connected;
+        _this6._updateSessions();
       });
     }
   }, {
@@ -819,26 +826,11 @@ var Webphone = (_class = function (_RcModule) {
       session.creationTime = Date.now();
       session.direction = _callDirections2.default.inbound;
       session.callStatus = _sessionStatus2.default.connecting;
-      if (!this._activeSession) {
-        this._activeSession = session;
-        this._resetMinimized();
-        this.store.dispatch({
-          type: this.actionTypes.updateCurrentSession,
-          session: (0, _webphoneHelper.normalizeSession)(session)
-        });
-      }
-      this._addSession(session);
       session.on('rejected', function () {
         console.log('Event: Rejected');
-        _this7._removeSession(session);
-        if (typeof _this7._onCallEnd === 'function') {
-          _this7._onCallEnd(session, _this7.currentSession);
-        }
+        _this7._onCallEnd(session);
       });
-      if (typeof this._onCallRing === 'function') {
-        this._onCallRing(session, this.currentSession);
-      }
-      this._onNewCall();
+      this._onCallRing(session);
     }
   }, {
     key: 'answer',
@@ -861,37 +853,30 @@ var Webphone = (_class = function (_RcModule) {
               case 3:
                 _context6.prev = 3;
 
-                if (this._activeSession && !this._activeSession.isOnHold().local && this._activeSession !== session) {
-                  this._activeSession.hold();
-                }
-                this._setActiveSession(session);
+                this._holdOtherSession(session.id);
                 this._onAccepted(session, 'inbound');
-                _context6.next = 9;
+                _context6.next = 8;
                 return session.accept(this.acceptOptions);
 
-              case 9:
-                this._resetMinimized();
-                if (typeof this._onCallStart === 'function') {
-                  this._onCallStart(session, this.currentSession);
-                }
-                _context6.next = 19;
+              case 8:
+                this._onCallStart(session);
+                _context6.next = 16;
                 break;
 
-              case 13:
-                _context6.prev = 13;
+              case 11:
+                _context6.prev = 11;
                 _context6.t0 = _context6['catch'](3);
 
                 console.log('Accept failed');
                 console.error(_context6.t0);
                 this._removeSession(session);
-                this._removeActiveSession();
 
-              case 19:
+              case 16:
               case 'end':
                 return _context6.stop();
             }
           }
-        }, _callee6, this, [[3, 13]]);
+        }, _callee6, this, [[3, 11]]);
       }));
 
       function answer(_x2) {
@@ -904,20 +889,42 @@ var Webphone = (_class = function (_RcModule) {
     key: 'reject',
     value: function () {
       var _ref8 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee7(sessionId) {
+        var session;
         return _regenerator2.default.wrap(function _callee7$(_context7) {
           while (1) {
             switch (_context7.prev = _context7.next) {
               case 0:
-                this._sessionHandleWithId(sessionId, function (session) {
-                  session.reject();
-                });
+                session = this._sessions.get(sessionId);
 
-              case 1:
+                if (session) {
+                  _context7.next = 3;
+                  break;
+                }
+
+                return _context7.abrupt('return');
+
+              case 3:
+                _context7.prev = 3;
+                _context7.next = 6;
+                return session.reject();
+
+              case 6:
+                _context7.next = 12;
+                break;
+
+              case 8:
+                _context7.prev = 8;
+                _context7.t0 = _context7['catch'](3);
+
+                console.error(_context7.t0);
+                this._removeSession(session);
+
+              case 12:
               case 'end':
                 return _context7.stop();
             }
           }
-        }, _callee7, this);
+        }, _callee7, this, [[3, 8]]);
       }));
 
       function reject(_x3) {
@@ -934,8 +941,8 @@ var Webphone = (_class = function (_RcModule) {
           while (1) {
             switch (_context8.prev = _context8.next) {
               case 0:
-                this.unhold(sessionId);
-                this._resetMinimized();
+                _context8.next = 2;
+                return this.unhold(sessionId);
 
               case 2:
               case 'end':
@@ -998,14 +1005,11 @@ var Webphone = (_class = function (_RcModule) {
 
               case 13:
                 console.log('Forwarded');
-                this._removeSession(session);
-                if (typeof this._onCallEnd === 'function') {
-                  this._onCallEnd(session, this.currentSession);
-                }
+                this._onCallEnd(session);
                 return _context9.abrupt('return', true);
 
-              case 19:
-                _context9.prev = 19;
+              case 18:
+                _context9.prev = 18;
                 _context9.t0 = _context9['catch'](3);
 
                 console.error(_context9.t0);
@@ -1014,12 +1018,12 @@ var Webphone = (_class = function (_RcModule) {
                 });
                 return _context9.abrupt('return', false);
 
-              case 24:
+              case 23:
               case 'end':
                 return _context9.stop();
             }
           }
-        }, _callee9, this, [[3, 19]]);
+        }, _callee9, this, [[3, 18]]);
       }));
 
       function forward(_x5, _x6) {
@@ -1095,7 +1099,7 @@ var Webphone = (_class = function (_RcModule) {
                 this._sessionHandleWithId(sessionId, function (session) {
                   session.isOnMute = true;
                   session.mute();
-                  _this9._updateCurrentSessionAndSessions(session);
+                  _this9._updateSessions();
                 });
                 return _context12.abrupt('return', true);
 
@@ -1136,7 +1140,7 @@ var Webphone = (_class = function (_RcModule) {
                 this._sessionHandleWithId(sessionId, function (session) {
                   session.isOnMute = false;
                   session.unmute();
-                  _this10._updateCurrentSessionAndSessions(session);
+                  _this10._updateSessions();
                 });
 
               case 1:
@@ -1157,23 +1161,32 @@ var Webphone = (_class = function (_RcModule) {
     key: 'hold',
     value: function () {
       var _ref15 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee14(sessionId) {
-        var _this11 = this;
-
+        var session;
         return _regenerator2.default.wrap(function _callee14$(_context14) {
           while (1) {
             switch (_context14.prev = _context14.next) {
               case 0:
-                _context14.prev = 0;
+                session = this._sessions.get(sessionId);
 
-                this._sessionHandleWithId(sessionId, function (session) {
-                  session.hold();
-                  _this11._updateCurrentSessionAndSessions(session);
-                });
+                if (session) {
+                  _context14.next = 3;
+                  break;
+                }
+
+                return _context14.abrupt('return', false);
+
+              case 3:
+                _context14.prev = 3;
+                _context14.next = 6;
+                return session.hold();
+
+              case 6:
+                this._updateSessions();
                 return _context14.abrupt('return', true);
 
-              case 5:
-                _context14.prev = 5;
-                _context14.t0 = _context14['catch'](0);
+              case 10:
+                _context14.prev = 10;
+                _context14.t0 = _context14['catch'](3);
 
                 console.log(_context14.t0);
                 this._alert.warning({
@@ -1181,12 +1194,12 @@ var Webphone = (_class = function (_RcModule) {
                 });
                 return _context14.abrupt('return', false);
 
-              case 10:
+              case 15:
               case 'end':
                 return _context14.stop();
             }
           }
-        }, _callee14, this, [[0, 5]]);
+        }, _callee14, this, [[3, 10]]);
       }));
 
       function hold(_x11) {
@@ -1195,6 +1208,19 @@ var Webphone = (_class = function (_RcModule) {
 
       return hold;
     }()
+  }, {
+    key: '_holdOtherSession',
+    value: function _holdOtherSession(currentSessionId) {
+      this._sessions.forEach(function (session, sessionId) {
+        if (currentSessionId === sessionId) {
+          return;
+        }
+        if (session.isOnHold().local) {
+          return;
+        }
+        session.hold();
+      });
+    }
   }, {
     key: 'unhold',
     value: function () {
@@ -1214,25 +1240,40 @@ var Webphone = (_class = function (_RcModule) {
                 return _context15.abrupt('return');
 
               case 3:
-                if (session.isOnHold().local) {
-                  this._sessions.forEach(function (sessionItem, sessionItemId) {
-                    if (session.id !== sessionItemId) {
-                      if (!sessionItem.isOnHold().local) {
-                        sessionItem.hold();
-                      }
-                    }
-                  });
-                  session.unhold();
-                }
-                this._setActiveSession(session);
-                this._updateCurrentSessionAndSessions(session);
+                _context15.prev = 3;
 
-              case 6:
+                if (!session.isOnHold().local) {
+                  _context15.next = 10;
+                  break;
+                }
+
+                this._holdOtherSession(session.id);
+                _context15.next = 8;
+                return session.unhold();
+
+              case 8:
+                this._updateSessions();
+                this.store.dispatch({
+                  type: this.actionTypes.callStart,
+                  sessionId: session.id
+                });
+
+              case 10:
+                _context15.next = 15;
+                break;
+
+              case 12:
+                _context15.prev = 12;
+                _context15.t0 = _context15['catch'](3);
+
+                console.log(_context15.t0);
+
+              case 15:
               case 'end':
                 return _context15.stop();
             }
           }
-        }, _callee15, this);
+        }, _callee15, this, [[3, 12]]);
       }));
 
       function unhold(_x12) {
@@ -1278,7 +1319,7 @@ var Webphone = (_class = function (_RcModule) {
                 console.error(_context16.t0);
 
               case 14:
-                this._updateCurrentSessionAndSessions(session);
+                this._updateSessions();
 
               case 15:
               case 'end':
@@ -1331,7 +1372,7 @@ var Webphone = (_class = function (_RcModule) {
                 console.error(_context17.t0);
 
               case 14:
-                this._updateCurrentSessionAndSessions(session);
+                this._updateSessions();
 
               case 15:
               case 'end':
@@ -1420,21 +1461,22 @@ var Webphone = (_class = function (_RcModule) {
 
               case 6:
                 console.log('Transferred');
-                _context19.next = 12;
+                this._onCallEnd(session);
+                _context19.next = 13;
                 break;
 
-              case 9:
-                _context19.prev = 9;
+              case 10:
+                _context19.prev = 10;
                 _context19.t0 = _context19['catch'](3);
 
                 console.error(_context19.t0);
 
-              case 12:
+              case 13:
               case 'end':
                 return _context19.stop();
             }
           }
-        }, _callee19, this, [[3, 9]]);
+        }, _callee19, this, [[3, 10]]);
       }));
 
       function transfer(_x16, _x17) {
@@ -1447,7 +1489,7 @@ var Webphone = (_class = function (_RcModule) {
     key: 'transferWarm',
     value: function () {
       var _ref21 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee21(transferNumber, sessionId) {
-        var _this12 = this;
+        var _this11 = this;
 
         var session, newSession;
         return _regenerator2.default.wrap(function _callee21$(_context21) {
@@ -1484,21 +1526,22 @@ var Webphone = (_class = function (_RcModule) {
 
                         case 3:
                           console.log('Transferred');
-                          _context20.next = 9;
+                          _this11._onCallEnd(session);
+                          _context20.next = 10;
                           break;
 
-                        case 6:
-                          _context20.prev = 6;
+                        case 7:
+                          _context20.prev = 7;
                           _context20.t0 = _context20['catch'](0);
 
                           console.error(_context20.t0);
 
-                        case 9:
+                        case 10:
                         case 'end':
                           return _context20.stop();
                       }
                     }
-                  }, _callee20, _this12, [[0, 6]]);
+                  }, _callee20, _this11, [[0, 7]]);
                 })));
                 _context21.next = 13;
                 break;
@@ -1547,22 +1590,23 @@ var Webphone = (_class = function (_RcModule) {
                 return session.flip(flipValue);
 
               case 6:
+                this._onCallEnd(session);
                 console.log('Flipped');
-                _context22.next = 12;
+                _context22.next = 13;
                 break;
 
-              case 9:
-                _context22.prev = 9;
+              case 10:
+                _context22.prev = 10;
                 _context22.t0 = _context22['catch'](3);
 
                 console.error(_context22.t0);
 
-              case 12:
+              case 13:
               case 'end':
                 return _context22.stop();
             }
           }
-        }, _callee22, this, [[3, 9]]);
+        }, _callee22, this, [[3, 10]]);
       }));
 
       function flip(_x20, _x21) {
@@ -1575,24 +1619,41 @@ var Webphone = (_class = function (_RcModule) {
     key: 'sendDTMF',
     value: function () {
       var _ref24 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee23(dtmfValue, sessionId) {
+        var session;
         return _regenerator2.default.wrap(function _callee23$(_context23) {
           while (1) {
             switch (_context23.prev = _context23.next) {
               case 0:
-                this._sessionHandleWithId(sessionId, function (session) {
-                  try {
-                    session.dtmf(dtmfValue);
-                  } catch (e) {
-                    console.error(e);
-                  }
-                });
+                session = this._sessions.get(sessionId);
 
-              case 1:
+                if (session) {
+                  _context23.next = 3;
+                  break;
+                }
+
+                return _context23.abrupt('return');
+
+              case 3:
+                _context23.prev = 3;
+                _context23.next = 6;
+                return session.dtmf(dtmfValue);
+
+              case 6:
+                _context23.next = 11;
+                break;
+
+              case 8:
+                _context23.prev = 8;
+                _context23.t0 = _context23['catch'](3);
+
+                console.error(_context23.t0);
+
+              case 11:
               case 'end':
                 return _context23.stop();
             }
           }
-        }, _callee23, this);
+        }, _callee23, this, [[3, 8]]);
       }));
 
       function sendDTMF(_x22, _x23) {
@@ -1605,27 +1666,42 @@ var Webphone = (_class = function (_RcModule) {
     key: 'hangup',
     value: function () {
       var _ref25 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee24(sessionId) {
-        var _this13 = this;
-
+        var session;
         return _regenerator2.default.wrap(function _callee24$(_context24) {
           while (1) {
             switch (_context24.prev = _context24.next) {
               case 0:
-                this._sessionHandleWithId(sessionId, function (session) {
-                  try {
-                    session.terminate();
-                  } catch (e) {
-                    console.error(e);
-                    _this13._removeSession(session);
-                  }
-                });
+                session = this._sessions.get(sessionId);
 
-              case 1:
+                if (session) {
+                  _context24.next = 3;
+                  break;
+                }
+
+                return _context24.abrupt('return');
+
+              case 3:
+                _context24.prev = 3;
+                _context24.next = 6;
+                return session.terminate();
+
+              case 6:
+                _context24.next = 12;
+                break;
+
+              case 8:
+                _context24.prev = 8;
+                _context24.t0 = _context24['catch'](3);
+
+                console.error(_context24.t0);
+                this._onCallEnd(session);
+
+              case 12:
               case 'end':
                 return _context24.stop();
             }
           }
-        }, _callee24, this);
+        }, _callee24, this, [[3, 8]]);
       }));
 
       function hangup(_x24) {
@@ -1638,30 +1714,45 @@ var Webphone = (_class = function (_RcModule) {
     key: 'toVoiceMail',
     value: function () {
       var _ref26 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee25(sessionId) {
-        var _this14 = this;
-
+        var session;
         return _regenerator2.default.wrap(function _callee25$(_context25) {
           while (1) {
             switch (_context25.prev = _context25.next) {
               case 0:
-                this._sessionHandleWithId(sessionId, function (session) {
-                  try {
-                    session.toVoicemail();
-                  } catch (e) {
-                    console.error(e);
-                    // this._removeSession(session);
-                    _this14._alert.warning({
-                      message: _webphoneErrors2.default.toVoiceMailError
-                    });
-                  }
+                session = this._sessions.get(sessionId);
+
+                if (session) {
+                  _context25.next = 3;
+                  break;
+                }
+
+                return _context25.abrupt('return');
+
+              case 3:
+                _context25.prev = 3;
+                _context25.next = 6;
+                return session.toVoicemail();
+
+              case 6:
+                _context25.next = 13;
+                break;
+
+              case 8:
+                _context25.prev = 8;
+                _context25.t0 = _context25['catch'](3);
+
+                console.error(_context25.t0);
+                this._onCallEnd(session);
+                this._alert.warning({
+                  message: _webphoneErrors2.default.toVoiceMailError
                 });
 
-              case 1:
+              case 13:
               case 'end':
                 return _context25.stop();
             }
           }
-        }, _callee25, this);
+        }, _callee25, this, [[3, 8]]);
       }));
 
       function toVoiceMail(_x25) {
@@ -1674,30 +1765,42 @@ var Webphone = (_class = function (_RcModule) {
     key: 'replyWithMessage',
     value: function () {
       var _ref27 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee26(sessionId, replyOptions) {
-        var _this15 = this;
-
+        var session;
         return _regenerator2.default.wrap(function _callee26$(_context26) {
           while (1) {
             switch (_context26.prev = _context26.next) {
               case 0:
-                this._sessionHandleWithId(sessionId, function (session) {
-                  try {
-                    session.replyWithMessage(replyOptions);
-                  } catch (e) {
-                    console.error(e);
-                    _this15._removeSession(session);
-                    if (typeof _this15._onCallEnd === 'function') {
-                      _this15._onCallEnd(session, _this15.currentSession);
-                    }
-                  }
-                });
+                session = this._sessions.get(sessionId);
 
-              case 1:
+                if (session) {
+                  _context26.next = 3;
+                  break;
+                }
+
+                return _context26.abrupt('return');
+
+              case 3:
+                _context26.prev = 3;
+                _context26.next = 6;
+                return session.replyWithMessage(replyOptions);
+
+              case 6:
+                _context26.next = 12;
+                break;
+
+              case 8:
+                _context26.prev = 8;
+                _context26.t0 = _context26['catch'](3);
+
+                console.error(_context26.t0);
+                this._onCallEnd(session);
+
+              case 12:
               case 'end':
                 return _context26.stop();
             }
           }
-        }, _callee26, this);
+        }, _callee26, this, [[3, 8]]);
       }));
 
       function replyWithMessage(_x26, _x27) {
@@ -1735,7 +1838,7 @@ var Webphone = (_class = function (_RcModule) {
                 this._alert.warning({
                   message: this.errorCode
                 });
-                return _context27.abrupt('return');
+                return _context27.abrupt('return', null);
 
               case 3:
                 _context27.next = 5;
@@ -1752,7 +1855,7 @@ var Webphone = (_class = function (_RcModule) {
                 this._alert.warning({
                   message: _webphoneErrors2.default.notOutboundCallWithoutDL
                 });
-                return _context27.abrupt('return');
+                return _context27.abrupt('return', null);
 
               case 9:
                 session = this._webphone.userAgent.invite(toNumber, {
@@ -1765,19 +1868,11 @@ var Webphone = (_class = function (_RcModule) {
                 session.callStatus = _sessionStatus2.default.connecting;
                 session.creationTime = Date.now();
                 this._onAccepted(session);
-                if (this._activeSession && !this._activeSession.isOnHold().local) {
-                  this._activeSession.hold();
-                }
-                this._addSession(session);
-                this._setActiveSession(session);
-                this._resetMinimized();
-                this._onNewCall();
-                if (typeof this._onCallStart === 'function') {
-                  this._onCallStart(session, this.currentSession);
-                }
+                this._holdOtherSession(session.id);
+                this._onCallStart(session);
                 return _context27.abrupt('return', session);
 
-              case 21:
+              case 17:
               case 'end':
                 return _context27.stop();
             }
@@ -1795,7 +1890,7 @@ var Webphone = (_class = function (_RcModule) {
     key: 'updateSessionMatchedContact',
     value: function () {
       var _ref30 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee28(sessionId, contact) {
-        var _this16 = this;
+        var _this12 = this;
 
         return _regenerator2.default.wrap(function _callee28$(_context28) {
           while (1) {
@@ -1803,7 +1898,7 @@ var Webphone = (_class = function (_RcModule) {
               case 0:
                 this._sessionHandleWithId(sessionId, function (session) {
                   session.contactMatch = contact;
-                  _this16._updateCurrentSessionAndSessions(session);
+                  _this12._updateSessions();
                 });
 
               case 1:
@@ -1821,72 +1916,24 @@ var Webphone = (_class = function (_RcModule) {
       return updateSessionMatchedContact;
     }()
   }, {
-    key: '_addSession',
-    value: function _addSession(session) {
-      this._sessions.set(session.id, session);
-      this.store.dispatch({
-        type: this.actionTypes.updateSessions,
-        sessions: [].concat((0, _toConsumableArray3.default)(this._sessions.values())).map(_webphoneHelper.normalizeSession)
-      });
-    }
-  }, {
-    key: '_removeSession',
-    value: function _removeSession(session) {
-      this._cleanActiveSession(session);
-      this._sessions.delete(session.id);
-      this.store.dispatch({
-        type: this.actionTypes.updateSessions,
-        sessions: [].concat((0, _toConsumableArray3.default)(this._sessions.values())).map(_webphoneHelper.normalizeSession)
-      });
-    }
-  }, {
-    key: '_setActiveSession',
-    value: function _setActiveSession(session) {
-      this._activeSession = session;
-      this.store.dispatch({
-        type: this.actionTypes.updateCurrentSession,
-        session: (0, _webphoneHelper.normalizeSession)(session)
-      });
-    }
-  }, {
-    key: '_removeActiveSession',
-    value: function _removeActiveSession() {
-      this._activeSession = null;
-      this.store.dispatch({
-        type: this.actionTypes.destroyCurrentSession
-      });
-    }
-  }, {
-    key: '_cleanActiveSession',
-    value: function _cleanActiveSession(session) {
-      if (session !== this._activeSession) {
-        return;
-      }
-      this._removeActiveSession();
-    }
-  }, {
-    key: '_updateCurrentSessionAndSessions',
-    value: function _updateCurrentSessionAndSessions(session) {
-      if (session === this._activeSession) {
-        this._updateCurrentSession(session);
-      }
-      this._updateSessions();
-    }
-  }, {
-    key: '_updateCurrentSession',
-    value: function _updateCurrentSession(session) {
-      this.store.dispatch({
-        type: this.actionTypes.updateCurrentSession,
-        session: (0, _webphoneHelper.normalizeSession)(session)
-      });
-    }
-  }, {
     key: '_updateSessions',
     value: function _updateSessions() {
       this.store.dispatch({
         type: this.actionTypes.updateSessions,
         sessions: [].concat((0, _toConsumableArray3.default)(this._sessions.values())).map(_webphoneHelper.normalizeSession)
       });
+    }
+  }, {
+    key: '_addSession',
+    value: function _addSession(session) {
+      this._sessions.set(session.id, session);
+      this._updateSessions();
+    }
+  }, {
+    key: '_removeSession',
+    value: function _removeSession(session) {
+      this._sessions.delete(session.id);
+      this._updateSessions();
     }
   }, {
     key: 'toggleMinimized',
@@ -1920,6 +1967,48 @@ var Webphone = (_class = function (_RcModule) {
       this.store.dispatch({
         type: this.actionTypes.resetMinimized
       });
+    }
+  }, {
+    key: '_onCallStart',
+    value: function _onCallStart(session) {
+      this._addSession(session);
+      this.store.dispatch({
+        type: this.actionTypes.callStart,
+        sessionId: session.id
+      });
+      if (this._contactMatcher) {
+        this._contactMatcher.triggerMatch();
+      }
+      if (typeof this._onCallStartFunc === 'function') {
+        this._onCallStartFunc(session, this.activeSession);
+      }
+    }
+  }, {
+    key: '_onCallRing',
+    value: function _onCallRing(session) {
+      this._addSession(session);
+      this.store.dispatch({
+        type: this.actionTypes.callRing,
+        sessionId: session.id
+      });
+      if (this._contactMatcher) {
+        this._contactMatcher.triggerMatch();
+      }
+      if (typeof this._onCallRingFunc === 'function') {
+        this._onCallRingFunc(session, this.activeSession);
+      }
+    }
+  }, {
+    key: '_onCallEnd',
+    value: function _onCallEnd(session) {
+      this._removeSession(session);
+      this.store.dispatch({
+        type: this.actionTypes.callEnd,
+        sessionId: session.id
+      });
+      if (typeof this._onCallEndFunc === 'function') {
+        this._onCallEndFunc(session, this.activeSession);
+      }
     }
   }, {
     key: '_retrySleep',
@@ -2036,11 +2125,11 @@ var Webphone = (_class = function (_RcModule) {
     get: function get() {
       return this.state.status;
     }
-  }, {
-    key: 'activeSession',
-    get: function get() {
-      return this._activeSession;
-    }
+
+    // get activeSession() {
+    //   return this._activeSession;
+    // }
+
   }, {
     key: 'originalSessions',
     get: function get() {
@@ -2057,9 +2146,29 @@ var Webphone = (_class = function (_RcModule) {
       return this.state.minimized;
     }
   }, {
+    key: 'ringSessionId',
+    get: function get() {
+      return this.state.ringSessionId;
+    }
+  }, {
+    key: 'activeSessionId',
+    get: function get() {
+      return this.state.activeSessionId;
+    }
+  }, {
+    key: 'activeSession',
+    get: function get() {
+      return this._selectors.activeSession;
+    }
+  }, {
     key: 'currentSession',
     get: function get() {
-      return this.state.currentSession;
+      return this.activeSession;
+    }
+  }, {
+    key: 'ringSession',
+    get: function get() {
+      return this._selectors.ringSession;
     }
   }, {
     key: 'sessions',

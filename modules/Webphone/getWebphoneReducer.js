@@ -3,17 +3,13 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _extends2 = require('babel-runtime/helpers/extends');
-
-var _extends3 = _interopRequireDefault(_extends2);
-
 exports.getVideoElementPreparedReducer = getVideoElementPreparedReducer;
 exports.getConnectionStatusReducer = getConnectionStatusReducer;
 exports.getErrorCodeReducer = getErrorCodeReducer;
 exports.getConnectRetryCountsReducer = getConnectRetryCountsReducer;
 exports.getWebphoneCountsReducer = getWebphoneCountsReducer;
-exports.getCurrentSessionReducer = getCurrentSessionReducer;
+exports.getActiveSessionIdReducer = getActiveSessionIdReducer;
+exports.getRingSessionIdReducer = getRingSessionIdReducer;
 exports.getSessionsReducer = getSessionsReducer;
 exports.getMinimizedReducer = getMinimizedReducer;
 exports.getUserMediaReducer = getUserMediaReducer;
@@ -123,17 +119,46 @@ function getWebphoneCountsReducer(types) {
   };
 }
 
-function getCurrentSessionReducer(types) {
+function getActiveSessionIdReducer(types) {
   return function () {
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
     var _ref6 = arguments[1];
     var type = _ref6.type,
-        session = _ref6.session;
+        sessionId = _ref6.sessionId;
 
     switch (type) {
-      case types.updateCurrentSession:
-        return (0, _extends3.default)({}, state, session);
-      case types.destroyCurrentSession:
+      case types.callStart:
+        return sessionId;
+      case types.callEnd:
+        if (sessionId === state) {
+          return null;
+        }
+        return state;
+      case types.disconnect:
+        return null;
+      default:
+        return state;
+    }
+  };
+}
+
+function getRingSessionIdReducer(types) {
+  return function () {
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+    var _ref7 = arguments[1];
+    var type = _ref7.type,
+        sessionId = _ref7.sessionId;
+
+    switch (type) {
+      case types.callRing:
+        return sessionId;
+      case types.callStart:
+      case types.callEnd:
+        if (sessionId === state) {
+          return null;
+        }
+        return state;
+      case types.disconnect:
         return null;
       default:
         return state;
@@ -144,9 +169,9 @@ function getCurrentSessionReducer(types) {
 function getSessionsReducer(types) {
   return function () {
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
-    var _ref7 = arguments[1];
-    var type = _ref7.type,
-        sessions = _ref7.sessions;
+    var _ref8 = arguments[1];
+    var type = _ref8.type,
+        sessions = _ref8.sessions;
 
     switch (type) {
       case types.updateSessions:
@@ -162,8 +187,8 @@ function getSessionsReducer(types) {
 function getMinimizedReducer(types) {
   return function () {
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-    var _ref8 = arguments[1];
-    var type = _ref8.type;
+    var _ref9 = arguments[1];
+    var type = _ref9.type;
 
     switch (type) {
       case types.toggleMinimized:
@@ -179,8 +204,8 @@ function getMinimizedReducer(types) {
 function getUserMediaReducer(types) {
   return function () {
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-    var _ref9 = arguments[1];
-    var type = _ref9.type;
+    var _ref10 = arguments[1];
+    var type = _ref10.type;
 
     switch (type) {
       case types.getUserMediaSuccess:
@@ -199,7 +224,8 @@ function getWebphoneReducer(types) {
     connectRetryCounts: getConnectRetryCountsReducer(types),
     errorCode: getErrorCodeReducer(types),
     webphoneCounts: getWebphoneCountsReducer(types),
-    currentSession: getCurrentSessionReducer(types),
+    activeSessionId: getActiveSessionIdReducer(types),
+    ringSessionId: getRingSessionIdReducer(types),
     sessions: getSessionsReducer(types),
     minimized: getMinimizedReducer(types)
   });
