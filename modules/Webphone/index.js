@@ -1243,7 +1243,7 @@ var Webphone = (_class = function (_RcModule) {
                 _context15.prev = 3;
 
                 if (!session.isOnHold().local) {
-                  _context15.next = 10;
+                  _context15.next = 9;
                   break;
                 }
 
@@ -1252,28 +1252,24 @@ var Webphone = (_class = function (_RcModule) {
                 return session.unhold();
 
               case 8:
-                this._updateSessions();
-                this.store.dispatch({
-                  type: this.actionTypes.callStart,
-                  sessionId: session.id
-                });
+                this._onCallStart(session);
 
-              case 10:
-                _context15.next = 15;
+              case 9:
+                _context15.next = 14;
                 break;
 
-              case 12:
-                _context15.prev = 12;
+              case 11:
+                _context15.prev = 11;
                 _context15.t0 = _context15['catch'](3);
 
                 console.log(_context15.t0);
 
-              case 15:
+              case 14:
               case 'end':
                 return _context15.stop();
             }
           }
-        }, _callee15, this, [[3, 12]]);
+        }, _callee15, this, [[3, 11]]);
       }));
 
       function unhold(_x12) {
@@ -1938,13 +1934,16 @@ var Webphone = (_class = function (_RcModule) {
   }, {
     key: 'toggleMinimized',
     value: function () {
-      var _ref31 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee29() {
+      var _ref31 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee29(sessionId) {
+        var _this13 = this;
+
         return _regenerator2.default.wrap(function _callee29$(_context29) {
           while (1) {
             switch (_context29.prev = _context29.next) {
               case 0:
-                this.store.dispatch({
-                  type: this.actionTypes.toggleMinimized
+                this._sessionHandleWithId(sessionId, function (session) {
+                  session.minimized = !session.minimized;
+                  _this13._updateSessions();
                 });
 
               case 1:
@@ -1955,19 +1954,12 @@ var Webphone = (_class = function (_RcModule) {
         }, _callee29, this);
       }));
 
-      function toggleMinimized() {
+      function toggleMinimized(_x31) {
         return _ref31.apply(this, arguments);
       }
 
       return toggleMinimized;
     }()
-  }, {
-    key: '_resetMinimized',
-    value: function _resetMinimized() {
-      this.store.dispatch({
-        type: this.actionTypes.resetMinimized
-      });
-    }
   }, {
     key: '_onCallStart',
     value: function _onCallStart(session) {
@@ -2114,7 +2106,7 @@ var Webphone = (_class = function (_RcModule) {
         }, _callee32, this);
       }));
 
-      function _onGetUserMediaError(_x31) {
+      function _onGetUserMediaError(_x32) {
         return _ref34.apply(this, arguments);
       }
 
@@ -2139,11 +2131,6 @@ var Webphone = (_class = function (_RcModule) {
     key: 'ready',
     get: function get() {
       return this.state.status === _moduleStatuses2.default.ready;
-    }
-  }, {
-    key: 'minimized',
-    get: function get() {
-      return this.state.minimized;
     }
   }, {
     key: 'ringSessionId',
