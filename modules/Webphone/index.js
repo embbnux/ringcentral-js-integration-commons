@@ -2117,11 +2117,6 @@ var Webphone = (_class = function (_RcModule) {
     get: function get() {
       return this.state.status;
     }
-
-    // get activeSession() {
-    //   return this._activeSession;
-    // }
-
   }, {
     key: 'originalSessions',
     get: function get() {
@@ -2145,17 +2140,12 @@ var Webphone = (_class = function (_RcModule) {
   }, {
     key: 'activeSession',
     get: function get() {
-      return this._selectors.activeSession;
-    }
-  }, {
-    key: 'currentSession',
-    get: function get() {
-      return this.activeSession;
+      return this._selectors.activeSession();
     }
   }, {
     key: 'ringSession',
     get: function get() {
-      return this._selectors.ringSession;
+      return this._selectors.ringSession();
     }
   }, {
     key: 'sessions',
