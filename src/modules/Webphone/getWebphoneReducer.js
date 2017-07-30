@@ -72,12 +72,36 @@ export function getWebphoneCountsReducer(types) {
   };
 }
 
-export function getCurrentSessionReducer(types) {
-  return (state = null, { type, session }) => {
+export function getActiveSessionIdReducer(types) {
+  return (state = null, { type, sessionId }) => {
     switch (type) {
-      case types.updateCurrentSession:
-        return { ...state, ...session };
-      case types.destroyCurrentSession:
+      case types.callStart:
+        return sessionId;
+      case types.callEnd:
+        if (sessionId === state) {
+          return null;
+        }
+        return state;
+      case types.disconnect:
+        return null;
+      default:
+        return state;
+    }
+  };
+}
+
+export function getRingSessionIdReducer(types) {
+  return (state = null, { type, sessionId }) => {
+    switch (type) {
+      case types.callRing:
+        return sessionId;
+      case types.callStart:
+      case types.callEnd:
+        if (sessionId === state) {
+          return null;
+        }
+        return state;
+      case types.disconnect:
         return null;
       default:
         return state;
@@ -130,7 +154,8 @@ export default function getWebphoneReducer(types) {
     connectRetryCounts: getConnectRetryCountsReducer(types),
     errorCode: getErrorCodeReducer(types),
     webphoneCounts: getWebphoneCountsReducer(types),
-    currentSession: getCurrentSessionReducer(types),
+    activeSessionId: getActiveSessionIdReducer(types),
+    ringSessionId: getRingSessionIdReducer(types),
     sessions: getSessionsReducer(types),
     minimized: getMinimizedReducer(types),
   });
