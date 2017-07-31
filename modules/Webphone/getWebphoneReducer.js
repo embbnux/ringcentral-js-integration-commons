@@ -11,7 +11,6 @@ exports.getWebphoneCountsReducer = getWebphoneCountsReducer;
 exports.getActiveSessionIdReducer = getActiveSessionIdReducer;
 exports.getRingSessionIdReducer = getRingSessionIdReducer;
 exports.getSessionsReducer = getSessionsReducer;
-exports.getMinimizedReducer = getMinimizedReducer;
 exports.getUserMediaReducer = getUserMediaReducer;
 exports.default = getWebphoneReducer;
 
@@ -184,28 +183,11 @@ function getSessionsReducer(types) {
   };
 }
 
-function getMinimizedReducer(types) {
+function getUserMediaReducer(types) {
   return function () {
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
     var _ref9 = arguments[1];
     var type = _ref9.type;
-
-    switch (type) {
-      case types.toggleMinimized:
-        return !state;
-      case types.resetMinimized:
-        return false;
-      default:
-        return state;
-    }
-  };
-}
-
-function getUserMediaReducer(types) {
-  return function () {
-    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-    var _ref10 = arguments[1];
-    var type = _ref10.type;
 
     switch (type) {
       case types.getUserMediaSuccess:
@@ -226,8 +208,7 @@ function getWebphoneReducer(types) {
     webphoneCounts: getWebphoneCountsReducer(types),
     activeSessionId: getActiveSessionIdReducer(types),
     ringSessionId: getRingSessionIdReducer(types),
-    sessions: getSessionsReducer(types),
-    minimized: getMinimizedReducer(types)
+    sessions: getSessionsReducer(types)
   });
 }
 //# sourceMappingURL=getWebphoneReducer.js.map

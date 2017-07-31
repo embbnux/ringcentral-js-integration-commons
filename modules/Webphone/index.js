@@ -153,6 +153,25 @@ var FOURTH_RETRIES_DELAY = 30 * 1000;
 var FIFTH_RETRIES_DELAY = 60 * 1000;
 var MAX_RETRIES_DELAY = 2 * 60 * 1000;
 
+/**
+ * Web phone module to handle phone interaction with WebRTC.
+ * @param {appKey} appKey
+ * @param {appName} appName
+ * @param {appVersion} appVersion
+ * @param {webphoneLogLevel} log Level
+ * @param {alert} alert module instance
+ * @param {auth} auth module instance
+ * @param {client} client module instance
+ * @param {rolesAndPermissions} rolesAndPermissions module instance
+ * @param {storage} storage module instance
+ * @param {globalStorage} globalStorage module instance
+ * @param {extensionDevice} extensionDevice module instance
+ * @param {numberValidate} numberValidate module instance
+ * @param {contactMatcher} contactMatcher module instance, optional
+ * @param {onCallEnd} callback on a call end
+ * @param {onCallRing} callback on a call ring
+ * @param {onCallStart} callback on a call start
+ */
 var Webphone = (_class = function (_RcModule) {
   (0, _inherits3.default)(Webphone, _RcModule);
 
@@ -595,6 +614,11 @@ var Webphone = (_class = function (_RcModule) {
 
       return _connect;
     }()
+
+    /**
+     * connect a web phone.
+     */
+
   }, {
     key: 'connect',
     value: function () {
@@ -1298,31 +1322,31 @@ var Webphone = (_class = function (_RcModule) {
 
               case 3:
                 _context16.prev = 3;
-                _context16.next = 6;
+
+                session.isOnRecord = true;
+                this._updateSessions();
+                _context16.next = 8;
                 return session.startRecord();
 
-              case 6:
-                session.isOnRecord = true;
+              case 8:
                 console.log('Recording Started');
-                _context16.next = 14;
+                _context16.next = 16;
                 break;
 
-              case 10:
-                _context16.prev = 10;
+              case 11:
+                _context16.prev = 11;
                 _context16.t0 = _context16['catch'](3);
 
                 session.isOnRecord = false;
+                this._updateSessions();
                 console.error(_context16.t0);
 
-              case 14:
-                this._updateSessions();
-
-              case 15:
+              case 16:
               case 'end':
                 return _context16.stop();
             }
           }
-        }, _callee16, this, [[3, 10]]);
+        }, _callee16, this, [[3, 11]]);
       }));
 
       function startRecord(_x13) {
@@ -1351,31 +1375,31 @@ var Webphone = (_class = function (_RcModule) {
 
               case 3:
                 _context17.prev = 3;
-                _context17.next = 6;
+
+                session.isOnRecord = false;
+                this._updateSessions();
+                _context17.next = 8;
                 return session.stopRecord();
 
-              case 6:
-                session.isOnRecord = false;
+              case 8:
                 console.log('Recording Stopped');
-                _context17.next = 14;
+                _context17.next = 16;
                 break;
 
-              case 10:
-                _context17.prev = 10;
+              case 11:
+                _context17.prev = 11;
                 _context17.t0 = _context17['catch'](3);
 
-                session.isOnRecord = true;
                 console.error(_context17.t0);
-
-              case 14:
+                session.isOnRecord = true;
                 this._updateSessions();
 
-              case 15:
+              case 16:
               case 'end':
                 return _context17.stop();
             }
           }
-        }, _callee17, this, [[3, 10]]);
+        }, _callee17, this, [[3, 11]]);
       }));
 
       function stopRecord(_x14) {
@@ -1814,6 +1838,14 @@ var Webphone = (_class = function (_RcModule) {
       }
       return func(session);
     }
+
+    /**
+     * start a outbound call.
+     * @param {toNumber} recipient number
+     * @param {fromNumber} call Id
+     * @param {homeCountryId} homeCountry Id
+     */
+
   }, {
     key: 'makeCall',
     value: function () {
@@ -2137,11 +2169,21 @@ var Webphone = (_class = function (_RcModule) {
     get: function get() {
       return this.state.activeSessionId;
     }
+
+    /**
+     * Current active session(Outbound and InBound that answered)
+     */
+
   }, {
     key: 'activeSession',
     get: function get() {
       return this._selectors.activeSession();
     }
+
+    /**
+     * Current ring session(inbound)
+     */
+
   }, {
     key: 'ringSession',
     get: function get() {
