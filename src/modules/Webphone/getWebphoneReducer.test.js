@@ -180,51 +180,6 @@ describe('Webphone :: getWebphoneCountsReducer', () => {
   });
 });
 
-describe('Webphone :: getCurrentSessionReducer', () => {
-  it('getCurrentSessionReducer should be a function', () => {
-    expect(getCurrentSessionReducer).to.be.a('function');
-  });
-  it('getCurrentSessionReducer should return a reducer', () => {
-    expect(getCurrentSessionReducer()).to.be.a('function');
-  });
-  describe('currentSessionReducer', () => {
-    const reducer = getCurrentSessionReducer(actionTypes);
-    it('should have initial state of null', () => {
-      expect(reducer(undefined, {})).to.equal(null);
-    });
-    it('should return original state when actionTypes is not recognized', () => {
-      const originalState = {};
-      expect(reducer(originalState, { type: 'foo' }))
-        .to.equal(originalState);
-    });
-    it('should return null when actionTypes is destroyCurrentSession', () => {
-      const originalState = {};
-      expect(reducer(originalState, { type: actionTypes.destroyCurrentSession }))
-        .to.equal(null);
-    });
-    it('should return new session object when actionTypes is updateCurrentSession', () => {
-      const originalState = {};
-      const session = {
-        id: '123',
-        direction: 'inbound',
-        callStatus: 'test',
-        to: 'test',
-        toUserName: 'haha',
-        from: 'test',
-        fromUserName: 'ha',
-        startTime: (new Date('Fri Apr 21 2017 13:39:34 GMT+0800')).getTime(),
-        creationTime: 1492753174000,
-        isOnHold: false,
-        isOnMute: false,
-        isOnRecord: false,
-        contactMatch: {},
-      };
-      expect(reducer(originalState, { type: actionTypes.updateCurrentSession, session }))
-        .to.deep.equal(session);
-    });
-  });
-});
-
 describe('Webphone :: getSessionsReducer', () => {
   it('getSessionsReducer should be a function', () => {
     expect(getSessionsReducer).to.be.a('function');
@@ -277,36 +232,6 @@ describe('Webphone :: getSessionsReducer', () => {
       }];
       expect(reducer(originalState, { type: actionTypes.updateSessions, sessions }))
         .to.equal(sessions);
-    });
-  });
-});
-
-describe('Webphone :: getMinimizedReducer', () => {
-  it('getMinimizedReducer should be a function', () => {
-    expect(getMinimizedReducer).to.be.a('function');
-  });
-  it('getMinimizedReducer should return a reducer', () => {
-    expect(getMinimizedReducer()).to.be.a('function');
-  });
-  describe('minimizedReducer', () => {
-    const reducer = getMinimizedReducer(actionTypes);
-    it('should have initial state of false', () => {
-      expect(reducer(undefined, {})).to.deep.equal(false);
-    });
-    it('should return original state when actionTypes is not recognized', () => {
-      const originalState = {};
-      expect(reducer(originalState, { type: 'foo' }))
-        .to.equal(originalState);
-    });
-    it('should return opposite state when actionTypes is toggleMinimized', () => {
-      const originalState = false;
-      expect(reducer(originalState, { type: actionTypes.toggleMinimized }))
-        .to.equal(true);
-    });
-    it('should return false when actionTypes is resetMinimized', () => {
-      const originalState = true;
-      expect(reducer(originalState, { type: actionTypes.resetMinimized }))
-        .to.equal(false);
     });
   });
 });

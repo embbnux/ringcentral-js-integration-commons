@@ -561,7 +561,6 @@ export default class Webphone extends RcModule {
   @proxify
   async resume(sessionId) {
     await this.unhold(sessionId);
-   //  this._resetMinimized();
   }
 
   @proxify
@@ -682,11 +681,7 @@ export default class Webphone extends RcModule {
       if (session.isOnHold().local) {
         this._holdOtherSession(session.id);
         await session.unhold();
-        this._updateSessions();
-        this.store.dispatch({
-          type: this.actionTypes.callStart,
-          sessionId: session.id,
-        });
+        this._onCallStart(session);
       }
     } catch (e) {
       console.log(e);
@@ -700,14 +695,15 @@ export default class Webphone extends RcModule {
       return;
     }
     try {
-      await session.startRecord();
       session.isOnRecord = true;
+      this._updateSessions();
+      await session.startRecord();
       console.log('Recording Started');
     } catch (e) {
       session.isOnRecord = false;
+      this._updateSessions();
       console.error(e);
     }
-    this._updateSessions();
   }
 
   @proxify
@@ -717,14 +713,15 @@ export default class Webphone extends RcModule {
       return;
     }
     try {
-      await session.stopRecord();
       session.isOnRecord = false;
+      this._updateSessions();
+      await session.stopRecord();
       console.log('Recording Stopped');
     } catch (e) {
-      session.isOnRecord = true;
       console.error(e);
+      session.isOnRecord = true;
+      this._updateSessions();
     }
-    this._updateSessions();
   }
 
   @proxify
@@ -917,15 +914,10 @@ export default class Webphone extends RcModule {
   }
 
   @proxify
-  async toggleMinimized() {
-    this.store.dispatch({
-      type: this.actionTypes.toggleMinimized,
-    });
-  }
-
-  _resetMinimized() {
-    this.store.dispatch({
-      type: this.actionTypes.resetMinimized,
+  async toggleMinimized(sessionId) {
+    this._sessionHandleWithId(sessionId, (session) => {
+      session.minimized = !session.minimized;
+      this._updateSessions();
     });
   }
 
@@ -987,20 +979,12 @@ export default class Webphone extends RcModule {
     return this.state.status;
   }
 
-  // get activeSession() {
-  //   return this._activeSession;
-  // }
-
   get originalSessions() {
     return this._sessions;
   }
 
   get ready() {
     return this.state.status === moduleStatuses.ready;
-  }
-
-  get minimized() {
-    return this.state.minimized;
   }
 
   get ringSessionId() {
@@ -1012,15 +996,11 @@ export default class Webphone extends RcModule {
   }
 
   get activeSession() {
-    return this._selectors.activeSession;
-  }
-
-  get currentSession() {
-    return this.activeSession;
+    return this._selectors.activeSession();
   }
 
   get ringSession() {
-    return this._selectors.ringSession;
+    return this._selectors.ringSession();
   }
 
   get sessions() {

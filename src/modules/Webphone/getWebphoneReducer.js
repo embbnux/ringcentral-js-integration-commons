@@ -122,19 +122,6 @@ export function getSessionsReducer(types) {
   };
 }
 
-export function getMinimizedReducer(types) {
-  return (state = false, { type }) => {
-    switch (type) {
-      case types.toggleMinimized:
-        return !state;
-      case types.resetMinimized:
-        return false;
-      default:
-        return state;
-    }
-  };
-}
-
 export function getUserMediaReducer(types) {
   return (state = false, { type }) => {
     switch (type) {
@@ -157,6 +144,5 @@ export default function getWebphoneReducer(types) {
     activeSessionId: getActiveSessionIdReducer(types),
     ringSessionId: getRingSessionIdReducer(types),
     sessions: getSessionsReducer(types),
-    minimized: getMinimizedReducer(types),
   });
 }
