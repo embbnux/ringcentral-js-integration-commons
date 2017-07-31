@@ -27,6 +27,25 @@ const FOURTH_RETRIES_DELAY = 30 * 1000;
 const FIFTH_RETRIES_DELAY = 60 * 1000;
 const MAX_RETRIES_DELAY = 2 * 60 * 1000;
 
+/**
+ * Web phone module to handle phone interaction with WebRTC.
+ * @param {appKey} appKey
+ * @param {appName} appName
+ * @param {appVersion} appVersion
+ * @param {webphoneLogLevel} log Level
+ * @param {alert} alert module instance
+ * @param {auth} auth module instance
+ * @param {client} client module instance
+ * @param {rolesAndPermissions} rolesAndPermissions module instance
+ * @param {storage} storage module instance
+ * @param {globalStorage} globalStorage module instance
+ * @param {extensionDevice} extensionDevice module instance
+ * @param {numberValidate} numberValidate module instance
+ * @param {contactMatcher} contactMatcher module instance, optional
+ * @param {onCallEnd} callback on a call end
+ * @param {onCallRing} callback on a call ring
+ * @param {onCallStart} callback on a call start
+ */
 export default class Webphone extends RcModule {
   constructor({
     appKey,
@@ -374,6 +393,9 @@ export default class Webphone extends RcModule {
     }
   }
 
+  /**
+   * connect a web phone.
+   */
   @proxify
   async connect() {
     if (
@@ -859,6 +881,12 @@ export default class Webphone extends RcModule {
     return func(session);
   }
 
+  /**
+   * start a outbound call.
+   * @param {toNumber} recipient number
+   * @param {fromNumber} call Id
+   * @param {homeCountryId} homeCountry Id
+   */
   @proxify
   async makeCall({ toNumber, fromNumber, homeCountryId }) {
     if (!this._webphone) {
@@ -995,10 +1023,16 @@ export default class Webphone extends RcModule {
     return this.state.activeSessionId;
   }
 
+  /**
+   * Current active session(Outbound and InBound that answered)
+   */
   get activeSession() {
     return this._selectors.activeSession();
   }
 
+  /**
+   * Current ring session(inbound)
+   */
   get ringSession() {
     return this._selectors.ringSession();
   }
