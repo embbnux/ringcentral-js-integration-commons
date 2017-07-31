@@ -4,9 +4,9 @@ import getWebphoneReducer, {
   getConnectionStatusReducer,
   getConnectRetryCountsReducer,
   getWebphoneCountsReducer,
-  getCurrentSessionReducer,
+  getActiveSessionIdReducer,
+  getRingSessionIdReducer,
   getSessionsReducer,
-  getMinimizedReducer,
   getErrorCodeReducer,
 } from './getWebphoneReducer';
 
@@ -180,6 +180,126 @@ describe('Webphone :: getWebphoneCountsReducer', () => {
   });
 });
 
+describe('Webphone :: getActiveSessionIdReducer', () => {
+  it('getActiveSessionIdReducer should be a function', () => {
+    expect(getActiveSessionIdReducer).to.be.a('function');
+  });
+  it('getActiveSessionIdReducer should return a reducer', () => {
+    expect(getActiveSessionIdReducer()).to.be.a('function');
+  });
+  describe('activeSessionIdReducer', () => {
+    const reducer = getActiveSessionIdReducer(actionTypes);
+    it('should have initial state of null', () => {
+      expect(reducer(undefined, {})).to.equal(null);
+    });
+
+    it('should return original state when actionTypes is not recognized', () => {
+      const originalState = {};
+      expect(reducer(originalState, { type: 'foo' }))
+      .to.equal(originalState);
+    });
+
+    it('should return sessionId when actionTypes is callStart', () => {
+      const originalState = '1111';
+      expect(reducer(originalState, {
+        type: actionTypes.callStart,
+        sessionId: '222',
+      })).to.equal('222');
+    });
+
+    it(`should return original state when actionTypes is callEnd
+        and sessionId is unequal original state`, () => {
+      const originalState = '111';
+      expect(reducer(originalState, {
+        type: actionTypes.callEnd,
+        sessionId: '222',
+      })).to.equal('111');
+    });
+
+    it(`should return null when actionTypes is callEnd
+        and sessionId is equal original state`, () => {
+      const originalState = '111';
+      expect(reducer(originalState, {
+        type: actionTypes.callEnd,
+        sessionId: '111',
+      })).to.equal(null);
+    });
+
+    it('should return null when actionTypes is disconnect', () => {
+      const originalState = '111';
+      expect(reducer(originalState, {
+        type: actionTypes.disconnect,
+        sessionId: '222',
+      })).to.equal(null);
+    });
+  });
+});
+
+describe('Webphone :: getRingSessionIdReducer', () => {
+  it('getRingSessionIdReducer should be a function', () => {
+    expect(getRingSessionIdReducer).to.be.a('function');
+  });
+  it('getRingSessionIdReducer should return a reducer', () => {
+    expect(getRingSessionIdReducer()).to.be.a('function');
+  });
+  describe('ringSessionIdReducer', () => {
+    const reducer = getRingSessionIdReducer(actionTypes);
+    it('should have initial state of null', () => {
+      expect(reducer(undefined, {})).to.equal(null);
+    });
+
+    it('should return original state when actionTypes is not recognized', () => {
+      const originalState = {};
+      expect(reducer(originalState, { type: 'foo' }))
+      .to.equal(originalState);
+    });
+
+    it('should return sessionId when actionTypes is callRing', () => {
+      const originalState = '1111';
+      expect(reducer(originalState, {
+        type: actionTypes.callRing,
+        sessionId: '222',
+      })).to.equal('222');
+    });
+
+    it(`should return original state when actionTypes is callEnd and callStart
+        and sessionId is unequal original state`, () => {
+      [
+        actionTypes.callStart,
+        actionTypes.callEnd,
+      ].forEach((type) => {
+        const originalState = '111';
+        expect(reducer(originalState, {
+          type,
+          sessionId: '222',
+        })).to.equal('111');
+      });
+    });
+
+    it(`should return null when actionTypes is callEnd and callStart
+        and sessionId is equal original state`, () => {
+      [
+        actionTypes.callStart,
+        actionTypes.callEnd,
+      ].forEach((type) => {
+        const originalState = '111';
+        expect(reducer(originalState, {
+          type,
+          sessionId: '111',
+        })).to.equal(null);
+      });
+    });
+
+    it('should return null when actionTypes is disconnect', () => {
+      const originalState = '111';
+      expect(reducer(originalState, {
+        type: actionTypes.disconnect,
+        sessionId: '222',
+      })).to.equal(null);
+    });
+  });
+});
+
 describe('Webphone :: getSessionsReducer', () => {
   it('getSessionsReducer should be a function', () => {
     expect(getSessionsReducer).to.be.a('function');
@@ -250,9 +370,9 @@ describe('getWebphoneReducer', () => {
     const connectionStatusReducer = getConnectionStatusReducer(actionTypes);
     const connectRetryCountsReducer = getConnectRetryCountsReducer(actionTypes);
     const webphoneCountsReducer = getWebphoneCountsReducer(actionTypes);
-    const currentSessionReducer = getCurrentSessionReducer(actionTypes);
+    const activeSessionIdReducer = getActiveSessionIdReducer(actionTypes);
+    const ringSessionIdReducer = getRingSessionIdReducer(actionTypes);
     const sessionsReducer = getSessionsReducer(actionTypes);
-    const minimizedReducer = getMinimizedReducer(actionTypes);
     const errorCodeReducer = getErrorCodeReducer(actionTypes);
     expect(reducer(undefined, {})).to.deep.equal({
       status: statusReducer(undefined, {}),
@@ -260,9 +380,9 @@ describe('getWebphoneReducer', () => {
       connectionStatus: connectionStatusReducer(undefined, {}),
       connectRetryCounts: connectRetryCountsReducer(undefined, {}),
       webphoneCounts: webphoneCountsReducer(undefined, {}),
-      currentSession: currentSessionReducer(undefined, {}),
+      activeSessionId: activeSessionIdReducer(undefined, {}),
+      ringSessionId: ringSessionIdReducer(undefined, {}),
       sessions: sessionsReducer(undefined, {}),
-      minimized: minimizedReducer(undefined, {}),
       errorCode: errorCodeReducer(undefined, {}),
     });
   });
