@@ -368,6 +368,7 @@ var CallingSettings = (_class = function (_RcModule) {
                   this._alert.warning({
                     message: this._brand.id === '1210' ? _callingSettingsMessages2.default.firstLogin : _callingSettingsMessages2.default.firstLoginOther
                   });
+                  this._warningEmergencyCallingNotAvailable();
                   if (typeof this._onFirstLogin === 'function') {
                     this._onFirstLogin();
                   }

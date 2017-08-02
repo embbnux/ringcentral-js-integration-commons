@@ -282,6 +282,8 @@ var Webphone = (_class = function (_RcModule) {
         }
       });
     }
+
+    _this._isFirstRegister = true;
     return _this;
   }
 
@@ -458,11 +460,17 @@ var Webphone = (_class = function (_RcModule) {
           outgoing: _outgoing2.default // path to aduotfile for outgoing call
         }
       });
-
+      this._isFirstRegister = true;
       var onRegistered = function onRegistered() {
         _this4.store.dispatch({
           type: _this4.actionTypes.registered
         });
+        if (_this4._isFirstRegister) {
+          _this4._alert.info({
+            message: _webphoneErrors2.default.connected
+          });
+        }
+        _this4._isFirstRegister = false;
       };
       var onUnregistered = function onUnregistered() {
         _this4.store.dispatch({
