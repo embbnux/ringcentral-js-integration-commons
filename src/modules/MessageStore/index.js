@@ -34,6 +34,7 @@ export default class MessageStore extends Pollable {
     daySpan = DEFAULT_DAY_SPAN,
     storage,
     subscription,
+    connectivityMonitor,
     polling = false,
     ...options
   }) {
@@ -45,6 +46,7 @@ export default class MessageStore extends Pollable {
     this._client = client;
     this._storage = storage;
     this._subscription = subscription;
+    this._connectivityMonitor = connectivityMonitor;
     this._reducer = getMessageStoreReducer(this.actionTypes);
     this._ttl = ttl;
     this._timeToRetry = timeToRetry;
@@ -114,6 +116,9 @@ export default class MessageStore extends Pollable {
       if (this._shouleCleanCache()) {
         this._cleanUpCache();
       }
+      if (this._connectivityMonitor) {
+        this._connectivity = this._connectivityMonitor.connectivity;
+      }
       this._initMessageStore();
     } else if (this._shouldReset()) {
       this._resetModuleStatus();
@@ -121,6 +126,7 @@ export default class MessageStore extends Pollable {
       this.ready
     ) {
       this._subscriptionHandler();
+      this._checkConnectivity();
     }
   }
 
@@ -128,6 +134,7 @@ export default class MessageStore extends Pollable {
     return (
       this._storage.ready &&
       this._subscription.ready &&
+      (!this._connectivityMonitor || this._connectivityMonitor.ready) &&
       this.pending
     );
   }
@@ -136,7 +143,8 @@ export default class MessageStore extends Pollable {
     return (
       (
         !this._storage.ready ||
-        !this._subscription.ready
+        !this._subscription.ready ||
+        (!!this._connectivityMonitor && !this._connectivityMonitor.ready)
       ) &&
       this.ready
     );
@@ -189,6 +197,19 @@ export default class MessageStore extends Pollable {
     ) {
       this._lastSubscriptionMessage = this._subscription.message;
       this._syncMessages();
+    }
+  }
+
+  _checkConnectivity() {
+    if (
+      this._connectivityMonitor &&
+      this._connectivityMonitor.ready &&
+      this._connectivity !== this._connectivityMonitor.connectivity
+    ) {
+      this._connectivity = this._connectivityMonitor.connectivity;
+      if (this._connectivity) {
+        this._syncMessages();
+      }
     }
   }
 
