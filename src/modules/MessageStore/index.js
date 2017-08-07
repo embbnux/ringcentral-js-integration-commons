@@ -1,4 +1,4 @@
-import RcModule from '../../lib/RcModule';
+import Pollable from '../../lib/Pollable';
 import moduleStatuses from '../../enums/moduleStatuses';
 
 import { batchPutApi } from '../../lib/batchApiHelper';
@@ -20,15 +20,21 @@ export function processResponseData(data) {
     syncToken: data.syncInfo.syncToken,
   };
 }
+const DEFAULT_TTL = 30 * 60 * 1000;
+const DEFAULT_TIME_TO_RETRY = 62 * 1000;
+const DEFAULT_DAY_SPAN = 7;
 
-export default class MessageStore extends RcModule {
+export default class MessageStore extends Pollable {
   constructor({
     alert,
     client,
     auth,
-    ttl = 30 * 60 * 1000,
+    ttl = DEFAULT_TTL,
+    timeToRetry = DEFAULT_TIME_TO_RETRY,
+    daySpan = DEFAULT_DAY_SPAN,
     storage,
     subscription,
+    polling = false,
     ...options
   }) {
     super({
@@ -41,10 +47,13 @@ export default class MessageStore extends RcModule {
     this._subscription = subscription;
     this._reducer = getMessageStoreReducer(this.actionTypes);
     this._ttl = ttl;
+    this._timeToRetry = timeToRetry;
+    this._daySpan = daySpan;
     this._auth = auth;
     this._promise = null;
     this._lastSubscriptionMessage = null;
     this._storageKey = 'messageStore';
+    this._polling = polling;
 
     this._storage.registerReducer({
       key: this._storageKey,
@@ -136,7 +145,7 @@ export default class MessageStore extends RcModule {
   _shouleCleanCache() {
     return (
       this._auth.isFreshLogin ||
-      (Date.now() - this.updatedTimestamp) > this._ttl
+      (Date.now() - this.updatedTimestamp) > this.ttl
     );
   }
 
@@ -202,6 +211,7 @@ export default class MessageStore extends RcModule {
       dateFrom,
       dateTo,
       syncToken,
+      daySpan: this._daySpan,
     });
     const response = await this._messageSyncApi(params);
     const records = response.records;
@@ -230,26 +240,41 @@ export default class MessageStore extends RcModule {
     this.store.dispatch({
       type: this.actionTypes.sync,
     });
-    const oldSyncToken = this.syncToken;
-    const params = messageStoreHelper.getMessageSyncParams({ syncToken: oldSyncToken });
-    if (!oldSyncToken) {
-      response = await this._recursiveFSync({
-        ...params,
+    try {
+      const oldSyncToken = this.syncToken;
+      const params = messageStoreHelper.getMessageSyncParams({
+        syncToken: oldSyncToken,
+        daySpan: this._daySpan,
       });
-    } else {
-      response = await this._messageSyncApi(params);
+      if (!oldSyncToken) {
+        response = await this._recursiveFSync({
+          ...params,
+        });
+      } else {
+        response = await this._messageSyncApi(params);
+      }
+      const {
+        records,
+        syncTimestamp,
+        syncToken,
+      } = processResponseData(response);
+      this.store.dispatch({
+        type: this.actionTypes.syncSuccess,
+        records,
+        syncTimestamp,
+        syncToken,
+      });
+      if (this._polling) {
+        this._startPolling();
+      }
+    } catch (error) {
+      if (this._polling) {
+        this._startPolling(this.timeToRetry);
+      } else {
+        this._retry();
+      }
+      throw error;
     }
-    const {
-      records,
-      syncTimestamp,
-      syncToken,
-    } = processResponseData(response);
-    this.store.dispatch({
-      type: this.actionTypes.syncSuccess,
-      records,
-      syncTimestamp,
-      syncToken,
-    });
   }
 
   async _updateConversationFromSync(conversationId) {
@@ -265,6 +290,7 @@ export default class MessageStore extends RcModule {
     const params = messageStoreHelper.getMessageSyncParams({
       syncToken: oldSyncToken,
       conversationId: conversation.id,
+      daySpan: this._daySpan,
     });
     if (!oldSyncToken) {
       response = await this._recursiveFSync({
@@ -291,6 +317,11 @@ export default class MessageStore extends RcModule {
     await this._sync(async () => {
       await this._updateMessagesFromSync();
     });
+  }
+
+  @proxify
+  async fetchData() {
+    await this._syncMessages();
   }
 
   @proxify
@@ -484,5 +515,13 @@ export default class MessageStore extends RcModule {
 
   get pending() {
     return this.status === moduleStatuses.pending;
+  }
+
+  get ttl() {
+    return this._ttl;
+  }
+
+  get timeToRetry() {
+    return this._timeToRetry;
   }
 }
