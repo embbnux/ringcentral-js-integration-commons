@@ -352,10 +352,33 @@ var Call = (_class = function (_RcModule) {
 
       return onToNumberChange;
     }()
+
+    // save the click to dial entity, only when call took place
+
+  }, {
+    key: 'onToNumberMatch',
+    value: function onToNumberMatch(_ref6) {
+      var entityId = _ref6.entityId,
+          startTime = _ref6.startTime;
+
+      if (this.isIdle) {
+        this.store.dispatch({
+          type: this.actionTypes.toNumberMatched,
+          data: { entityId: entityId, startTime: startTime }
+        });
+      }
+    }
+  }, {
+    key: 'cleanToNumberEntities',
+    value: function cleanToNumberEntities() {
+      this.store.dispatch({
+        type: this.actionTypes.cleanToNumberEntities
+      });
+    }
   }, {
     key: 'onCall',
     value: function () {
-      var _ref6 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee5() {
+      var _ref7 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee5() {
         var validatedNumbers;
         return _regenerator2.default.wrap(function _callee5$(_context5) {
           while (1) {
@@ -384,7 +407,8 @@ var Call = (_class = function (_RcModule) {
               case 5:
                 this.store.dispatch({
                   type: this.actionTypes.connect,
-                  number: this.toNumber
+                  number: this.toNumber,
+                  callSettingMode: this._callSettingMode // for Track
                 });
                 _context5.prev = 6;
                 _context5.next = 9;
@@ -450,7 +474,7 @@ var Call = (_class = function (_RcModule) {
       }));
 
       function onCall() {
-        return _ref6.apply(this, arguments);
+        return _ref7.apply(this, arguments);
       }
 
       return onCall;
@@ -458,7 +482,7 @@ var Call = (_class = function (_RcModule) {
   }, {
     key: '_getValidatedNumbers',
     value: function () {
-      var _ref7 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee6() {
+      var _ref8 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee6() {
         var _this3 = this;
 
         var fromNumber, isWebphone, waitingValidateNumbers, validatedResult, parsedNumbers, parsedFromNumber;
@@ -509,7 +533,10 @@ var Call = (_class = function (_RcModule) {
 
                 validatedResult.errors.forEach(function (error) {
                   _this3._alert.warning({
-                    message: _callErrors2.default[error.type]
+                    message: _callErrors2.default[error.type],
+                    payload: {
+                      phoneNumber: error.phoneNumber
+                    }
                   });
                 });
                 return _context6.abrupt('return', null);
@@ -541,7 +568,7 @@ var Call = (_class = function (_RcModule) {
       }));
 
       function _getValidatedNumbers() {
-        return _ref7.apply(this, arguments);
+        return _ref8.apply(this, arguments);
       }
 
       return _getValidatedNumbers;
@@ -549,9 +576,9 @@ var Call = (_class = function (_RcModule) {
   }, {
     key: '_makeCall',
     value: function () {
-      var _ref8 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee7(_ref9) {
-        var toNumber = _ref9.toNumber,
-            fromNumber = _ref9.fromNumber;
+      var _ref9 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee7(_ref10) {
+        var toNumber = _ref10.toNumber,
+            fromNumber = _ref10.fromNumber;
         var callingMode, countryCode, homeCountry, homeCountryId;
         return _regenerator2.default.wrap(function _callee7$(_context7) {
           while (1) {
@@ -610,7 +637,7 @@ var Call = (_class = function (_RcModule) {
       }));
 
       function _makeCall(_x2) {
-        return _ref8.apply(this, arguments);
+        return _ref9.apply(this, arguments);
       }
 
       return _makeCall;
@@ -649,6 +676,11 @@ var Call = (_class = function (_RcModule) {
     key: 'toNumber',
     get: function get() {
       return this.state.toNumber;
+    }
+  }, {
+    key: 'toNumberEntities',
+    get: function get() {
+      return this.state.toNumberEntities;
     }
   }]);
   return Call;

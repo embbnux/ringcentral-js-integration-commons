@@ -135,6 +135,12 @@ var Presence = (_class = function (_RcModule) {
 
     _this._subscriptionHandler = function (message) {
       if (message && presenceEndPoint.test(message.event) && message.body) {
+        if (message.body.sequence) {
+          if (message.body.sequence <= _this._lastSequence) {
+            return;
+          }
+          _this._lastSequence = message.body.sequence;
+        }
         _this.store.dispatch((0, _extends3.default)({
           type: _this.actionTypes.notification
         }, message.body));
@@ -161,6 +167,7 @@ var Presence = (_class = function (_RcModule) {
         lastNotDisturbDndStatus: (0, _getPresenceReducer.getLastNotDisturbDndStatusReducer)(_this.actionTypes)
       });
     }
+    _this._lastSequence = 0;
     return _this;
   }
 
@@ -195,6 +202,11 @@ var Presence = (_class = function (_RcModule) {
 
               case 8:
                 if ((_this2._auth.loginStatus !== _loginStatus2.default.loggedIn || !_this2._subscription.ready) && _this2.ready) {
+                  _this2.store.dispatch({
+                    type: _this2.actionTypes.reset
+                  });
+                  _this2._lastSequence = 0;
+                  _this2._lastMessage = null;
                   _this2.store.dispatch({
                     type: _this2.actionTypes.resetSuccess
                   });

@@ -188,7 +188,8 @@ var MessageSender = (_class = function (_RcModule) {
     value: function _alertWarning(message) {
       if (message) {
         this._alert.warning({
-          message: message
+          message: message,
+          ttl: 0
         });
         return true;
       }

@@ -155,8 +155,8 @@ function getISODateTo(records) {
   });
   return dateTo && new Date(dateTo).toISOString();
 }
-
-var presenceRegExp = /\/presence\?detailedTelephonyState=true$/;
+// to not use $ at the end, presence with sipData has extra query parameters
+var presenceRegExp = /\/presence\?detailedTelephonyState=true/;
 
 var CallLog = (_class = function (_Pollable) {
   (0, _inherits3.default)(CallLog, _Pollable);

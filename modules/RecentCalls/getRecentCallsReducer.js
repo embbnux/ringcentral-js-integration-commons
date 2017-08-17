@@ -3,6 +3,19 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProperties');
+
+var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
+
+var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
+
+var _defineProperty3 = _interopRequireDefault(_defineProperty2);
+
+var _extends3 = require('babel-runtime/helpers/extends');
+
+var _extends4 = _interopRequireDefault(_extends3);
+
 exports.getCallsReducer = getCallsReducer;
 exports.getCallStatusReducer = getCallStatusReducer;
 exports.default = getRecentCallsReducer;
@@ -21,12 +34,21 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function getCallsReducer(types) {
   return function () {
-    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
     var _ref = arguments[1];
     var type = _ref.type,
+        contact = _ref.contact,
         calls = _ref.calls;
 
-    if (type === types.loadSuccess) return calls;else if (type === types.loadReset) return [];
+    var contactId = String(contact && contact.id);
+    if (type === types.loadSuccess) {
+      return (0, _extends4.default)({}, state, (0, _defineProperty3.default)({}, contactId, calls));
+    } else if (type === types.loadReset) {
+      var _ = state[contactId],
+          rest = (0, _objectWithoutProperties3.default)(state, [contactId]);
+
+      return rest;
+    }
     return state;
   };
 }

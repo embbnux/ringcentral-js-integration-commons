@@ -13,6 +13,10 @@ var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
+var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
+
+var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
+
 var _extends2 = require('babel-runtime/helpers/extends');
 
 var _extends3 = _interopRequireDefault(_extends2);
@@ -116,7 +120,7 @@ var CallHistory = function (_RcModule) {
           from: callFrom,
           to: callTo
         });
-      });
+      }).sort(_callLogHelpers.sortByStartTime);
     });
 
     _this.addSelector('calls', _this._selectors.normalizedCalls, function () {
@@ -125,23 +129,32 @@ var CallHistory = function (_RcModule) {
       return _this._contactMatcher && _this._contactMatcher.dataMapping;
     }, function () {
       return _this._activityMatcher && _this._activityMatcher.dataMapping;
+    }, function () {
+      return _this._callMonitor && _this._callMonitor.callMatched;
     }, function (normalizedCalls, endedCalls) {
       var contactMapping = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
       var activityMapping = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+      var callMatched = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : {};
 
       var sessionIds = {};
-      return normalizedCalls.map(function (call) {
+      var calls = normalizedCalls.map(function (call) {
         sessionIds[call.sessionId] = true;
         var fromNumber = call.from && (call.from.phoneNumber || call.from.extensionNumber);
         var toNumber = call.to && (call.to.phoneNumber || call.to.extensionNumber);
+        var fromMatches = fromNumber && contactMapping[fromNumber] || [];
+        var toMatches = toNumber && contactMapping[toNumber] || [];
+        var activityMatches = activityMapping[call.sessionId] || [];
+        var matched = callMatched[call.sessionId];
         return (0, _extends3.default)({}, call, {
-          fromMatches: fromNumber && contactMapping[fromNumber] || [],
-          toMatches: toNumber && contactMapping[toNumber] || [],
-          activityMatches: activityMapping[call.sessionId] || []
+          fromMatches: fromMatches,
+          toMatches: toMatches,
+          activityMatches: activityMatches,
+          toNumberEntity: matched
         });
-      }).concat(endedCalls.filter(function (call) {
+      });
+      return [].concat((0, _toConsumableArray3.default)(endedCalls.filter(function (call) {
         return !sessionIds[call.sessionId];
-      })).sort(_callLogHelpers.sortByStartTime);
+      })), (0, _toConsumableArray3.default)(calls));
     });
 
     _this.addSelector('uniqueNumbers', _this._selectors.normalizedCalls, function () {
@@ -280,13 +293,18 @@ var CallHistory = function (_RcModule) {
       return false;
     }
   }, {
-    key: '_shouldAddEndedCalls',
-    value: function _shouldAddEndedCalls() {
+    key: '_getEndedCalls',
+    value: function _getEndedCalls() {
       if (this._callMonitor) {
         var monitorCalls = this._callMonitor.calls;
+        var callLogCalls = this._callLog.calls;
         if (this._lastProcessedMonitorCalls !== monitorCalls) {
           var endedCalls = (this._lastProcessedMonitorCalls || []).filter(function (call) {
             return !monitorCalls.find(function (currentCall) {
+              return call.sessionId === currentCall.sessionId;
+            }) &&
+            // if the call's callLog has been fetch, skip
+            !callLogCalls.find(function (currentCall) {
               return call.sessionId === currentCall.sessionId;
             });
           });
@@ -324,7 +342,7 @@ var CallHistory = function (_RcModule) {
         this._activityMatcher.triggerMatch();
       }
 
-      var endedCalls = this._shouldAddEndedCalls();
+      var endedCalls = this._getEndedCalls();
       if (endedCalls && endedCalls.length) {
         this._addEndedCalls(endedCalls);
       }
@@ -361,6 +379,10 @@ var CallHistory = function (_RcModule) {
   }, {
     key: '_addEndedCalls',
     value: function _addEndedCalls(endedCalls) {
+      endedCalls.map(function (call) {
+        call.result = 'Disconnected';
+        return call;
+      });
       this.store.dispatch({
         type: this.actionTypes.addEndedCalls,
         endedCalls: endedCalls,

@@ -223,7 +223,7 @@ var DateTimeFormat = function (_RcModule) {
   }, {
     key: 'status',
     get: function get() {
-      return this.state.status;
+      return this.proxyState && this.proxyState.status || this.state.status;
     }
   }, {
     key: 'proxyStatus',

@@ -911,6 +911,11 @@ var Auth = (_class = function (_RcModule) {
     get: function get() {
       return this.state.loginStatus === _loginStatus2.default.loggedIn || this.state.loginStatus === _loginStatus2.default.beforeLogout;
     }
+  }, {
+    key: 'notLoggedIn',
+    get: function get() {
+      return this.state.loginStatus === _loginStatus2.default.notLoggedIn;
+    }
   }]);
   return Auth;
 }(_RcModule3.default), (_applyDecoratedDescriptor(_class.prototype, 'login', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'login'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'logout', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'logout'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'checkIsLoggedIn', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'checkIsLoggedIn'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setupProxyFrame', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'setupProxyFrame'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'clearProxyFrame', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'clearProxyFrame'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'openOAuthPage', [_proxify2.default], (0, _getOwnPropertyDescriptor2.default)(_class.prototype, 'openOAuthPage'), _class.prototype)), _class);

@@ -9,10 +9,6 @@ var _getOwnPropertyDescriptor = require('babel-runtime/core-js/object/get-own-pr
 
 var _getOwnPropertyDescriptor2 = _interopRequireDefault(_getOwnPropertyDescriptor);
 
-var _stringify = require('babel-runtime/core-js/json/stringify');
-
-var _stringify2 = _interopRequireDefault(_stringify);
-
 var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
@@ -406,7 +402,7 @@ var ContactSearch = (_class = function (_RcModule) {
       var sourceName = _ref7.sourceName,
           searchString = _ref7.searchString;
 
-      var key = (0, _stringify2.default)([sourceName, searchString]);
+      var key = sourceName + '-' + searchString;
       var searching = this.cache && this.cache.contactSearch && this.cache.contactSearch[key];
       var now = Date.now();
       if (searching && now - searching.timestamp < this._ttl) {
@@ -498,6 +494,11 @@ var ContactSearch = (_class = function (_RcModule) {
     key: 'searching',
     get: function get() {
       return this.state.searching;
+    }
+  }, {
+    key: 'searchResult',
+    get: function get() {
+      return this.searching ? this.searching.result : [];
     }
   }, {
     key: 'ready',

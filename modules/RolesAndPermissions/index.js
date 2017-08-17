@@ -148,7 +148,7 @@ var RolesAndPermissions = function (_DataFetcher) {
                 return (0, _get3.default)(RolesAndPermissions.prototype.__proto__ || (0, _getPrototypeOf2.default)(RolesAndPermissions.prototype), '_onStateChange', this).call(this);
 
               case 2:
-                if (!(this.ready && this._auth.loginStatus === _loginStatus2.default.loggedIn && this._isCRM && !this.tierEnabled)) {
+                if (!(this.ready && this._auth.loginStatus === _loginStatus2.default.loggedIn && this._isCRM && this.tierEnabled !== null && !this.tierEnabled)) {
                   _context2.next = 6;
                   break;
                 }
@@ -206,7 +206,10 @@ var RolesAndPermissions = function (_DataFetcher) {
   }, {
     key: 'tierEnabled',
     get: function get() {
-      return !!(this._extensionInfo.serviceFeatures && this._extensionInfo.serviceFeatures[this._flag] && this._extensionInfo.serviceFeatures[this._flag].enabled);
+      if (!this._extensionInfo.serviceFeatures || !this._extensionInfo.serviceFeatures[this._flag]) {
+        return null;
+      }
+      return this._extensionInfo.serviceFeatures[this._flag].enabled;
     }
   }]);
   return RolesAndPermissions;

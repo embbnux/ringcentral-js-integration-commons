@@ -55,10 +55,6 @@ var _sleep = require('../../lib/sleep');
 
 var _sleep2 = _interopRequireDefault(_sleep);
 
-var _moduleStatuses = require('../../enums/moduleStatuses');
-
-var _moduleStatuses2 = _interopRequireDefault(_moduleStatuses);
-
 var _syncTypes = require('../../enums/syncTypes');
 
 var _syncTypes2 = _interopRequireDefault(_syncTypes);

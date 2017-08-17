@@ -87,6 +87,10 @@ var _sessionStatus = require('./sessionStatus');
 
 var _sessionStatus2 = _interopRequireDefault(_sessionStatus);
 
+var _recordStatus = require('./recordStatus');
+
+var _recordStatus2 = _interopRequireDefault(_recordStatus);
+
 var _actionTypes = require('./actionTypes');
 
 var _actionTypes2 = _interopRequireDefault(_actionTypes);
@@ -1025,7 +1029,10 @@ var Webphone = (_class = function (_RcModule) {
 
                 validatedResult.errors.forEach(function (error) {
                   _this8._alert.warning({
-                    message: _callErrors2.default[error.type]
+                    message: _callErrors2.default[error.type],
+                    payload: {
+                      phoneNumber: error.phoneNumber
+                    }
                   });
                 });
                 return _context9.abrupt('return', false);
@@ -1329,32 +1336,63 @@ var Webphone = (_class = function (_RcModule) {
                 return _context16.abrupt('return');
 
               case 3:
-                _context16.prev = 3;
+                if (!(session.callStatus === _sessionStatus2.default.connecting)) {
+                  _context16.next = 5;
+                  break;
+                }
 
-                session.isOnRecord = true;
+                return _context16.abrupt('return');
+
+              case 5:
+                _context16.prev = 5;
+
+                session.recordStatus = _recordStatus2.default.pending;
                 this._updateSessions();
-                _context16.next = 8;
+                _context16.next = 10;
                 return session.startRecord();
 
-              case 8:
-                console.log('Recording Started');
-                _context16.next = 16;
+              case 10:
+                session.recordStatus = _recordStatus2.default.recording;
+                this._updateSessions();
+                _context16.next = 25;
                 break;
 
-              case 11:
-                _context16.prev = 11;
-                _context16.t0 = _context16['catch'](3);
+              case 14:
+                _context16.prev = 14;
+                _context16.t0 = _context16['catch'](5);
 
-                session.isOnRecord = false;
-                this._updateSessions();
                 console.error(_context16.t0);
+                session.recordStatus = _recordStatus2.default.idle;
+                this._updateSessions();
+                // Recording has been disabled
 
-              case 16:
+                if (!(_context16.t0 && _context16.t0.code === -5)) {
+                  _context16.next = 24;
+                  break;
+                }
+
+                this._alert.danger({
+                  message: _webphoneErrors2.default.recordDisabled
+                });
+                // Disabled phone recording
+                session.recordStatus = _recordStatus2.default.pending;
+                this._updateSessions();
+                return _context16.abrupt('return');
+
+              case 24:
+                this._alert.danger({
+                  message: _webphoneErrors2.default.recordError,
+                  payload: {
+                    errorCode: _context16.t0.code
+                  }
+                });
+
+              case 25:
               case 'end':
                 return _context16.stop();
             }
           }
-        }, _callee16, this, [[3, 11]]);
+        }, _callee16, this, [[5, 14]]);
       }));
 
       function startRecord(_x13) {
@@ -1384,30 +1422,31 @@ var Webphone = (_class = function (_RcModule) {
               case 3:
                 _context17.prev = 3;
 
-                session.isOnRecord = false;
+                session.recordStatus = _recordStatus2.default.pending;
                 this._updateSessions();
                 _context17.next = 8;
                 return session.stopRecord();
 
               case 8:
-                console.log('Recording Stopped');
-                _context17.next = 16;
+                session.recordStatus = _recordStatus2.default.idle;
+                this._updateSessions();
+                _context17.next = 17;
                 break;
 
-              case 11:
-                _context17.prev = 11;
+              case 12:
+                _context17.prev = 12;
                 _context17.t0 = _context17['catch'](3);
 
                 console.error(_context17.t0);
-                session.isOnRecord = true;
+                session.recordStatus = _recordStatus2.default.recording;
                 this._updateSessions();
 
-              case 16:
+              case 17:
               case 'end':
                 return _context17.stop();
             }
           }
-        }, _callee17, this, [[3, 11]]);
+        }, _callee17, this, [[3, 12]]);
       }));
 
       function stopRecord(_x14) {
@@ -1468,7 +1507,9 @@ var Webphone = (_class = function (_RcModule) {
     key: 'transfer',
     value: function () {
       var _ref20 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee19(transferNumber, sessionId) {
-        var session;
+        var _this11 = this;
+
+        var session, validatedResult, validPhoneNumber;
         return _regenerator2.default.wrap(function _callee19$(_context19) {
           while (1) {
             switch (_context19.prev = _context19.next) {
@@ -1484,27 +1525,61 @@ var Webphone = (_class = function (_RcModule) {
 
               case 3:
                 _context19.prev = 3;
-                _context19.next = 6;
-                return session.transfer(transferNumber);
 
-              case 6:
-                console.log('Transferred');
+                session.isOnTransfer = true;
+                this._updateSessions();
+                _context19.next = 8;
+                return this._numberValidate.validateNumbers([transferNumber]);
+
+              case 8:
+                validatedResult = _context19.sent;
+
+                if (validatedResult.result) {
+                  _context19.next = 14;
+                  break;
+                }
+
+                validatedResult.errors.forEach(function (error) {
+                  _this11._alert.warning({
+                    message: _callErrors2.default[error.type],
+                    payload: {
+                      phoneNumber: error.phoneNumber
+                    }
+                  });
+                });
+                session.isOnTransfer = false;
+                this._updateSessions();
+                return _context19.abrupt('return');
+
+              case 14:
+                validPhoneNumber = validatedResult.numbers[0] && validatedResult.numbers[0].e164;
+                _context19.next = 17;
+                return session.transfer(validPhoneNumber);
+
+              case 17:
+                session.isOnTransfer = false;
+                this._updateSessions();
                 this._onCallEnd(session);
-                _context19.next = 13;
+                _context19.next = 28;
                 break;
 
-              case 10:
-                _context19.prev = 10;
+              case 22:
+                _context19.prev = 22;
                 _context19.t0 = _context19['catch'](3);
 
                 console.error(_context19.t0);
+                session.isOnTransfer = false;
+                this._updateSessions();
+                this._alert.danger({
+                  message: _webphoneErrors2.default.transferError
+                });
 
-              case 13:
+              case 28:
               case 'end':
                 return _context19.stop();
             }
           }
-        }, _callee19, this, [[3, 10]]);
+        }, _callee19, this, [[3, 22]]);
       }));
 
       function transfer(_x16, _x17) {
@@ -1517,7 +1592,7 @@ var Webphone = (_class = function (_RcModule) {
     key: 'transferWarm',
     value: function () {
       var _ref21 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee21(transferNumber, sessionId) {
-        var _this11 = this;
+        var _this12 = this;
 
         var session, newSession;
         return _regenerator2.default.wrap(function _callee21$(_context21) {
@@ -1554,7 +1629,7 @@ var Webphone = (_class = function (_RcModule) {
 
                         case 3:
                           console.log('Transferred');
-                          _this11._onCallEnd(session);
+                          _this12._onCallEnd(session);
                           _context20.next = 10;
                           break;
 
@@ -1569,7 +1644,7 @@ var Webphone = (_class = function (_RcModule) {
                           return _context20.stop();
                       }
                     }
-                  }, _callee20, _this11, [[0, 7]]);
+                  }, _callee20, _this12, [[0, 7]]);
                 })));
                 _context21.next = 13;
                 break;
@@ -1618,18 +1693,26 @@ var Webphone = (_class = function (_RcModule) {
                 return session.flip(flipValue);
 
               case 6:
-                this._onCallEnd(session);
+                // this._onCallEnd(session);
+                session.isOnFlip = true;
                 console.log('Flipped');
-                _context22.next = 13;
+                _context22.next = 15;
                 break;
 
               case 10:
                 _context22.prev = 10;
                 _context22.t0 = _context22['catch'](3);
 
+                session.isOnFlip = false;
+                this._alert.warning({
+                  message: _webphoneErrors2.default.flipError
+                });
                 console.error(_context22.t0);
 
-              case 13:
+              case 15:
+                this._updateSessions();
+
+              case 16:
               case 'end':
                 return _context22.stop();
             }
@@ -1926,7 +2009,7 @@ var Webphone = (_class = function (_RcModule) {
     key: 'updateSessionMatchedContact',
     value: function () {
       var _ref30 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee28(sessionId, contact) {
-        var _this12 = this;
+        var _this13 = this;
 
         return _regenerator2.default.wrap(function _callee28$(_context28) {
           while (1) {
@@ -1934,7 +2017,7 @@ var Webphone = (_class = function (_RcModule) {
               case 0:
                 this._sessionHandleWithId(sessionId, function (session) {
                   session.contactMatch = contact;
-                  _this12._updateSessions();
+                  _this13._updateSessions();
                 });
 
               case 1:
@@ -1975,7 +2058,7 @@ var Webphone = (_class = function (_RcModule) {
     key: 'toggleMinimized',
     value: function () {
       var _ref31 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee29(sessionId) {
-        var _this13 = this;
+        var _this14 = this;
 
         return _regenerator2.default.wrap(function _callee29$(_context29) {
           while (1) {
@@ -1983,7 +2066,7 @@ var Webphone = (_class = function (_RcModule) {
               case 0:
                 this._sessionHandleWithId(sessionId, function (session) {
                   session.minimized = !session.minimized;
-                  _this13._updateSessions();
+                  _this14._updateSessions();
                 });
 
               case 1:

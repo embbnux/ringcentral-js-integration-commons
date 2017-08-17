@@ -592,8 +592,7 @@ var ConversationLogger = (_class = function (_LoggerBase) {
                 _context6.next = 3;
                 return _promise2.default.all((0, _keys2.default)(this.conversationLogMap[conversationId]).map(function (date) {
                   return _this6.conversationLogMap[conversationId][date];
-                }).sort(_messageHelper.sortByDate).reverse // reverse to get the last items first
-                ().map(function (conversation, idx) {
+                }).sort(_messageHelper.sortByDate).map(function (conversation, idx) {
                   var queueIndex = _this6._autoLogQueue.find(function (item) {
                     return item.conversationLogId === conversation.conversationLogId;
                   });

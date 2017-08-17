@@ -15,6 +15,10 @@ require('core-js/fn/array/find');
 
 require('core-js/fn/array/find-index');
 
+var _ramda = require('ramda');
+
+var _ramda2 = _interopRequireDefault(_ramda);
+
 var _redux = require('redux');
 
 var _getPresenceReducer = require('../Presence/getPresenceReducer');
@@ -28,6 +32,14 @@ var _callLogHelpers = require('../../lib/callLogHelpers');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function getDataReducer(types) {
+  var removeIntermediateCall = _ramda2.default.reduce(function (result, activeCall) {
+    if (!(0, _callLogHelpers.isIntermediateCall)(activeCall) && !_ramda2.default.find(function (item) {
+      return item.sessionId === activeCall.sessionId;
+    }, result)) {
+      result.push(activeCall);
+    }
+    return result;
+  });
   return function () {
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
     var _ref = arguments[1];
@@ -40,18 +52,21 @@ function getDataReducer(types) {
       case types.fetchSuccess:
       case types.notification:
         {
-          return activeCalls.map(function (activeCall) {
+          return _ramda2.default.map(function (activeCall) {
             var existingCall = state.find(function (call) {
               return call.sessionId === activeCall.sessionId;
             });
-            if (!existingCall) return (0, _extends3.default)({}, (0, _callLogHelpers.normalizeFromTo)(activeCall), { startTime: timestamp });
-            if ((0, _callLogHelpers.isIntermediateCall)(activeCall)) return existingCall;
-            return (0, _extends3.default)({}, existingCall, (0, _callLogHelpers.normalizeFromTo)(activeCall));
-          }
-          // [RCINT-3558] should ignore intermediate call states
-          ).filter(function (activeCall) {
-            return !(0, _callLogHelpers.isIntermediateCall)(activeCall);
-          });
+            if (!existingCall) {
+              var normalizedCall = (0, _callLogHelpers.normalizeStartTime)((0, _callLogHelpers.normalizeFromTo)(activeCall));
+              var startTime = normalizedCall.startTime || timestamp;
+              var offset = Math.min(startTime - timestamp, 0);
+              return (0, _extends3.default)({}, normalizedCall, {
+                startTime: startTime,
+                offset: offset
+              });
+            }
+            return (0, _extends3.default)({}, existingCall, (0, _callLogHelpers.normalizeStartTime)((0, _callLogHelpers.normalizeFromTo)(activeCall)));
+          }, removeIntermediateCall([], activeCalls));
         }
       case types.resetSuccess:
         return [];

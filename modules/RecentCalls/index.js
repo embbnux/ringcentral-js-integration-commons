@@ -122,8 +122,8 @@ var RecentCalls = (_class = function (_RcModule) {
 
   function RecentCalls(_ref) {
     var client = _ref.client,
-        callLog = _ref.callLog,
-        options = (0, _objectWithoutProperties3.default)(_ref, ['client', 'callLog']);
+        callHistory = _ref.callHistory,
+        options = (0, _objectWithoutProperties3.default)(_ref, ['client', 'callHistory']);
     (0, _classCallCheck3.default)(this, RecentCalls);
 
     var _this = (0, _possibleConstructorReturn3.default)(this, (RecentCalls.__proto__ || (0, _getPrototypeOf2.default)(RecentCalls)).call(this, (0, _extends3.default)({
@@ -131,7 +131,7 @@ var RecentCalls = (_class = function (_RcModule) {
     }, options)));
 
     _this._client = _ensureExist2.default.call(_this, client, 'client');
-    _this._callLog = _ensureExist2.default.call(_this, callLog, 'callLog');
+    _this._callHistory = _ensureExist2.default.call(_this, callHistory, 'callHistory');
     _this._reducer = (0, _getRecentCallsReducer2.default)(_this.actionTypes);
     return _this;
   }
@@ -148,11 +148,11 @@ var RecentCalls = (_class = function (_RcModule) {
   }, {
     key: '_onStateChange',
     value: function _onStateChange() {
-      if (this.pending && this._callLog.ready) {
+      if (this.pending && this._callHistory.ready) {
         this.store.dispatch({
           type: this.actionTypes.initSuccess
         });
-      } else if (this.ready && !this._callLog.ready) {
+      } else if (this.ready && !this._callHistory.ready) {
         this.store.dispatch({
           type: this.actionTypes.resetSuccess
         });
@@ -167,7 +167,7 @@ var RecentCalls = (_class = function (_RcModule) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                if (!(!!currentContact && currentContact === this._currentContact)) {
+                if (currentContact) {
                   _context.next = 2;
                   break;
                 }
@@ -175,34 +175,30 @@ var RecentCalls = (_class = function (_RcModule) {
                 return _context.abrupt('return');
 
               case 2:
-                this._currentContact = currentContact;
-                this.store.dispatch({
-                  type: this.actionTypes.initLoad
-                });
-
-                if (currentContact) {
-                  _context.next = 7;
+                if (!this.calls[currentContact.id]) {
+                  _context.next = 4;
                   break;
                 }
 
-                this.store.dispatch({
-                  type: this.actionTypes.loadReset
-                });
                 return _context.abrupt('return');
 
-              case 7:
-                _context.next = 9;
-                return this._getRecentCalls(currentContact, this._callLog.calls);
+              case 4:
+                this.store.dispatch({
+                  type: this.actionTypes.initLoad
+                });
+                _context.next = 7;
+                return this._getRecentCalls(currentContact, this._callHistory.calls);
 
-              case 9:
+              case 7:
                 calls = _context.sent;
 
                 this.store.dispatch({
                   type: this.actionTypes.loadSuccess,
-                  calls: calls
+                  calls: calls,
+                  contact: currentContact
                 });
 
-              case 11:
+              case 9:
               case 'end':
                 return _context.stop();
             }
@@ -218,11 +214,11 @@ var RecentCalls = (_class = function (_RcModule) {
     }()
   }, {
     key: 'cleanUpCalls',
-    value: function cleanUpCalls() {
+    value: function cleanUpCalls(contact) {
       this.store.dispatch({
-        type: this.actionTypes.loadReset
+        type: this.actionTypes.loadReset,
+        contact: contact
       });
-      this._currentContact = null;
     }
   }, {
     key: '_getRecentCalls',
@@ -231,7 +227,7 @@ var RecentCalls = (_class = function (_RcModule) {
     /**
      * Searching for recent calls of specific contact.
      * @param {Object} currentContact Current contact
-     * @param {Array} calls Calls in callLog
+     * @param {Array} calls Calls in callHistory
      * @param {Number} daySpan Find calls within certain days
      * @param {Number} length Maximum length of recent calls
      * @return {Array}
@@ -286,7 +282,7 @@ var RecentCalls = (_class = function (_RcModule) {
     }()
 
     /**
-     * Get recent calls from callLog.
+     * Get recent calls from callHistory.
      * @param {Object} currentContact
      * @param {Array} calls
      * @param {Date} dateFrom

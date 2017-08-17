@@ -214,6 +214,7 @@ var Messages = (_class = function (_RcModule) {
         var searchResults = [];
         allConversations.forEach(function (message) {
           var searchNumber = (0, _cleanNumber2.default)(effectiveSearchString, false);
+          var searchRegExp = new RegExp(effectiveSearchString, 'i');
           if (searchNumber !== '' && message.correspondents.find(function (contact) {
             return (0, _cleanNumber2.default)(contact.phoneNumber || contact.extensionNumber || '').indexOf(searchNumber) > -1;
           })) {
@@ -225,7 +226,7 @@ var Messages = (_class = function (_RcModule) {
           }
           if (message.correspondentMatches.length) {
             if (message.correspondentMatches.find(function (entity) {
-              return entity.name && entity.name.indexOf(effectiveSearchString) > -1;
+              return entity.name && searchRegExp.test(entity.name);
             })) {
               // match by entity's name
               searchResults.push((0, _extends3.default)({}, message, {
@@ -234,7 +235,7 @@ var Messages = (_class = function (_RcModule) {
               return;
             }
           } else if (message.correspondents.find(function (contact) {
-            return (contact.name || '').indexOf(effectiveSearchString) > -1;
+            return searchRegExp.test(contact.name || '');
           })) {
             searchResults.push((0, _extends3.default)({}, message, {
               matchOrder: 0
@@ -243,14 +244,14 @@ var Messages = (_class = function (_RcModule) {
           }
 
           // try match messages of the same conversation
-          if (message.subject.indexOf(effectiveSearchString) > -1) {
+          if (searchRegExp.test(message.subject)) {
             searchResults.push((0, _extends3.default)({}, message, {
               matchOrder: 1
             }));
             return;
           }
           var matchedMessage = _this._messageStore.messages.find(function (item) {
-            return item.conversationId === message.conversationId && item.subject.indexOf(effectiveSearchString) > -1;
+            return item.conversationId === message.conversationId && searchRegExp.test(item.subject);
           });
           if (matchedMessage) {
             searchResults.push((0, _extends3.default)({}, message, {

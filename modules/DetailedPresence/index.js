@@ -89,6 +89,12 @@ var DetailedPresence = function (_Presence) {
 
     _this._subscriptionHandler = function (message) {
       if (presenceRegExp.test(message.event) && message.body) {
+        if (message.body.sequence) {
+          if (message.body.sequence <= _this._lastSequence) {
+            return;
+          }
+          _this._lastSequence = message.body.sequence;
+        }
         var _message$body = message.body,
             activeCalls = _message$body.activeCalls,
             dndStatus = _message$body.dndStatus,
@@ -139,6 +145,12 @@ var DetailedPresence = function (_Presence) {
 
             case 9:
               if ((!_this._auth.loggedIn || !_this._subscription.ready || _this._connectivityMonitor && !_this._connectivityMonitor.ready) && _this.ready) {
+                _this.store.dispatch({
+                  type: _this.actionTypes.reset
+                });
+                _this._lastTelephonyStatus = null;
+                _this._lastSequence = 0;
+                _this._lastMessage = null;
                 _this.store.dispatch({
                   type: _this.actionTypes.resetSuccess
                 });
@@ -194,8 +206,9 @@ var DetailedPresence = function (_Presence) {
         return !(0, _callLogHelpers.isEnded)(call);
       });
     });
-
+    _this._lastMessage = null;
     _this._lastTelephonyStatus = null;
+    _this._lastSequence = 0;
     return _this;
   }
 

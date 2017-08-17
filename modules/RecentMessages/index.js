@@ -21,6 +21,18 @@ var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
+var _values = require('babel-runtime/core-js/object/values');
+
+var _values2 = _interopRequireDefault(_values);
+
+var _getIterator2 = require('babel-runtime/core-js/get-iterator');
+
+var _getIterator3 = _interopRequireDefault(_getIterator2);
+
+var _keys = require('babel-runtime/core-js/object/keys');
+
+var _keys2 = _interopRequireDefault(_keys);
+
 var _extends2 = require('babel-runtime/helpers/extends');
 
 var _extends3 = _interopRequireDefault(_extends2);
@@ -137,12 +149,14 @@ var RecentMessages = (_class = function (_RcModule) {
     _this.addSelector('unreadMessageCounts', function () {
       return _this.messages;
     }, function (messages) {
-      return messages.reduce(function (acc, cur) {
-        return acc + (cur.readStatus !== 'Read' ? 1 : 0);
-      }, 0);
+      return (0, _keys2.default)(messages).reduce(function (unreadCounts, contactId) {
+        unreadCounts[contactId] = messages[contactId].reduce(function (acc, cur) {
+          return acc + (cur.readStatus !== 'Read' ? 1 : 0);
+        }, 0);
+        return unreadCounts;
+      }, {});
     });
 
-    _this._currentContact = null;
     _this._prevMessageStoreTimestamp = null;
     return _this;
   }
@@ -167,11 +181,34 @@ var RecentMessages = (_class = function (_RcModule) {
         this.store.dispatch({
           type: this.actionTypes.resetSuccess
         });
-      } else if (this._currentContact !== null) {
+      } else if ((0, _keys2.default)(this.messages).length > 0) {
         // Listen to messageStore state changes
         if (this._messageStore.updatedTimestamp !== this._prevMessageStoreTimestamp) {
           this._prevMessageStoreTimestamp = this._messageStore.updatedTimestamp;
-          this.getMessages(this._currentContact, true);
+          var _iteratorNormalCompletion = true;
+          var _didIteratorError = false;
+          var _iteratorError = undefined;
+
+          try {
+            for (var _iterator = (0, _getIterator3.default)((0, _values2.default)(this.contacts)), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+              var contact = _step.value;
+
+              this.getMessages(contact, true);
+            }
+          } catch (err) {
+            _didIteratorError = true;
+            _iteratorError = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion && _iterator.return) {
+                _iterator.return();
+              }
+            } finally {
+              if (_didIteratorError) {
+                throw _iteratorError;
+              }
+            }
+          }
         }
       }
     }
@@ -185,7 +222,7 @@ var RecentMessages = (_class = function (_RcModule) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                if (!(!forceUpdate && !!currentContact && currentContact === this._currentContact)) {
+                if (currentContact) {
                   _context.next = 2;
                   break;
                 }
@@ -193,35 +230,31 @@ var RecentMessages = (_class = function (_RcModule) {
                 return _context.abrupt('return');
 
               case 2:
-                this._currentContact = currentContact;
+                if (!(!forceUpdate && !!this.messages[currentContact.id])) {
+                  _context.next = 4;
+                  break;
+                }
+
+                return _context.abrupt('return');
+
+              case 4:
                 this._prevMessageStoreTimestamp = this._messageStore.updatedTimestamp;
                 this.store.dispatch({
                   type: this.actionTypes.initLoad
                 });
-
-                if (currentContact) {
-                  _context.next = 8;
-                  break;
-                }
-
-                this.store.dispatch({
-                  type: this.actionTypes.loadReset
-                });
-                return _context.abrupt('return');
-
-              case 8:
-                _context.next = 10;
+                _context.next = 8;
                 return this._getRecentMessages(currentContact, this._messageStore.messages);
 
-              case 10:
+              case 8:
                 messages = _context.sent;
 
                 this.store.dispatch({
                   type: this.actionTypes.loadSuccess,
-                  messages: messages
+                  messages: messages,
+                  contact: currentContact
                 });
 
-              case 12:
+              case 10:
               case 'end':
                 return _context.stop();
             }
@@ -237,11 +270,11 @@ var RecentMessages = (_class = function (_RcModule) {
     }()
   }, {
     key: 'cleanUpMessages',
-    value: function cleanUpMessages() {
+    value: function cleanUpMessages(contact) {
       this.store.dispatch({
-        type: this.actionTypes.loadReset
+        type: this.actionTypes.loadReset,
+        contact: contact
       });
-      this._currentContact = null;
     }
   }, {
     key: '_getRecentMessages',
@@ -277,7 +310,7 @@ var RecentMessages = (_class = function (_RcModule) {
                   break;
                 }
 
-                dateTo = recentMessages.length > 0 ? recentMessages[recentMessages.length - 1].lastModifiedTime : undefined;
+                dateTo = recentMessages.length > 0 ? recentMessages[recentMessages.length - 1].creationTime : undefined;
 
                 // This will always be sorted
 
@@ -330,7 +363,7 @@ var RecentMessages = (_class = function (_RcModule) {
         matches = phoneNumbers.find(this._filterPhoneNumber(message));
 
         // Check if message is within certain days
-        if (!!matches && new Date(message.lastModifiedTime) > dateFrom) {
+        if (!!matches && new Date(message.creationTime) > dateFrom) {
           recentMessages.push(message);
         }
         if (recentMessages.length >= length) break;
@@ -370,14 +403,13 @@ var RecentMessages = (_class = function (_RcModule) {
       var params = {
         dateTo: dateTo,
         dateFrom: dateFrom,
-        messageType: ['SMS', 'Text'],
+        messageType: ['SMS', 'Text', 'Pager'],
         perPage: length
       };
       var phoneNumbers = currentContact.phoneNumbers;
       var recentMessagesPromise = phoneNumbers.reduce(function (acc, _ref5) {
         var phoneNumber = _ref5.phoneNumber;
 
-        // Cannot filter out by extensionNumber
         if (phoneNumber) {
           var promise = _this3._fetchMessageList((0, _assign2.default)({}, params, {
             phoneNumber: phoneNumber
@@ -422,7 +454,7 @@ var RecentMessages = (_class = function (_RcModule) {
     value: function _sortMessages(recentMessages) {
       // Sort by time in descending order
       return recentMessages.sort(function (a, b) {
-        return new Date(b.lastModifiedTime) - new Date(a.lastModifiedTime);
+        return new Date(b.creationTime) - new Date(a.creationTime);
       });
     }
   }, {
@@ -442,6 +474,11 @@ var RecentMessages = (_class = function (_RcModule) {
         hash[cur.id] = true;
         return acc.concat(cur);
       }, []);
+    }
+  }, {
+    key: 'contacts',
+    get: function get() {
+      return this.state.contacts;
     }
   }, {
     key: 'messages',
