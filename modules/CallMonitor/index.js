@@ -73,7 +73,7 @@ var _ensureExist = require('../../lib/ensureExist');
 
 var _ensureExist2 = _interopRequireDefault(_ensureExist);
 
-var _webphoneHelper = require('../webphone/webphoneHelper');
+var _webphoneHelper = require('../Webphone/webphoneHelper');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -137,13 +137,16 @@ var CallMonitor = function (_RcModule) {
           countryCode: countryCode
         });
         var webphoneSession = void 0;
-        if (sessions) {
+        if (sessions && callItem.sipData) {
           webphoneSession = sessions.find(function (session) {
             // debugger;
             if (session.direction !== callItem.direction) {
               return false;
             }
-            if (session.to.indexOf(toNumber) === -1 || session.from.indexOf(fromNumber) === -1) {
+            if (session.direction === _callDirections2.default.inbound && callItem.sipData.remoteUri.indexOf(session.from) === -1) {
+              return false;
+            }
+            if (session.direction === _callDirections2.default.outbound && callItem.sipData.remoteUri.indexOf(session.to) === -1) {
               return false;
             }
             if (callItem.startTime - session.creationTime > 5000 || session.creationTime - callItem.startTime > 5000) {
