@@ -2110,7 +2110,7 @@ var Webphone = (_class = function (_RcModule) {
         this._contactMatcher.triggerMatch();
       }
       if (typeof this._onCallRingFunc === 'function') {
-        this._onCallRingFunc(session, this.activeSession);
+        this._onCallRingFunc(session, this.ringSession);
       }
     }
   }, {
