@@ -137,15 +137,15 @@ var CallMonitor = function (_RcModule) {
           countryCode: countryCode
         });
         var webphoneSession = void 0;
-        if (sessions && call.sipData) {
+        if (sessions) {
           webphoneSession = sessions.find(function (session) {
+            // debugger;
             if (session.direction !== callItem.direction) {
               return false;
             }
-            if (callItem.to.indexOf(session.to) === -1 || callItem.from.indexOf(session.from)) {
+            if (session.to.indexOf(toNumber) === -1 || session.from.indexOf(fromNumber) === -1) {
               return false;
             }
-            var startTime = session.creationTime;
             if (callItem.startTime - session.creationTime > 5000 || session.creationTime - callItem.startTime > 5000) {
               return false;
             }
@@ -216,6 +216,12 @@ var CallMonitor = function (_RcModule) {
     _this.addSelector('activeCurrentCalls', _this._selectors.calls, function (calls) {
       return calls.filter(function (callItem) {
         return callItem.webphoneSession && !(0, _webphoneHelper.isOnHold)(callItem.webphoneSession) && !(0, _webphoneHelper.isRing)(callItem.webphoneSession);
+      });
+    });
+
+    _this.addSelector('otherDeviceCalls', _this._selectors.calls, function (calls) {
+      return calls.filter(function (callItem) {
+        return !callItem.webphoneSession;
       });
     });
 
