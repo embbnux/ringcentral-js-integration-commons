@@ -448,6 +448,26 @@ var CallMonitor = function (_RcModule) {
     get: function get() {
       return this._storage.getItem(this._callMatchedKey);
     }
+  }, {
+    key: 'activeRingCalls',
+    get: function get() {
+      return this._selectors.activeRingCalls();
+    }
+  }, {
+    key: 'activeOnHoldCalls',
+    get: function get() {
+      return this._selectors.activeOnHoldCalls();
+    }
+  }, {
+    key: 'activeCurrentCalls',
+    get: function get() {
+      return this._selectors.activeCurrentCalls();
+    }
+  }, {
+    key: 'otherDeviceCalls',
+    get: function get() {
+      return this._selectors.otherDeviceCalls();
+    }
   }]);
   return CallMonitor;
 }(_RcModule3.default);
