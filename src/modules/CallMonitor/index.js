@@ -13,7 +13,7 @@ import {
   sortByStartTime,
 } from '../../lib/callLogHelpers';
 import ensureExist from '../../lib/ensureExist';
-import { isRing, isOnHold } from '../webphone/webphoneHelper';
+import { isRing, isOnHold } from '../Webphone/webphoneHelper';
 
 export default class CallMonitor extends RcModule {
   constructor({
@@ -71,15 +71,21 @@ export default class CallMonitor extends RcModule {
             countryCode,
           });
           let webphoneSession;
-          if (sessions) {
+          if (sessions && callItem.sipData) {
             webphoneSession = sessions.find((session) => {
               // debugger;
               if (session.direction !== callItem.direction) {
                 return false;
               }
               if (
-                session.to.indexOf(toNumber) === -1 ||
-                session.from.indexOf(fromNumber) === -1
+                session.direction === callDirections.inbound &&
+                callItem.sipData.remoteUri.indexOf(session.from) === -1
+              ) {
+                return false;
+              }
+              if (
+                session.direction === callDirections.outbound &&
+                callItem.sipData.remoteUri.indexOf(session.to) === -1
               ) {
                 return false;
               }
@@ -382,5 +388,21 @@ export default class CallMonitor extends RcModule {
 
   get callMatched() {
     return this._storage.getItem(this._callMatchedKey);
+  }
+
+  get activeRingCalls() {
+    return this._selectors.activeRingCalls();
+  }
+
+  get activeOnHoldCalls() {
+    return this._selectors.activeOnHoldCalls();
+  }
+
+  get activeCurrentCalls() {
+    return this._selectors.activeCurrentCalls();
+  }
+
+  get otherDeviceCalls() {
+    return this._selectors.otherDeviceCalls();
   }
 }
