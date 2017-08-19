@@ -1044,6 +1044,9 @@ export default class Webphone extends RcModule {
     if (this._contactMatcher) {
       this._contactMatcher.triggerMatch();
     }
+    if (this.activeSessionId) {
+      this._webphone.userAgent.audioHelper.playIncoming(false);
+    }
     if (typeof this._onCallRingFunc === 'function') {
       this._onCallRingFunc(session, this.ringSession);
     }
