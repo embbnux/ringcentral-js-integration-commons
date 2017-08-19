@@ -2117,6 +2117,9 @@ var Webphone = (_class = function (_RcModule) {
       if (this._contactMatcher) {
         this._contactMatcher.triggerMatch();
       }
+      if (this.activeSessionId) {
+        this._webphone.userAgent.audioHelper.playIncoming(false);
+      }
       if (typeof this._onCallRingFunc === 'function') {
         this._onCallRingFunc(session, this.ringSession);
       }
