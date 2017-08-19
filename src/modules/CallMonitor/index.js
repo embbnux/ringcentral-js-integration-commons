@@ -90,8 +90,7 @@ export default class CallMonitor extends RcModule {
                 return false;
               }
               if (
-                callItem.startTime - session.creationTime > 5000 ||
-                session.creationTime - callItem.startTime > 5000
+                Math.abs(callItem.startTime - session.creationTime) > 5000
               ) {
                 return false;
               }
