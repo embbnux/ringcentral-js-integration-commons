@@ -278,6 +278,14 @@ var Webphone = (_class = function (_RcModule) {
       return activeSession;
     });
 
+    _this.addSelector('ringSessions', function () {
+      return _this.sessions;
+    }, function (sessions) {
+      return sessions.filter(function (session) {
+        return (0, _webphoneHelper.isRing)(session);
+      });
+    });
+
     if (_this._contactMatcher) {
       _this._contactMatcher.addQuerySource({
         getQueriesFn: _this._selectors.sessionPhoneNumbers,
@@ -2284,6 +2292,11 @@ var Webphone = (_class = function (_RcModule) {
     key: 'sessions',
     get: function get() {
       return this.state.sessions;
+    }
+  }, {
+    key: 'ringSessions',
+    get: function get() {
+      return this._selectors.ringSessions();
     }
   }, {
     key: 'videoElementPrepared',

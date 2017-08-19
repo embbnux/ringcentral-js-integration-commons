@@ -149,7 +149,7 @@ var CallMonitor = function (_RcModule) {
             if (session.direction === _callDirections2.default.outbound && callItem.sipData.remoteUri.indexOf(session.to) === -1) {
               return false;
             }
-            if (callItem.startTime - session.creationTime > 5000 || session.creationTime - callItem.startTime > 5000) {
+            if (Math.abs(callItem.startTime - session.creationTime) > 5000) {
               return false;
             }
             return true;
