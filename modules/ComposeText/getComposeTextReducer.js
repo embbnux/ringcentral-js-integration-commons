@@ -81,15 +81,26 @@ function getToNumbers(types) {
     var type = _ref4.type,
         number = _ref4.number;
 
-    var newState = state;
-    var oldNumber = null;
+    var newState = state.slice();
     switch (type) {
       case types.addToNumber:
-        oldNumber = newState.find(function (item) {
-          return number.phoneNumber === item.phoneNumber;
-        });
-        if (oldNumber) {
-          return newState;
+        // known entity id eg. from click2SMS
+        if (number.id) {
+          var idx = newState.findIndex(function (item) {
+            return number.id === item.id || number.phoneNumber === item.phoneNumber;
+          });
+          if (idx > -1) {
+            // replace old one if found
+            newState[idx] = number;
+            return newState;
+          }
+        } else {
+          var oldNumber = newState.find(function (item) {
+            return number.phoneNumber === item.phoneNumber;
+          });
+          if (oldNumber) {
+            return newState;
+          }
         }
         newState.push(number);
         return newState;

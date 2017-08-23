@@ -117,8 +117,7 @@ var Subscription = (_class = function (_RcModule) {
         storage = _ref.storage,
         _ref$timeToRetry = _ref.timeToRetry,
         timeToRetry = _ref$timeToRetry === undefined ? DEFAULT_TIME_TO_RETRY : _ref$timeToRetry,
-        connectivityMonitor = _ref.connectivityMonitor,
-        options = (0, _objectWithoutProperties3.default)(_ref, ['auth', 'client', 'storage', 'timeToRetry', 'connectivityMonitor']);
+        options = (0, _objectWithoutProperties3.default)(_ref, ['auth', 'client', 'storage', 'timeToRetry']);
     (0, _classCallCheck3.default)(this, Subscription);
 
     var _this = (0, _possibleConstructorReturn3.default)(this, (Subscription.__proto__ || (0, _getPrototypeOf2.default)(Subscription)).call(this, (0, _extends3.default)({}, options, {
@@ -129,7 +128,6 @@ var Subscription = (_class = function (_RcModule) {
     _this._client = client;
     _this._storage = storage;
     _this._timeToRetry = timeToRetry;
-    _this._connectivityMonitor = connectivityMonitor;
     _this._cacheStorageKey = 'cachedSubscription';
     _this._reducer = (0, _getSubscriptionReducer2.default)(_this.actionTypes);
     _this._storage.registerReducer({
@@ -154,51 +152,15 @@ var Subscription = (_class = function (_RcModule) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                if (!(_this2._auth.loginStatus === _loginStatus2.default.loggedIn && _this2._storage.ready && (!_this2._connectivityMonitor || _this2._connectivityMonitor.ready) && _this2.status === _moduleStatuses2.default.pending)) {
-                  _context.next = 5;
-                  break;
+                if (_this2._auth.loginStatus === _loginStatus2.default.loggedIn && _this2._storage.ready && _this2.status === _moduleStatuses2.default.pending) {
+                  _this2.store.dispatch({
+                    type: _this2.actionTypes.initSuccess
+                  });
+                } else if ((_this2._auth.loginStatus === _loginStatus2.default.notLoggedIn || !_this2._storage.ready) && _this2.ready) {
+                  _this2.reset();
                 }
 
-                _this2.store.dispatch({
-                  type: _this2.actionTypes.initSuccess
-                });
-                if (_this2._connectivityMonitor) {
-                  _this2._connectivity = _this2._connectivityMonitor.connectivity;
-                }
-                _context.next = 16;
-                break;
-
-              case 5:
-                if (!((_this2._auth.loginStatus === _loginStatus2.default.notLoggedIn || !_this2._storage.ready || !!_this2._connectivityMonitor && !_this2._connectivityMonitor.ready) && _this2.ready)) {
-                  _context.next = 9;
-                  break;
-                }
-
-                _this2.reset();
-                _context.next = 16;
-                break;
-
-              case 9:
-                if (!(_this2.ready && _this2._connectivityMonitor && _this2._connectivityMonitor.ready && _this2._connectivity !== _this2._connectivityMonitor.connectivity)) {
-                  _context.next = 16;
-                  break;
-                }
-
-                _this2._connectivity = _this2._connectivityMonitor.connectivity;
-
-                if (!(_this2._connectivity && _this2._subscription)) {
-                  _context.next = 16;
-                  break;
-                }
-
-                _context.next = 14;
-                return _this2.remove();
-
-              case 14:
-                _context.next = 16;
-                return _this2._subscribe();
-
-              case 16:
+              case 1:
               case 'end':
                 return _context.stop();
             }

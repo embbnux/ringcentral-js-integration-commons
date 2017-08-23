@@ -136,7 +136,7 @@ var ComposeText = (_class = function (_RcModule) {
     _this._messageSender = messageSender;
     _this._numberValidate = numberValidate;
     _this._contactSearch = contactSearch;
-    _this._lastToNumberEntity = '';
+    _this._lastContactSearchResult = [];
     storage.registerReducer({ key: _this._storageKey, reducer: _this._cacheReducer });
     return _this;
   }
@@ -180,7 +180,7 @@ var ComposeText = (_class = function (_RcModule) {
   }, {
     key: '_shouldHandleRecipient',
     value: function _shouldHandleRecipient() {
-      return this.ready && !!this._contactSearch && this._contactSearch.ready && this._contactSearch.searchResult.length > 0 && this.toNumberEntity !== this._lastToNumberEntity;
+      return this.ready && !!this._contactSearch && this._contactSearch.ready && this._contactSearch.searchResult.length > 0 && this._contactSearch.searchResult !== this._lastContactSearchResult;
     }
   }, {
     key: '_resetModuleStatus',
@@ -204,17 +204,17 @@ var ComposeText = (_class = function (_RcModule) {
   }, {
     key: '_handleRecipient',
     value: function _handleRecipient() {
-      var _this3 = this;
-
-      this._lastToNumberEntity = this.toNumberEntity;
-      var recipient = this._contactSearch.searchResult.find(function (item) {
-        return item.id === _this3.toNumberEntity;
+      var dummy = this.toNumbers.find(function (toNumber) {
+        return !toNumber.entityType;
       });
-      if (recipient) {
-        this.toNumbers.map(function (toNumber) {
-          return _this3.removeToNumber(toNumber);
+      if (dummy) {
+        var recipient = this._contactSearch.searchResult.find(function (item) {
+          return item.id === dummy.id;
         });
-        this.addToRecipients(recipient);
+        if (recipient) {
+          this.addToNumber(recipient);
+          this._lastContactSearchResult = this._contactSearch.searchResult.slice();
+        }
       }
     }
   }, {

@@ -73,6 +73,8 @@ var _ensureExist = require('../../lib/ensureExist');
 
 var _ensureExist2 = _interopRequireDefault(_ensureExist);
 
+var _webphoneHelper = require('../Webphone/webphoneHelper');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var CallMonitor = function (_RcModule) {
@@ -124,59 +126,63 @@ var CallMonitor = function (_RcModule) {
     }, function () {
       return _this._webphone && _this._webphone.sessions;
     }, function (callsFromPresence, countryCode, sessions) {
-      return callsFromPresence.map(function (call) {
+      return callsFromPresence.map(function (callItem) {
         // use account countryCode to normalize number due to API issues [RCINT-3419]
         var fromNumber = (0, _normalizeNumber2.default)({
-          phoneNumber: call.from && call.from.phoneNumber,
+          phoneNumber: callItem.from && callItem.from.phoneNumber,
           countryCode: countryCode
         });
         var toNumber = (0, _normalizeNumber2.default)({
-          phoneNumber: call.to && call.to.phoneNumber,
+          phoneNumber: callItem.to && callItem.to.phoneNumber,
           countryCode: countryCode
         });
         var webphoneSession = void 0;
-        if (sessions && call.sipData) {
+        if (sessions && callItem.sipData) {
           webphoneSession = sessions.find(function (session) {
-            if (session.direction !== call.direction) {
+            // debugger;
+            if (session.direction !== callItem.direction) {
               return false;
             }
-            var remoteUser = void 0;
-            if (session.direction === _callDirections2.default.outbound) {
-              remoteUser = session.to;
+            if (session.direction === _callDirections2.default.inbound && callItem.sipData.remoteUri.indexOf(session.from) === -1) {
+              return false;
+            }
+            if (session.direction === _callDirections2.default.outbound && callItem.sipData.remoteUri.indexOf(session.to) === -1) {
+              return false;
+            }
+            var webphoneStartTime = void 0;
+            if (session.direction === _callDirections2.default.inbound) {
+              webphoneStartTime = session.creationTime;
             } else {
-              remoteUser = session.from;
+              webphoneStartTime = session.startTime || session.creationTime;
             }
-            if (call.sipData.remoteUri.indexOf(remoteUser) === -1) {
-              return false;
-            }
-            var startTime = session.startTime || session.creationTime;
-            if (call.startTime - startTime > 4000 || session.startTime - startTime > 4000) {
+            if (Math.abs(callItem.startTime - webphoneStartTime) > 6000) {
               return false;
             }
             return true;
           });
         }
 
-        return (0, _extends3.default)({}, call, {
+        return (0, _extends3.default)({}, callItem, {
           from: {
             phoneNumber: fromNumber
           },
           to: {
             phoneNumber: toNumber
           },
-          startTime: webphoneSession && webphoneSession.startTime || call.startTime,
+          startTime: webphoneSession && webphoneSession.startTime || callItem.startTime,
           webphoneSession: webphoneSession
         });
-      }).filter(function (call) {
-        if (!call.webphoneSession || !sessions) {
+      }).filter(function (callItem) {
+        if (!callItem.webphoneSession || !sessions) {
           return true;
         }
         var session = sessions.find(function (sessionItem) {
-          return call.webphoneSession.id === sessionItem.id;
+          return callItem.webphoneSession.id === sessionItem.id;
         });
         return !!session;
       }).sort(_callLogHelpers.sortByStartTime);
     });
+
     _this.addSelector('calls', _this._selectors.normalizedCalls, function () {
       return _this._contactMatcher && _this._contactMatcher.dataMapping;
     }, function () {
@@ -188,20 +194,44 @@ var CallMonitor = function (_RcModule) {
       var activityMapping = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
       var callMatched = arguments[3];
 
-      var calls = normalizedCalls.map(function (call) {
-        var fromNumber = call.from && call.from.phoneNumber;
-        var toNumber = call.to && call.to.phoneNumber;
+      var calls = normalizedCalls.map(function (callItem) {
+        var fromNumber = callItem.from && callItem.from.phoneNumber;
+        var toNumber = callItem.to && callItem.to.phoneNumber;
         var fromMatches = fromNumber && contactMapping[fromNumber] || [];
         var toMatches = toNumber && contactMapping[toNumber] || [];
-        var toNumberEntity = callMatched[call.sessionId];
-        return (0, _extends3.default)({}, call, {
+        var toNumberEntity = callMatched[callItem.sessionId];
+        return (0, _extends3.default)({}, callItem, {
           fromMatches: fromMatches,
           toMatches: toMatches,
-          activityMatches: activityMapping[call.sessionId] || [],
+          activityMatches: activityMapping[callItem.sessionId] || [],
           toNumberEntity: toNumberEntity
         });
       });
       return calls;
+    });
+
+    _this.addSelector('activeRingCalls', _this._selectors.calls, function (calls) {
+      return calls.filter(function (callItem) {
+        return callItem.webphoneSession && (0, _webphoneHelper.isRing)(callItem.webphoneSession);
+      });
+    });
+
+    _this.addSelector('activeOnHoldCalls', _this._selectors.calls, function (calls) {
+      return calls.filter(function (callItem) {
+        return callItem.webphoneSession && (0, _webphoneHelper.isOnHold)(callItem.webphoneSession);
+      });
+    });
+
+    _this.addSelector('activeCurrentCalls', _this._selectors.calls, function (calls) {
+      return calls.filter(function (callItem) {
+        return callItem.webphoneSession && !(0, _webphoneHelper.isOnHold)(callItem.webphoneSession) && !(0, _webphoneHelper.isRing)(callItem.webphoneSession);
+      });
+    });
+
+    _this.addSelector('otherDeviceCalls', _this._selectors.calls, function (calls) {
+      return calls.filter(function (callItem) {
+        return !callItem.webphoneSession;
+      });
     });
 
     _this.addSelector('uniqueNumbers', _this._selectors.normalizedCalls, function (normalizedCalls) {
@@ -213,12 +243,12 @@ var CallMonitor = function (_RcModule) {
           numberMap[number] = true;
         }
       }
-      normalizedCalls.forEach(function (call) {
-        if (call.from && call.from.phoneNumber) {
-          addIfNotExist(call.from.phoneNumber);
+      normalizedCalls.forEach(function (callItem) {
+        if (callItem.from && callItem.from.phoneNumber) {
+          addIfNotExist(callItem.from.phoneNumber);
         }
-        if (call.to && call.to.phoneNumber) {
-          addIfNotExist(call.to.phoneNumber);
+        if (callItem.to && callItem.to.phoneNumber) {
+          addIfNotExist(callItem.to.phoneNumber);
         }
       });
       return output;
@@ -232,13 +262,15 @@ var CallMonitor = function (_RcModule) {
         }
       });
     }
+
     _this.addSelector('sessionIds', function () {
       return _this._detailedPresence.calls;
     }, function (calls) {
-      return calls.map(function (call) {
-        return call.sessionId;
+      return calls.map(function (callItem) {
+        return callItem.sessionId;
       });
     });
+
     if (_this._activityMatcher) {
       _this._activityMatcher.addQuerySource({
         getQueriesFn: _this._selectors.sessionIds,
@@ -424,6 +456,26 @@ var CallMonitor = function (_RcModule) {
     key: 'callMatched',
     get: function get() {
       return this._storage.getItem(this._callMatchedKey);
+    }
+  }, {
+    key: 'activeRingCalls',
+    get: function get() {
+      return this._selectors.activeRingCalls();
+    }
+  }, {
+    key: 'activeOnHoldCalls',
+    get: function get() {
+      return this._selectors.activeOnHoldCalls();
+    }
+  }, {
+    key: 'activeCurrentCalls',
+    get: function get() {
+      return this._selectors.activeCurrentCalls();
+    }
+  }, {
+    key: 'otherDeviceCalls',
+    get: function get() {
+      return this._selectors.otherDeviceCalls();
     }
   }]);
   return CallMonitor;
