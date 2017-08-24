@@ -149,13 +149,7 @@ var CallMonitor = function (_RcModule) {
             if (session.direction === _callDirections2.default.outbound && callItem.sipData.remoteUri.indexOf(session.to) === -1) {
               return false;
             }
-            var webphoneStartTime = void 0;
-            if (session.direction === _callDirections2.default.inbound) {
-              webphoneStartTime = session.creationTime;
-            } else {
-              webphoneStartTime = session.startTime || session.creationTime;
-            }
-            if (Math.abs(callItem.startTime - webphoneStartTime) > 6000) {
+            if (Math.abs(callItem.startTime - session.creationTime) > 5000) {
               return false;
             }
             return true;
