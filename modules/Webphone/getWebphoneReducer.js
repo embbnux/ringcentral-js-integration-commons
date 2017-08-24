@@ -157,7 +157,9 @@ function getRingSessionIdReducer(types) {
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
     var _ref7 = arguments[1];
     var type = _ref7.type,
-        sessionId = _ref7.sessionId;
+        sessionId = _ref7.sessionId,
+        _ref7$sessions = _ref7.sessions,
+        sessions = _ref7$sessions === undefined ? [] : _ref7$sessions;
 
     var ringSessions = void 0;
     switch (type) {
