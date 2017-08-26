@@ -329,7 +329,7 @@ export default class Webphone extends RcModule {
       let errorCode;
       let needToReconnect = false;
       console.error(response);
-      console.error(`webphone register failed: ${response}`);
+      console.error(`webphone register failed: ${cause}`);
       if (response && response.status_code === 503) {
         errorCode = webphoneErrors.webphoneCountOverLimit;
         this._alert.warning({
