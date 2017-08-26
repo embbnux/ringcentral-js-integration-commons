@@ -324,22 +324,30 @@ export default class Webphone extends RcModule {
         type: this.actionTypes.unregistered,
       });
     };
-    const onRegistrationFailed = (error) => {
+    const onRegistrationFailed = (response, cause) => {
       this._isFirstRegister = true;
       let errorCode;
-      console.error(error);
-      if (error && error.status_code === 503) {
+      let needToReconnect = false;
+      console.error(response);
+      console.error(`webphone register failed: ${response}`);
+      if (response && response.status_code === 503) {
         errorCode = webphoneErrors.webphoneCountOverLimit;
         this._alert.warning({
           message: errorCode,
         });
-        this._removeWebphone();
-        this._connect(true);
+        needToReconnect = true;
       }
       this.store.dispatch({
         type: this.actionTypes.registrationFailed,
         errorCode,
       });
+      if (cause === 'Request Timeout') {
+        needToReconnect = true;
+      }
+      if (needToReconnect) {
+        this._removeWebphone();
+        this._connect(needToReconnect);
+      }
     };
     this._webphone.userAgent.audioHelper.setVolume(0.3);
     this._webphone.userAgent.on('registered', onRegistered);
