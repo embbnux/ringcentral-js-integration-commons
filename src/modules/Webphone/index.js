@@ -326,7 +326,6 @@ export default class Webphone extends RcModule {
     };
     const onRegistrationFailed = (error) => {
       this._isFirstRegister = true;
-      let needToReconnect = false;
       let errorCode;
       console.error(error);
       if (error && error.status_code === 503) {
@@ -334,16 +333,13 @@ export default class Webphone extends RcModule {
         this._alert.warning({
           message: errorCode,
         });
-        needToReconnect = true;
+        this._removeWebphone();
+        this._connect(true);
       }
       this.store.dispatch({
         type: this.actionTypes.registrationFailed,
         errorCode,
       });
-      if (needToReconnect) {
-        this._removeWebphone();
-        this._connect(needToReconnect);
-      }
     };
     this._webphone.userAgent.audioHelper.setVolume(0.3);
     this._webphone.userAgent.on('registered', onRegistered);
@@ -360,6 +356,10 @@ export default class Webphone extends RcModule {
     try {
       if (reconnect) {
         await this._retrySleep();
+      }
+
+      if (!this._auth.loggedIn) {
+        return;
       }
 
       // do not connect if it is connecting
@@ -424,7 +424,7 @@ export default class Webphone extends RcModule {
   @proxify
   async connect() {
     if (
-      (await this._auth.checkIsLoggedIn()) &&
+      this._auth.loggedIn &&
       this.enabled &&
       this.connectionStatus === connectionStatus.disconnected
     ) {
