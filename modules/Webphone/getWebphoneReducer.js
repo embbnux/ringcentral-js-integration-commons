@@ -180,6 +180,14 @@ function getLastEndSessionsReducer(types) {
     var lastSessions = void 0;
     switch (type) {
       case types.callEnd:
+        if (
+        /**
+        * don't add incoming call that isn't relied by current app
+        *   to end sessions. this call can be answered by other apps
+        */
+        !session.startTime && !session.isToVoicemail && !session.isForwarded && !session.isReplied) {
+          return state;
+        }
         lastSessions = [session].concat(state.filter(function (sessionItem) {
           return sessionItem.id !== session.id;
         }));
