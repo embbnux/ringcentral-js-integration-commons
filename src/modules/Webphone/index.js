@@ -1152,7 +1152,7 @@ export default class Webphone extends RcModule {
   }
 
   get lastEndedSessions() {
-    return this.state.lastEndSessions;
+    return this.state.lastEndedSessions;
   }
 
   get videoElementPrepared() {
