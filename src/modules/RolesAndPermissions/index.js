@@ -13,7 +13,20 @@ function extractData(permissions) {
   return output;
 }
 
+/**
+ * @class
+ * @description Roles and permission module
+ */
 export default class RolesAndPermissions extends DataFetcher {
+  /**
+   * @constructor
+   * @param {Client} client - client module instance
+   * @param {Alert} alert - alert module instance
+   * @param {ExtensionInfo} extensionInfo - extensionInfo module instance
+   * @param {Bool} isCRM - if it is CRM
+   * @param {String} flag - app flag
+   * @param {Number} ttl - local cache time
+   */
   constructor({
     isCRM,
     flag,

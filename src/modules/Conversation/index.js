@@ -12,7 +12,17 @@ import getConversationReducer from './getConversationReducer';
 import conversationStatus from './conversationStatus';
 import proxify from '../../lib/proxy/proxify';
 
+/**
+ * @class
+ * @description Conversation managing module
+ */
 export default class Conversation extends RcModule {
+  /**
+   * @constructor
+   * @param {MessageSender} messageSender - messageSender module instance
+   * @param {ExtensionInfo} extensionInfo - extensionInfo module instance
+   * @param {MessageStore} messageStore - messageStore module instance
+   */
   constructor({
     messageSender,
     extensionInfo,

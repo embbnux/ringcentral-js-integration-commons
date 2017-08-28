@@ -10,7 +10,19 @@ import messageSenderStatus from './messageSenderStatus';
 import messageSenderMessages from './messageSenderMessages';
 import proxify from '../../lib/proxy/proxify';
 
+/**
+ * @class
+ * @description Message sender and validator module
+ */
 export default class MessageSender extends RcModule {
+  /**
+   * @constructor
+   * @param {Alert} alert - alert module instance
+   * @param {Client} client - client module instance
+   * @param {ExtensionInfo} extensionInfo - extensionInfo module instance
+   * @param {ExtensionPhoneNumber} extensionPhoneNumber - extensionPhoneNumber module instance
+   * @param {NumberValidate} numberValidate - numberValidate module instance
+   */
   constructor({
     alert,
     client,

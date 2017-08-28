@@ -9,7 +9,19 @@ import proxify from '../../lib/proxy/proxify';
 export const DEFAULT_TIME_TO_RETRY = 5 * 1000;
 export const DEFAULT_HEART_BEAT_INTERVAL = 60 * 1000;
 
+/**
+ * @class
+ * @description Connectivity monitor module
+ */
 export default class ConnectivityMonitor extends RcModule {
+  /**
+   * @constructor
+   * @param {Alert} alert - alert module instance
+   * @param {Client} client - client module instance
+   * @param {Environment} environment - environment module instance
+   * @param {Number} timeToRetry - time to Retry
+   * @param {Number} heartBeatInterval - heart beat interval
+   */
   constructor({
     alert,
     client,

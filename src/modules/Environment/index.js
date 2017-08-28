@@ -14,6 +14,13 @@ import getEnvironmentReducer, {
  * @description Environment module manages which api server the app calls.
  */
 export default class Environment extends RcModule {
+  /**
+   * @constructor
+   * @param {Client} client - client module instance
+   * @param {GlobalStorage} globalStorage - globalStorage module instance
+   * @param {String} defaultRecordingHost - default recording host uri
+   * @param {Object} sdkConfig - sdk config
+   */
   constructor({
     client,
     globalStorage,

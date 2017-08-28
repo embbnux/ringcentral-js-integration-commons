@@ -24,7 +24,24 @@ const DEFAULT_TTL = 30 * 60 * 1000;
 const DEFAULT_TIME_TO_RETRY = 62 * 1000;
 const DEFAULT_DAY_SPAN = 7;
 
+/**
+ * @class
+ * @description Messages data manageing module
+ */
 export default class MessageStore extends Pollable {
+  /**
+   * @constructor
+   * @param {Alert} alert - alert module instance
+   * @param {Auth} auth - auth module instance
+   * @param {Client} client - client module instance
+   * @param {Storage} storage - storage module instance
+   * @param {subscription} subscription - subscription module instance
+   * @param {connectivityMonitor} connectivityMonitor - connectivityMonitor module instance
+   * @param {Number} ttl - local cache timestamp
+   * @param {Number} timeToRetry - waiting time to retry
+   * @param {Number} daySpan - day span of call log
+   * @param {Bool} polling - polling flag, default false
+   */
   constructor({
     alert,
     client,

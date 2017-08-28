@@ -15,7 +15,25 @@ import {
 import ensureExist from '../../lib/ensureExist';
 import { isRing, isOnHold } from '../Webphone/webphoneHelper';
 
+/**
+ * @class
+ * @description active calls monitor module
+ */
 export default class CallMonitor extends RcModule {
+  /**
+   * @constructor
+   * @param {Call} call - call module instance
+   * @param {AccountInfo} accountInfo - accountInfo module instance
+   * @param {DetailedPresence} detailedPresence - detailedPresence module instance
+   * @param {ActivityMatcher} activityMatcher - activityMatcher module instance
+   * @param {ContactMatcher} contactMatcher - contactMatcher module instance
+   * @param {Webphone} webphone - webphone module instance
+   * @param {Storage} storage - storage module instance
+   * @param {Function} onRinging - function on ring
+   * @param {Function} onNewCall - function on new call
+   * @param {Function} onCallUpdated - function on call updated
+   * @param {Function} onCallEnded - function on call ended
+   */
   constructor({
     call,
     accountInfo,

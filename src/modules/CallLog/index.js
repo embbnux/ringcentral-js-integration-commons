@@ -49,7 +49,24 @@ export function getISODateTo(records) {
 // to not use $ at the end, presence with sipData has extra query parameters
 const presenceRegExp = /\/presence\?detailedTelephonyState=true/;
 
+/**
+ * @class
+ * @description Call log managing module
+ */
 export default class CallLog extends Pollable {
+  /**
+   * @constructor
+   * @param {Auth} auth - auth module instance
+   * @param {Client} client - client module instance
+   * @param {Storage} storage - storage module instance
+   * @param {Subscription} subscription - subscription module instance
+   * @param {RolesAndPermissions} rolesAndPermissions - rolesAndPermissions module instance
+   * @param {Number} ttl - local cache timestamp
+   * @param {Number} tokenExpiresIn - time for token expire
+   * @param {Number} timeToRetry - waiting time to retry
+   * @param {Number} daySpan - day span of call log
+   * @param {Bool} polling - polling flag
+   */
   constructor({
     auth,
     client,

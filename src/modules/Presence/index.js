@@ -11,16 +11,25 @@ import proxify from '../../lib/proxy/proxify';
 
 const presenceEndPoint = /.*\/presence(\?.*)?/;
 
-const UPDATE_DELAY_TIME = 1000;
-
+/**
+ * @class
+ * @description Presence info module
+ */
 export default class Presence extends RcModule {
+  /**
+   * @constructor
+   * @param {Auth} auth - auth module instance
+   * @param {Client} client - client module instance
+   * @param {Storage} storage - storage module instance
+   * @param {Subscription} subscription - subscription module instance
+   * @param {Object} actionTypes - actionTypes enums
+   */
   constructor({
     auth,
     client,
     storage,
     subscription,
     actionTypes = presenceActionTypes,
-    updateDelayTime = UPDATE_DELAY_TIME,
     ...options
   }) {
     super({
@@ -33,7 +42,6 @@ export default class Presence extends RcModule {
     this._storage = storage;
     this._lastMessage = null;
 
-    this._updateDelayTime = updateDelayTime;
     this._delayTimeoutId = null;
     this._lastNotDisturbDndStatusStorageKey = 'lastNotDisturbDndStatus';
     if (this._storage) {

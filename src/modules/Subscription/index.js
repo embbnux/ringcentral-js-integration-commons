@@ -10,7 +10,18 @@ import proxify from '../../lib/proxy/proxify';
 
 const DEFAULT_TIME_TO_RETRY = 60 * 1000;
 
+/**
+ * @class
+ * @description Subscription module to subscibe notification
+ */
 export default class Subscription extends RcModule {
+  /**
+   * @constructor
+   * @param {Auth} auth - auth module instance
+   * @param {Client} client - client module instance
+   * @param {Storage} storage - storage module instance
+   * @param {Number} timeToRetry - time to retry, default 60 seconds
+   */
   constructor({
     auth,
     client,

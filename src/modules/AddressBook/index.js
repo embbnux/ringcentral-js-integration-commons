@@ -30,7 +30,25 @@ function getSyncParams(syncToken, pageId) {
   return query;
 }
 
+/**
+ * Accound book module to get user person contacts in RC
+ * @param {client} client module instance
+ * @param {auth} auth module instance
+ * @param {storage} storage module instance
+ * @param {ttl} local cache timestamp, default 30 mins
+ * @param {timeToRetry} timestamp to retry, default 62 seconds
+ * @param {polling} polling flag, default true
+ */
 export default class AddressBook extends Pollable {
+  /**
+   * @constructor
+   * @param {Client} client - client module instance
+   * @param {Auth} auth - Auth module instance
+   * @param {Storage} storage - storage module instance
+   * @param {Number} ttl - local cache timestamp, default 30 mins
+   * @param {Number} timeToRetry - timestamp to retry, default 62 seconds
+   * @param {Bool} polling - polling flag, default true
+   */
   constructor({
     client,
     auth,
@@ -38,7 +56,7 @@ export default class AddressBook extends Pollable {
     ttl = DEFAULT_TTL,
     timeToRetry = DEFAULT_TIME_TO_RETRY,
     polling = true,
-    ...options,
+    ...options
   }) {
     super({
       ...options,

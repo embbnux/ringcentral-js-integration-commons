@@ -1,7 +1,15 @@
 import DataFetcher from '../../lib/DataFetcher';
 import fetchList from '../../lib/fetchList';
 
+/**
+ * @class
+ * @description Blocked number list managing module
+ */
 export default class BlockedNumber extends DataFetcher {
+  /**
+   * @constructor
+   * @param {Client} client - client module instance
+   */
   constructor({
     client,
     ...options

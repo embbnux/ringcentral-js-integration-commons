@@ -3,11 +3,20 @@ import DataFetcher from '../../lib/DataFetcher';
 
 const DEFAULT_MASK = 'phoneNumber,hostCode,participantCode,phoneNumbers(country,phoneNumber)';
 
+/**
+ * @class
+ * @description Conference managing module
+ */
 export default class Conference extends DataFetcher {
+  /**
+   * @constructor
+   * @param {RegionSettings} regionSettings - regionSettings module instance
+   * @param {Client} client - client module instance
+   */
   constructor({
     client,
     regionSettings,
-    ...options,
+    ...options
   }) {
     super({
       name: 'conference',
@@ -39,8 +48,8 @@ export default class Conference extends DataFetcher {
       }
     );
   }
+
   get conferenceNumbers() {
     return this._selectors.conferenceNumbers();
   }
-
 }

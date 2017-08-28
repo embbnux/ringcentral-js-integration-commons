@@ -15,7 +15,25 @@ export function conversationLogIdentityFunction(conversation) {
   return conversation.conversationLogId;
 }
 
+/**
+ * @class
+ * @description Conversation logger module
+ */
 export default class ConversationLogger extends LoggerBase {
+  /**
+   * @constructor
+   * @param {Auth} auth - auth module instance
+   * @param {ContactMatcher} contactMatcher - contactMatcher module instance
+   * @param {ConversationMatcher} conversationMatcher - conversationMatcher module instance
+   * @param {DateTimeFormat} dateTimeFormat - dateTimeFormat module instance
+   * @param {MessageStore} messageStore - messageStore module instance
+   * @param {RolesAndPermissions} rolesAndPermissions - rolesAndPermissions module instance
+   * @param {Storage} storage - storage module instance
+   * @param {Storage} storage - storage module instance
+   * @param {TabManager} tabManager - tabManager module instance
+   * @param {Function} isLoggedContact - get if contact is logged
+   * @param {Function} formatDateTime - data time format
+   */
   constructor({
     auth,
     contactMatcher,
@@ -28,7 +46,7 @@ export default class ConversationLogger extends LoggerBase {
     tabManager,
     isLoggedContact = () => false,
     formatDateTime = (...args) => dateTimeFormat.formatDateTime(...args),
-    ...options,
+    ...options
   }) {
     super({
       ...options,

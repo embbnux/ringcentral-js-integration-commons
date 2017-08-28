@@ -17,7 +17,16 @@ import proxify from '../../lib/proxy/proxify';
 const extensionRegExp = /.*\/extension$/;
 const DEFAULT_TTL = 24 * 60 * 60 * 1000;
 
+/**
+ * @class
+ * @description Accound extension list managing module
+ */
 export default class AccountExtension extends DataFetcher {
+  /**
+   * @constructor
+   * @param {Client} client - client module instance
+   * @param {Number} ttl - local cache timestamp, default 24 hours
+   */
   constructor({
     client,
     ttl = DEFAULT_TTL,

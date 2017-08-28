@@ -11,8 +11,23 @@ import callStatus from './callStatus';
 import callErrors from './callErrors';
 import ringoutErrors from '../Ringout/ringoutErrors';
 
-
+/**
+ * @class
+ * @description Call managing module
+ */
 export default class Call extends RcModule {
+  /**
+   * @constructor
+   * @param {Alert} alert - alert module instance
+   * @param {Client} client - client module instance
+   * @param {Storage} storage - storage module instance
+   * @param {CallingSettings} callingSettings - callingSettings module instance
+   * @param {Softphone} softphone - softphone module instance
+   * @param {Ringout} ringout - ringout module instance
+   * @param {Webphone} webphone - webphone module instance
+   * @param {NumberValidate} numberValidate - numberValidate module instance
+   * @param {RegionSettings} regionSettings - regionSettings module instance
+   */
   constructor({
     alert,
     client,

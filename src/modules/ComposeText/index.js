@@ -8,8 +8,20 @@ import getCacheReducer from './getCacheReducer';
 
 import messageSenderMessages from '../MessageSender/messageSenderMessages';
 import proxify from '../../lib/proxy/proxify';
-
+/**
+ * @class
+ * @description Compose text managing module
+ */
 export default class ComposeText extends RcModule {
+  /**
+   * @constructor
+   * @param {Alert} alert - alert module instance
+   * @param {Auth} auth - auth module instance
+   * @param {Storage} storage - storage module instance
+   * @param {MessageSender} messageSender - messageSender module instance
+   * @param {NumberValidate} numberValidate - numberValidate module instance
+   * @param {ContactSearch} contactSearch - contactSearch module instance
+   */
   constructor({
     alert,
     auth,

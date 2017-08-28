@@ -15,7 +15,19 @@ export function callIdentityFunction(call) {
   return call.sessionId;
 }
 
+/**
+ * @class
+ * @description call logger module
+ */
 export default class CallLogger extends LoggerBase {
+  /**
+   * @constructor
+   * @param {Storage} storage - storage module instance
+   * @param {ActivityMatcher} activityMatcher - activityMatcher module instance
+   * @param {CallHistory} callHistory - callHistory module instance
+   * @param {TabManager} tabManager - tabManager module instance
+   * @param {ContactMatcher} contactMatcher - contactMatcher module instance
+   */
   constructor({
     storage,
     activityMatcher,
@@ -23,7 +35,7 @@ export default class CallLogger extends LoggerBase {
     callMonitor,
     contactMatcher,
     tabManager,
-    ...options,
+    ...options
   }) {
     super({
       ...options,
@@ -100,7 +112,7 @@ export default class CallLogger extends LoggerBase {
   async logCall({
     call,
     contact,
-    ...options,
+    ...options
   }) {
     const inbound = isInbound(call);
     const fromEntity = (inbound && contact) ||

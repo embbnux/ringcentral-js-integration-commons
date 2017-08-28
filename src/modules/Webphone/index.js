@@ -28,25 +28,29 @@ const FIFTH_RETRIES_DELAY = 60 * 1000;
 const MAX_RETRIES_DELAY = 2 * 60 * 1000;
 
 /**
- * Web phone module to handle phone interaction with WebRTC.
- * @param {appKey} appKey
- * @param {appName} appName
- * @param {appVersion} appVersion
- * @param {webphoneLogLevel} log Level
- * @param {alert} alert module instance
- * @param {auth} auth module instance
- * @param {client} client module instance
- * @param {rolesAndPermissions} rolesAndPermissions module instance
- * @param {storage} storage module instance
- * @param {globalStorage} globalStorage module instance
- * @param {extensionDevice} extensionDevice module instance
- * @param {numberValidate} numberValidate module instance
- * @param {contactMatcher} contactMatcher module instance, optional
- * @param {onCallEnd} callback on a call end
- * @param {onCallRing} callback on a call ring
- * @param {onCallStart} callback on a call start
+ * @constructor
+ * @description Web phone module to handle phone interaction with WebRTC.
  */
 export default class Webphone extends RcModule {
+  /**
+   * @constructor
+   * @param {String} appKey - app key
+   * @param {String} appName - app name
+   * @param {String} appVersion - app version
+   * @param {Number} webphoneLogLevel - log Level
+   * @param {Alert} alert - alert module instance
+   * @param {Auth} auth - auth module instance
+   * @param {Client} client - client module instance
+   * @param {RolesAndPermissions} rolesAndPermissions - rolesAndPermissions module instance
+   * @param {Storage} storage - storage module instance
+   * @param {GlobalStorage} globalStorage - globalStorage module instance
+   * @param {ExtensionDevice} extensionDevice - extensionDevice module instance
+   * @param {NumberValidate} numberValidate - numberValidate module instance
+   * @param {ContactMatcher} contactMatcher - contactMatcher module instance, optional
+   * @param {Function} onCallEnd - callback on a call end
+   * @param {Function} onCallRing - callback on a call ring
+   * @param {Function} onCallStart - callback on a call start
+   */
   constructor({
     appKey,
     appName,
@@ -64,7 +68,7 @@ export default class Webphone extends RcModule {
     onCallEnd,
     onCallRing,
     onCallStart,
-    ...options,
+    ...options
   }) {
     super({
       ...options,

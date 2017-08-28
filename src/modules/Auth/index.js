@@ -32,6 +32,15 @@ function getDefaultProxyUri() {
 export default class Auth extends RcModule {
   /**
    * @constructor
+   * @param {Client} client - client module instance
+   * @param {Alert} alert - alert module instance
+   * @param {Brand} brand - brand module instance
+   * @param {Locale} locale - locale module instance
+   * @param {TabManager} tabManager - tabManager module instance
+   * @param {environment} Environment - environment module instance
+   * @param {String} redirectUri - redirect uri
+   * @param {String} proxyUri - proxyUri module instance
+   * @param {Number} defaultProxyRetry - default proxy retry time 5000
    */
   constructor({
     client,

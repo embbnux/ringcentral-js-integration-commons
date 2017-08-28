@@ -7,12 +7,21 @@ import getContactSearchReducer from './getContactSearchReducer';
 import getCacheReducer from './getCacheReducer';
 import proxify from '../../lib/proxy/proxify';
 
+/**
+ * @class
+ * @description Contact search module
+ */
 export default class ContactSearch extends RcModule {
+  /**
+   * @param {Auth} auth - auth module instance
+   * @param {Storage} storage - storage module instance
+   * @param {Number} ttl - timestamp of local cache, default 30 mins
+   */
   constructor({
     auth,
     storage,
     ttl = 30 * 60 * 1000,
-    ...options,
+    ...options
   }) {
     super({
       ...options,

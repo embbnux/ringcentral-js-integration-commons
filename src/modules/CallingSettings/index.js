@@ -13,7 +13,24 @@ import callingSettingsMessages from './callingSettingsMessages';
 import actionTypes from './actionTypes';
 import proxify from '../../lib/proxy/proxify';
 
+/**
+ * @class
+ * @description Call setting managing module
+ */
 export default class CallingSettings extends RcModule {
+  /**
+   * @constructor
+   * @param {Alert} alert - alert module instance
+   * @param {Brand} brand - brand module instance
+   * @param {ExtensionInfo} extensionInfo - extensionInfo module instance
+   * @param {ExtensionPhoneNumber} extensionPhoneNumber - extensionPhoneNumber module instance
+   * @param {ForwardingNumber} forwardingNumber - forwardingNumber module instance
+   * @param {Storage} storage - storage module instance
+   * @param {RolesAndPermissions} rolesAndPermissions - rolesAndPermissions module instance
+   * @param {TabManager} tabManager - tabManager module instance
+   * @param {Webphone} webphone - webphone module instance
+   * @param {Function} onFirstLogin - func on first login
+   */
   constructor({
     alert,
     brand,

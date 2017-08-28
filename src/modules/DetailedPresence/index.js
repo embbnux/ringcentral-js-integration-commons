@@ -11,7 +11,18 @@ import {
 
 const presenceRegExp = /\/presence(\?.*)?/;
 
+/**
+ * @class
+ * @description Presence detail info managing module
+ */
 export default class DetailedPresence extends Presence {
+  /**
+   * @constructor
+   * @param {Auth} auth - auth module instance
+   * @param {Client} client - client module instance
+   * @param {Subscription} subscription - subscription module instance
+   * @param {ConnectivityMonitor} connectivityMonitor - connectivityMonitor module instance
+   */
   constructor({
     auth,
     client,

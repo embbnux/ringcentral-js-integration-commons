@@ -10,14 +10,26 @@ import actionTypes from './actionTypes';
 import validateAreaCode from '../../lib/validateAreaCode';
 import proxify from '../../lib/proxy/proxify';
 
+/**
+ * @class
+ * @description Region settings managing module
+ */
 export default class RegionSettings extends RcModule {
+  /**
+   * @constructor
+   * @param {Storage} storage - storage module instance
+   * @param {ExtensionInfo} extensionInfo - extensionInfo module instance
+   * @param {DialingPlan} dialingPlan - dialingPlan module instance
+   * @param {Alert} alert - alert module instance
+   * @param {TabManager} tabManager - tabManager module instance
+   */
   constructor({
     storage,
     extensionInfo,
     dialingPlan,
     alert,
     tabManager,
-    ...options,
+    ...options
   }) {
     super({
       ...options,

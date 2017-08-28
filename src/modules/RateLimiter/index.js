@@ -9,7 +9,20 @@ import proxify from '../../lib/proxy/proxify';
 
 const DEFAULT_THROTTLE_DURATION = 61 * 1000;
 const DEFAULT_ALERT_TTL = 5 * 1000;
+
+/**
+ * @class
+ * @description Rate limiter managing module
+ */
 export default class RateLimiter extends RcModule {
+  /**
+   * @constructor
+   * @param {Alert} alert - alert module instance
+   * @param {Client} client - client module instance
+   * @param {Environment} environment - environment module instance
+   * @param {GlobalStorage} globalStorage - globalStorage module instance
+   * @param {Number} throttleDuration - throttle duration, default 61 seconds
+   */
   constructor({
     alert,
     client,
