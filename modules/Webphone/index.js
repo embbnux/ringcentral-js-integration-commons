@@ -2325,7 +2325,7 @@ var Webphone = (_class = function (_RcModule) {
   }, {
     key: 'lastEndedSessions',
     get: function get() {
-      return this.state.lastEndSessions;
+      return this.state.lastEndedSessions;
     }
   }, {
     key: 'videoElementPrepared',
