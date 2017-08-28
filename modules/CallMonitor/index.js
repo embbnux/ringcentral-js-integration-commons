@@ -152,9 +152,7 @@ var CallMonitor = function (_RcModule) {
       return _this._accountInfo.countryCode;
     }, function () {
       return _this._webphone && _this._webphone.sessions;
-    }, function () {
-      return _this._webphone && _this._webphone.lastEndSessions;
-    }, function (callsFromPresence, countryCode, sessions, lastEndSessions) {
+    }, function (callsFromPresence, countryCode, sessions) {
       return callsFromPresence.map(function (callItem) {
         // use account countryCode to normalize number due to API issues [RCINT-3419]
         var fromNumber = (0, _normalizeNumber2.default)({
@@ -176,12 +174,6 @@ var CallMonitor = function (_RcModule) {
           startTime: webphoneSession && webphoneSession.startTime || callItem.startTime,
           webphoneSession: webphoneSession
         });
-      }).filter(function (callItem) {
-        if (!lastEndSessions) {
-          return true;
-        }
-        var endCall = matchWephoneSessionWithAcitveCall(lastEndSessions, callItem);
-        return !endCall;
       }).sort(_callLogHelpers.sortByStartTime);
     });
 
@@ -230,9 +222,18 @@ var CallMonitor = function (_RcModule) {
       });
     });
 
-    _this.addSelector('otherDeviceCalls', _this._selectors.calls, function (calls) {
+    _this.addSelector('otherDeviceCalls', _this._selectors.calls, function () {
+      return _this._webphone && _this._webphone.lastEndSessions;
+    }, function (calls, lastEndSessions) {
       return calls.filter(function (callItem) {
-        return !callItem.webphoneSession;
+        if (callItem.webphoneSession) {
+          return false;
+        }
+        if (!lastEndSessions) {
+          return true;
+        }
+        var endCall = matchWephoneSessionWithAcitveCall(lastEndSessions, callItem);
+        return !endCall;
       });
     });
 
