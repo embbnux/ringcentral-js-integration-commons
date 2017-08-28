@@ -77,6 +77,33 @@ var _webphoneHelper = require('../Webphone/webphoneHelper');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function matchWephoneSessionWithAcitveCall(sessions, callItem) {
+  if (!sessions || !callItem.sipData) {
+    return undefined;
+  }
+  return sessions.find(function (session) {
+    if (session.direction !== callItem.direction) {
+      return false;
+    }
+    if (session.direction === _callDirections2.default.inbound && callItem.sipData.remoteUri.indexOf(session.from) === -1) {
+      return false;
+    }
+    if (session.direction === _callDirections2.default.outbound && callItem.sipData.remoteUri.indexOf(session.to) === -1) {
+      return false;
+    }
+    var webphoneStartTime = void 0;
+    if (session.direction === _callDirections2.default.inbound) {
+      webphoneStartTime = session.creationTime;
+    } else {
+      webphoneStartTime = session.startTime || session.creationTime;
+    }
+    if (Math.abs(callItem.startTime - webphoneStartTime) > 16000) {
+      return false;
+    }
+    return true;
+  });
+}
+
 var CallMonitor = function (_RcModule) {
   (0, _inherits3.default)(CallMonitor, _RcModule);
 
@@ -125,7 +152,9 @@ var CallMonitor = function (_RcModule) {
       return _this._accountInfo.countryCode;
     }, function () {
       return _this._webphone && _this._webphone.sessions;
-    }, function (callsFromPresence, countryCode, sessions) {
+    }, function () {
+      return _this._webphone && _this._webphone.lastEndSessions;
+    }, function (callsFromPresence, countryCode, sessions, lastEndSessions) {
       return callsFromPresence.map(function (callItem) {
         // use account countryCode to normalize number due to API issues [RCINT-3419]
         var fromNumber = (0, _normalizeNumber2.default)({
@@ -136,32 +165,7 @@ var CallMonitor = function (_RcModule) {
           phoneNumber: callItem.to && callItem.to.phoneNumber,
           countryCode: countryCode
         });
-        var webphoneSession = void 0;
-        if (sessions && callItem.sipData) {
-          webphoneSession = sessions.find(function (session) {
-            // debugger;
-            if (session.direction !== callItem.direction) {
-              return false;
-            }
-            if (session.direction === _callDirections2.default.inbound && callItem.sipData.remoteUri.indexOf(session.from) === -1) {
-              return false;
-            }
-            if (session.direction === _callDirections2.default.outbound && callItem.sipData.remoteUri.indexOf(session.to) === -1) {
-              return false;
-            }
-            var webphoneStartTime = void 0;
-            if (session.direction === _callDirections2.default.inbound) {
-              webphoneStartTime = session.creationTime;
-            } else {
-              webphoneStartTime = session.startTime || session.creationTime;
-            }
-            if (Math.abs(callItem.startTime - webphoneStartTime) > 15000) {
-              return false;
-            }
-            return true;
-          });
-        }
-
+        var webphoneSession = matchWephoneSessionWithAcitveCall(sessions, callItem);
         return (0, _extends3.default)({}, callItem, {
           from: {
             phoneNumber: fromNumber
@@ -173,13 +177,11 @@ var CallMonitor = function (_RcModule) {
           webphoneSession: webphoneSession
         });
       }).filter(function (callItem) {
-        if (!callItem.webphoneSession || !sessions) {
+        if (!lastEndSessions) {
           return true;
         }
-        var session = sessions.find(function (sessionItem) {
-          return callItem.webphoneSession.id === sessionItem.id;
-        });
-        return !!session;
+        var endCall = matchWephoneSessionWithAcitveCall(lastEndSessions, callItem);
+        return !endCall;
       }).sort(_callLogHelpers.sortByStartTime);
     });
 
