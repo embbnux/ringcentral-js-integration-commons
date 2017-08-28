@@ -223,16 +223,16 @@ var CallMonitor = function (_RcModule) {
     });
 
     _this.addSelector('otherDeviceCalls', _this._selectors.calls, function () {
-      return _this._webphone && _this._webphone.lastEndSessions;
-    }, function (calls, lastEndSessions) {
+      return _this._webphone && _this._webphone.lastEndedSessions;
+    }, function (calls, lastEndedSessions) {
       return calls.filter(function (callItem) {
         if (callItem.webphoneSession) {
           return false;
         }
-        if (!lastEndSessions) {
+        if (!lastEndedSessions) {
           return true;
         }
-        var endCall = matchWephoneSessionWithAcitveCall(lastEndSessions, callItem);
+        var endCall = matchWephoneSessionWithAcitveCall(lastEndedSessions, callItem);
         return !endCall;
       });
     });

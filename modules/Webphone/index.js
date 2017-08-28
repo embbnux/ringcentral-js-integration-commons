@@ -2323,7 +2323,7 @@ var Webphone = (_class = function (_RcModule) {
       return this._selectors.onHoldSessions();
     }
   }, {
-    key: 'lastEndSessions',
+    key: 'lastEndedSessions',
     get: function get() {
       return this.state.lastEndSessions;
     }

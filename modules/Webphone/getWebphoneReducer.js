@@ -9,7 +9,7 @@ exports.getErrorCodeReducer = getErrorCodeReducer;
 exports.getConnectRetryCountsReducer = getConnectRetryCountsReducer;
 exports.getActiveSessionIdReducer = getActiveSessionIdReducer;
 exports.getRingSessionIdReducer = getRingSessionIdReducer;
-exports.getLastEndSessionsReducer = getLastEndSessionsReducer;
+exports.getLastEndedSessionsReducer = getLastEndedSessionsReducer;
 exports.getSessionsReducer = getSessionsReducer;
 exports.getUserMediaReducer = getUserMediaReducer;
 exports.default = getWebphoneReducer;
@@ -169,7 +169,7 @@ function getRingSessionIdReducer(types) {
   };
 }
 
-function getLastEndSessionsReducer(types) {
+function getLastEndedSessionsReducer(types) {
   return function () {
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
     var _ref7 = arguments[1];
@@ -241,7 +241,7 @@ function getWebphoneReducer(types) {
     activeSessionId: getActiveSessionIdReducer(types),
     ringSessionId: getRingSessionIdReducer(types),
     sessions: getSessionsReducer(types),
-    lastEndSessions: getLastEndSessionsReducer(types)
+    lastEndedSessions: getLastEndedSessionsReducer(types)
   });
 }
 //# sourceMappingURL=getWebphoneReducer.js.map
