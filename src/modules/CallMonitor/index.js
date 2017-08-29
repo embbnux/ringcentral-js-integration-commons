@@ -41,6 +41,9 @@ function matchWephoneSessionWithAcitveCall(sessions, callItem) {
     } else {
       webphoneStartTime = session.startTime || session.creationTime;
     }
+    // 16000 is from experience in test.
+    // there is delay bettween active call created and webphone session created
+    // for example, the time delay is decided by when webphone get invite info
     if (
       Math.abs(callItem.startTime - webphoneStartTime) > 16000
     ) {
