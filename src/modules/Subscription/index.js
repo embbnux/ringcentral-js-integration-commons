@@ -297,4 +297,8 @@ export default class Subscription extends RcModule {
     }
     return this._resetPromise;
   }
+
+  get pubnub() {
+    return this._subscription && this._subscription._pubnub;
+  }
 }

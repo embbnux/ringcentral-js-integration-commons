@@ -119,6 +119,11 @@ export default class Phone extends RcModule {
       alert: this.alert,
       client: this.client,
       environment: this.environment,
+      checkConnectionFunc: async () => {
+        if (this.subscription && this.subscription.pubnub) {
+          await this.subscription.pubnub.time();
+        }
+      },
       getState: () => this.state.connectivityMonitor,
     }));
     reducers.connectivityMonitor = this.connectivityMonitor.reducer;

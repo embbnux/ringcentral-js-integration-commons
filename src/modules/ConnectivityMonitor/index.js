@@ -16,6 +16,7 @@ export default class ConnectivityMonitor extends RcModule {
     environment,
     timeToRetry = DEFAULT_TIME_TO_RETRY,
     heartBeatInterval = DEFAULT_HEART_BEAT_INTERVAL,
+    checkConnectionFunc,
     ...options
   }) {
     super({
@@ -35,17 +36,35 @@ export default class ConnectivityMonitor extends RcModule {
     this._beforeRequestHandler = this::this._beforeRequestHandler;
     this._requestSuccessHandler = this::this._requestSuccessHandler;
     this._requestErrorHandler = this::this._requestErrorHandler;
+
+    if (typeof checkConnectionFunc === 'function') {
+      this._checkConnectionFunc = async () => {
+        try {
+          await checkConnectionFunc();
+          this._requestSuccessHandler();
+        } catch (error) {
+          this._requestErrorHandler(error);
+        }
+      };
+    } else {
+      this._checkConnectionFunc = async () => {
+        await this._client.service.platform().get('', null, { skipAuthCheck: true });
+      };
+    }
   }
+
   _shouldInit() {
     return !!(this.pending &&
       (!this._environment || this._environment.ready));
   }
+
   _shouldRebindHandlers() {
     return !!(this.ready &&
       this._environment &&
       this._environment.ready &&
       this._environment.changeCounter !== this._lastEnvironmentCounter);
   }
+
   _onStateChange() {
     if (this._shouldInit()) {
       this._bindHandlers();
@@ -58,12 +77,15 @@ export default class ConnectivityMonitor extends RcModule {
       this._bindHandlers();
     }
   }
+
   initialize() {
     this.store.subscribe(() => this._onStateChange());
   }
+
   _beforeRequestHandler() {
     this._clearTimeout();
   }
+
   _requestSuccessHandler() {
     if (!this.connectivity) {
       this.store.dispatch({
@@ -81,6 +103,7 @@ export default class ConnectivityMonitor extends RcModule {
     }
     this._retry();
   }
+
   @proxify
   async showAlert() {
     if (!this.connectivity && this._alert) {
@@ -90,6 +113,7 @@ export default class ConnectivityMonitor extends RcModule {
       });
     }
   }
+
   _requestErrorHandler(error) {
     if (
       !error.apiResponse ||
@@ -104,6 +128,7 @@ export default class ConnectivityMonitor extends RcModule {
       this._retry();
     }
   }
+
   _bindHandlers() {
     if (this._unbindHandlers) {
       this._unbindHandlers();
@@ -111,27 +136,37 @@ export default class ConnectivityMonitor extends RcModule {
     const client = this._client.service.platform().client();
     client.on(client.events.requestSuccess, this._requestSuccessHandler);
     client.on(client.events.requestError, this._requestErrorHandler);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('offline', this._requestErrorHandler);
+      window.addEventListener('online', this._requestSuccessHandler);
+    }
     this._unbindHandlers = () => {
       client.removeListener(client.events.requestSuccess, this._requestSuccessHandler);
       client.removeListener(client.events.requestError, this._requestErrorHandler);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('offline', this._requestErrorHandler);
+        window.removeEventListener('online', this._requestSuccessHandler);
+      }
       this._unbindHandlers = null;
     };
   }
+
   @proxify
   async _checkConnection() {
     try {
-      // query api info as a test of connectivity
-      await this._client.service.platform().get('', null, { skipAuthCheck: true });
+      await this._checkConnectionFunc();
     } catch (error) {
-      /* falls through */
+      // catch error
     }
   }
+
   _clearTimeout() {
     if (this._retryTimeoutId) {
       clearTimeout(this._retryTimeoutId);
       this._retryTimeoutId = null;
     }
   }
+
   _retry(t = (this.connectivity ? this._heartBeatInterval : this._timeToRetry)) {
     this._clearTimeout();
     this._retryTimeoutId = setTimeout(() => {
