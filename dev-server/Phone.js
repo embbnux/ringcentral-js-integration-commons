@@ -122,7 +122,9 @@ export default class Phone extends RcModule {
       checkConnectionFunc: async () => {
         if (this.subscription && this.subscription.pubnub) {
           await this.subscription.pubnub.time();
+          return;
         }
+        await this.client.service.platform().get('', null, { skipAuthCheck: true });
       },
       getState: () => this.state.connectivityMonitor,
     }));

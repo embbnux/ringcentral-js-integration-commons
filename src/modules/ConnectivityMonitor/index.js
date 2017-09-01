@@ -138,14 +138,12 @@ export default class ConnectivityMonitor extends RcModule {
     client.on(client.events.requestError, this._requestErrorHandler);
     if (typeof window !== 'undefined') {
       window.addEventListener('offline', this._requestErrorHandler);
-      window.addEventListener('online', this._requestSuccessHandler);
     }
     this._unbindHandlers = () => {
       client.removeListener(client.events.requestSuccess, this._requestSuccessHandler);
       client.removeListener(client.events.requestError, this._requestErrorHandler);
       if (typeof window !== 'undefined') {
         window.removeEventListener('offline', this._requestErrorHandler);
-        window.removeEventListener('online', this._requestSuccessHandler);
       }
       this._unbindHandlers = null;
     };
