@@ -19,9 +19,10 @@ import proxify from '../../lib/proxy/proxify';
 export default class Conversation extends RcModule {
   /**
    * @constructor
-   * @param {MessageSender} messageSender - messageSender module instance
-   * @param {ExtensionInfo} extensionInfo - extensionInfo module instance
-   * @param {MessageStore} messageStore - messageStore module instance
+   * @param {Object} params - params object
+   * @param {MessageSender} params.messageSender - messageSender module instance
+   * @param {ExtensionInfo} params.extensionInfo - extensionInfo module instance
+   * @param {MessageStore} params.messageStore - messageStore module instance
    */
   constructor({
     messageSender,

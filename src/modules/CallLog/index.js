@@ -56,16 +56,17 @@ const presenceRegExp = /\/presence\?detailedTelephonyState=true/;
 export default class CallLog extends Pollable {
   /**
    * @constructor
-   * @param {Auth} auth - auth module instance
-   * @param {Client} client - client module instance
-   * @param {Storage} storage - storage module instance
-   * @param {Subscription} subscription - subscription module instance
-   * @param {RolesAndPermissions} rolesAndPermissions - rolesAndPermissions module instance
-   * @param {Number} ttl - local cache timestamp
-   * @param {Number} tokenExpiresIn - time for token expire
-   * @param {Number} timeToRetry - waiting time to retry
-   * @param {Number} daySpan - day span of call log
-   * @param {Bool} polling - polling flag
+   * @param {Object} params - params object
+   * @param {Auth} params.auth - auth module instance
+   * @param {Client} params.client - client module instance
+   * @param {Storage} params.storage - storage module instance
+   * @param {Subscription} params.subscription - subscription module instance
+   * @param {RolesAndPermissions} params.rolesAndPermissions - rolesAndPermissions module instance
+   * @param {Number} params.ttl - local cache timestamp
+   * @param {Number} params.tokenExpiresIn - time for token expire
+   * @param {Number} params.timeToRetry - waiting time to retry
+   * @param {Number} params.daySpan - day span of call log
+   * @param {Bool} params.polling - polling flag
    */
   constructor({
     auth,

@@ -16,10 +16,11 @@ const DEFAULT_TIME_BETWEEN_CALLS = 10000;
 export default class Ringout extends RcModule {
   /**
    * @constructor
-   * @param {Client} client - client module instance
-   * @param {Auth} auth - auth module instance
-   * @param {Number} monitorInterval - monitor interval, default 2500
-   * @param {Number} timeBetweenCalls - time between calls, default 10000
+   * @param {Object} params - params object
+   * @param {Client} params.client - client module instance
+   * @param {Auth} params.auth - auth module instance
+   * @param {Number} params.monitorInterval - monitor interval, default 2500
+   * @param {Number} params.timeBetweenCalls - time between calls, default 10000
    */
   constructor({
     auth,

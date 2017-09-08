@@ -32,11 +32,12 @@ const DEFAULT_TTL = 30 * 60 * 1000;
 export default class Contacts extends RcModule {
   /**
    * @constructor
-   * @param {Client} client - client module instance
-   * @param {AddressBook} addressBook - addressBook module instance
-   * @param {AccountExtension} accountExtension - accountExtension module instance
-   * @param {AccountPhoneNumber} accountPhoneNumber - accountPhoneNumber module instance
-   * @param {Number} ttl - timestamp of local cache, default 30 mins
+   * @param {Object} params - params object
+   * @param {Client} params.client - client module instance
+   * @param {AddressBook} params.addressBook - addressBook module instance
+   * @param {AccountExtension} params.accountExtension - accountExtension module instance
+   * @param {AccountPhoneNumber} params.accountPhoneNumber - accountPhoneNumber module instance
+   * @param {Number} params.ttl - timestamp of local cache, default 30 mins
    */
   constructor({
     client,

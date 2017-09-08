@@ -8,7 +8,8 @@ import fetchList from '../..//lib/fetchList';
 export default class ForwardingNumber extends DataFetcher {
   /**
    * @constructor
-   * @param {Client} client - client module instance
+   * @param {Object} params - params object
+   * @param {Client} params.client - client module instance
    */
   constructor({
     client,

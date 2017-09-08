@@ -34,22 +34,23 @@ const MAX_RETRIES_DELAY = 2 * 60 * 1000;
 export default class Webphone extends RcModule {
   /**
    * @constructor
-   * @param {String} appKey - app key
-   * @param {String} appName - app name
-   * @param {String} appVersion - app version
-   * @param {Number} webphoneLogLevel - log Level
-   * @param {Alert} alert - alert module instance
-   * @param {Auth} auth - auth module instance
-   * @param {Client} client - client module instance
-   * @param {RolesAndPermissions} rolesAndPermissions - rolesAndPermissions module instance
-   * @param {Storage} storage - storage module instance
-   * @param {GlobalStorage} globalStorage - globalStorage module instance
-   * @param {ExtensionDevice} extensionDevice - extensionDevice module instance
-   * @param {NumberValidate} numberValidate - numberValidate module instance
-   * @param {ContactMatcher} contactMatcher - contactMatcher module instance, optional
-   * @param {Function} onCallEnd - callback on a call end
-   * @param {Function} onCallRing - callback on a call ring
-   * @param {Function} onCallStart - callback on a call start
+   * @param {Object} params - params object
+   * @param {String} params.appKey - app key
+   * @param {String} params.appName - app name
+   * @param {String} params.appVersion - app version
+   * @param {Number} params.webphoneLogLevel - log Level
+   * @param {Alert} params.alert - alert module instance
+   * @param {Auth} params.auth - auth module instance
+   * @param {Client} params.client - client module instance
+   * @param {RolesAndPermissions} params.rolesAndPermissions - rolesAndPermissions module instance
+   * @param {Storage} params.storage - storage module instance
+   * @param {GlobalStorage} params.globalStorage - globalStorage module instance
+   * @param {ExtensionDevice} params.extensionDevice - extensionDevice module instance
+   * @param {NumberValidate} params.numberValidate - numberValidate module instance
+   * @param {ContactMatcher} params.contactMatcher - contactMatcher module instance, optional
+   * @param {Function} params.onCallEnd - callback on a call end
+   * @param {Function} params.onCallRing - callback on a call ring
+   * @param {Function} params.onCallStart - callback on a call start
    */
   constructor({
     appKey,

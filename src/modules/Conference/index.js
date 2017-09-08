@@ -10,8 +10,9 @@ const DEFAULT_MASK = 'phoneNumber,hostCode,participantCode,phoneNumbers(country,
 export default class Conference extends DataFetcher {
   /**
    * @constructor
-   * @param {RegionSettings} regionSettings - regionSettings module instance
-   * @param {Client} client - client module instance
+   * @param {Object} params - params object
+   * @param {RegionSettings} params.regionSettings - regionSettings module instance
+   * @param {Client} params.client - client module instance
    */
   constructor({
     client,

@@ -17,11 +17,12 @@ import proxify from '../../lib/proxy/proxify';
 export default class MessageSender extends RcModule {
   /**
    * @constructor
-   * @param {Alert} alert - alert module instance
-   * @param {Client} client - client module instance
-   * @param {ExtensionInfo} extensionInfo - extensionInfo module instance
-   * @param {ExtensionPhoneNumber} extensionPhoneNumber - extensionPhoneNumber module instance
-   * @param {NumberValidate} numberValidate - numberValidate module instance
+   * @param {Object} params - params object
+   * @param {Alert} params.alert - alert module instance
+   * @param {Client} params.client - client module instance
+   * @param {ExtensionInfo} params.extensionInfo - extensionInfo module instance
+   * @param {ExtensionPhoneNumber} params.extensionPhoneNumber - extensionPhoneNumber module instance
+   * @param {NumberValidate} params.numberValidate - numberValidate module instance
    */
   constructor({
     alert,

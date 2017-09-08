@@ -22,11 +22,12 @@ export function callIdentityFunction(call) {
 export default class CallLogger extends LoggerBase {
   /**
    * @constructor
-   * @param {Storage} storage - storage module instance
-   * @param {ActivityMatcher} activityMatcher - activityMatcher module instance
-   * @param {CallHistory} callHistory - callHistory module instance
-   * @param {TabManager} tabManager - tabManager module instance
-   * @param {ContactMatcher} contactMatcher - contactMatcher module instance
+   * @param {Object} params - params object
+   * @param {Storage} params.storage - storage module instance
+   * @param {ActivityMatcher} params.activityMatcher - activityMatcher module instance
+   * @param {CallHistory} params.callHistory - callHistory module instance
+   * @param {TabManager} params.tabManager - tabManager module instance
+   * @param {ContactMatcher} params.contactMatcher - contactMatcher module instance
    */
   constructor({
     storage,

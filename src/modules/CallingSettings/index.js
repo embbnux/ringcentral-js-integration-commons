@@ -20,16 +20,17 @@ import proxify from '../../lib/proxy/proxify';
 export default class CallingSettings extends RcModule {
   /**
    * @constructor
-   * @param {Alert} alert - alert module instance
-   * @param {Brand} brand - brand module instance
-   * @param {ExtensionInfo} extensionInfo - extensionInfo module instance
-   * @param {ExtensionPhoneNumber} extensionPhoneNumber - extensionPhoneNumber module instance
-   * @param {ForwardingNumber} forwardingNumber - forwardingNumber module instance
-   * @param {Storage} storage - storage module instance
-   * @param {RolesAndPermissions} rolesAndPermissions - rolesAndPermissions module instance
-   * @param {TabManager} tabManager - tabManager module instance
-   * @param {Webphone} webphone - webphone module instance
-   * @param {Function} onFirstLogin - func on first login
+   * @param {Object} params - params object
+   * @param {Alert} params.alert - alert module instance
+   * @param {Brand} params.brand - brand module instance
+   * @param {ExtensionInfo} params.extensionInfo - extensionInfo module instance
+   * @param {ExtensionPhoneNumber} params.extensionPhoneNumber - extensionPhoneNumber module instance
+   * @param {ForwardingNumber} params.forwardingNumber - forwardingNumber module instance
+   * @param {Storage} params.storage - storage module instance
+   * @param {RolesAndPermissions} params.rolesAndPermissions - rolesAndPermissions module instance
+   * @param {TabManager} params.tabManager - tabManager module instance
+   * @param {Webphone} params.webphone - webphone module instance
+   * @param {Function} params.onFirstLogin - func on first login
    */
   constructor({
     alert,

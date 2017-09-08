@@ -13,9 +13,11 @@ import proxify from '../../lib/proxy/proxify';
  */
 export default class ContactSearch extends RcModule {
   /**
-   * @param {Auth} auth - auth module instance
-   * @param {Storage} storage - storage module instance
-   * @param {Number} ttl - timestamp of local cache, default 30 mins
+   * @constructor
+   * @param {Object} params - params object
+   * @param {Auth} params.auth - auth module instance
+   * @param {Storage} params.storage - storage module instance
+   * @param {Number} params.ttl - timestamp of local cache, default 30 mins
    */
   constructor({
     auth,

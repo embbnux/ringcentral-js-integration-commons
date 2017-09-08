@@ -24,8 +24,9 @@ const DEFAULT_TTL = 24 * 60 * 60 * 1000;
 export default class AccountExtension extends DataFetcher {
   /**
    * @constructor
-   * @param {Client} client - client module instance
-   * @param {Number} ttl - local cache timestamp, default 24 hours
+   * @param {Object} params - params object
+   * @param {Client} params.client - client module instance
+   * @param {Number} params.ttl - local cache timestamp, default 24 hours
    */
   constructor({
     client,

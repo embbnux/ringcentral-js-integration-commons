@@ -15,10 +15,11 @@ import getNumberValidateReducer from './getNumberValidateReducer';
 export default class NumberValidate extends RcModule {
   /**
    * @constructor
-   * @param {Client} client - client module instance
-   * @param {AccountExtension} accountExtension - accountExtension module instance
-   * @param {RegionSettings} regionSettings - regionSettings module instance
-   * @param {AccountInfo} accountInfo - accountInfo module instance
+   * @param {Object} params - params object
+   * @param {Client} params.client - client module instance
+   * @param {AccountExtension} params.accountExtension - accountExtension module instance
+   * @param {RegionSettings} params.regionSettings - regionSettings module instance
+   * @param {AccountInfo} params.accountInfo - accountInfo module instance
    */
   constructor({
     client,

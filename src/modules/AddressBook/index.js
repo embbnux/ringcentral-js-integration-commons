@@ -31,23 +31,19 @@ function getSyncParams(syncToken, pageId) {
 }
 
 /**
- * Accound book module to get user person contacts in RC
- * @param {client} client module instance
- * @param {auth} auth module instance
- * @param {storage} storage module instance
- * @param {ttl} local cache timestamp, default 30 mins
- * @param {timeToRetry} timestamp to retry, default 62 seconds
- * @param {polling} polling flag, default true
+ * @class
+ * @description Accound book module to get user person contacts in RC
  */
 export default class AddressBook extends Pollable {
   /**
    * @constructor
-   * @param {Client} client - client module instance
-   * @param {Auth} auth - Auth module instance
-   * @param {Storage} storage - storage module instance
-   * @param {Number} ttl - local cache timestamp, default 30 mins
-   * @param {Number} timeToRetry - timestamp to retry, default 62 seconds
-   * @param {Bool} polling - polling flag, default true
+   * @param {Object} params - params object
+   * @param {Client} params.client - client module instance
+   * @param {Auth} params.auth - Auth module instance
+   * @param {Storage} params.storage - storage module instance
+   * @param {Number} params.ttl - local cache timestamp, default 30 mins
+   * @param {Number} params.timeToRetry - timestamp to retry, default 62 seconds
+   * @param {Bool} params.polling - polling flag, default true
    */
   constructor({
     client,

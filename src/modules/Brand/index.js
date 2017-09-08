@@ -8,10 +8,11 @@ import moduleStatuses from '../../enums/moduleStatuses';
 export default class Brand extends RcModule {
   /**
    * @constructor
-   * @param {String} id - brand id
-   * @param {String} name - brand name
-   * @param {String} fullName - full brand name
-   * @param {String} application - application name
+   * @param {Object} params - params object
+   * @param {String} params.id - brand id
+   * @param {String} params.name - brand name
+   * @param {String} params.fullName - full brand name
+   * @param {String} params.application - application name
    */
   constructor({ id, name, fullName, application, ...options }) {
     super(options);

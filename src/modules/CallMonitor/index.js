@@ -60,17 +60,18 @@ function matchWephoneSessionWithAcitveCall(sessions, callItem) {
 export default class CallMonitor extends RcModule {
   /**
    * @constructor
-   * @param {Call} call - call module instance
-   * @param {AccountInfo} accountInfo - accountInfo module instance
-   * @param {DetailedPresence} detailedPresence - detailedPresence module instance
-   * @param {ActivityMatcher} activityMatcher - activityMatcher module instance
-   * @param {ContactMatcher} contactMatcher - contactMatcher module instance
-   * @param {Webphone} webphone - webphone module instance
-   * @param {Storage} storage - storage module instance
-   * @param {Function} onRinging - function on ring
-   * @param {Function} onNewCall - function on new call
-   * @param {Function} onCallUpdated - function on call updated
-   * @param {Function} onCallEnded - function on call ended
+   * @param {Object} params - params object
+   * @param {Call} params.call - call module instance
+   * @param {AccountInfo} params.accountInfo - accountInfo module instance
+   * @param {DetailedPresence} params.detailedPresence - detailedPresence module instance
+   * @param {ActivityMatcher} params.activityMatcher - activityMatcher module instance
+   * @param {ContactMatcher} params.contactMatcher - contactMatcher module instance
+   * @param {Webphone} params.webphone - webphone module instance
+   * @param {Storage} params.storage - storage module instance
+   * @param {Function} params.onRinging - function on ring
+   * @param {Function} params.onNewCall - function on new call
+   * @param {Function} params.onCallUpdated - function on call updated
+   * @param {Function} params.onCallEnded - function on call ended
    */
   constructor({
     call,

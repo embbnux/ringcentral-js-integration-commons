@@ -16,10 +16,11 @@ import getEnvironmentReducer, {
 export default class Environment extends RcModule {
   /**
    * @constructor
-   * @param {Client} client - client module instance
-   * @param {GlobalStorage} globalStorage - globalStorage module instance
-   * @param {String} defaultRecordingHost - default recording host uri
-   * @param {Object} sdkConfig - sdk config
+   * @param {Object} params - params object
+   * @param {Client} params.client - client module instance
+   * @param {GlobalStorage} params.globalStorage - globalStorage module instance
+   * @param {String} params.defaultRecordingHost - default recording host uri
+   * @param {Object} params.sdkConfig - sdk config
    */
   constructor({
     client,

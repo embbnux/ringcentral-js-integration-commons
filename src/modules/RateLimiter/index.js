@@ -17,11 +17,12 @@ const DEFAULT_ALERT_TTL = 5 * 1000;
 export default class RateLimiter extends RcModule {
   /**
    * @constructor
-   * @param {Alert} alert - alert module instance
-   * @param {Client} client - client module instance
-   * @param {Environment} environment - environment module instance
-   * @param {GlobalStorage} globalStorage - globalStorage module instance
-   * @param {Number} throttleDuration - throttle duration, default 61 seconds
+   * @param {Object} params - params object
+   * @param {Alert} params.alert - alert module instance
+   * @param {Client} params.client - client module instance
+   * @param {Environment} params.environment - environment module instance
+   * @param {GlobalStorage} params.globalStorage - globalStorage module instance
+   * @param {Number} params.throttleDuration - throttle duration, default 61 seconds
    */
   constructor({
     alert,

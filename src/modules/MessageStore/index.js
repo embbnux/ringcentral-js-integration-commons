@@ -31,16 +31,17 @@ const DEFAULT_DAY_SPAN = 7;
 export default class MessageStore extends Pollable {
   /**
    * @constructor
-   * @param {Alert} alert - alert module instance
-   * @param {Auth} auth - auth module instance
-   * @param {Client} client - client module instance
-   * @param {Storage} storage - storage module instance
-   * @param {subscription} subscription - subscription module instance
-   * @param {connectivityMonitor} connectivityMonitor - connectivityMonitor module instance
-   * @param {Number} ttl - local cache timestamp
-   * @param {Number} timeToRetry - waiting time to retry
-   * @param {Number} daySpan - day span of call log
-   * @param {Bool} polling - polling flag, default false
+   * @param {Object} params - params object
+   * @param {Alert} params.alert - alert module instance
+   * @param {Auth} params.auth - auth module instance
+   * @param {Client} params.client - client module instance
+   * @param {Storage} params.storage - storage module instance
+   * @param {subscription} params.subscription - subscription module instance
+   * @param {connectivityMonitor} params.connectivityMonitor - connectivityMonitor module instance
+   * @param {Number} params.ttl - local cache timestamp
+   * @param {Number} params.timeToRetry - waiting time to retry
+   * @param {Number} params.daySpan - day span of call log
+   * @param {Bool} params.polling - polling flag, default false
    */
   constructor({
     alert,

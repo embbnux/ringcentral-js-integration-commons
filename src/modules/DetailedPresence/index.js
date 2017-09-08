@@ -18,10 +18,11 @@ const presenceRegExp = /\/presence(\?.*)?/;
 export default class DetailedPresence extends Presence {
   /**
    * @constructor
-   * @param {Auth} auth - auth module instance
-   * @param {Client} client - client module instance
-   * @param {Subscription} subscription - subscription module instance
-   * @param {ConnectivityMonitor} connectivityMonitor - connectivityMonitor module instance
+   * @param {Object} params - params object
+   * @param {Auth} params.auth - auth module instance
+   * @param {Client} params.client - client module instance
+   * @param {Subscription} params.subscription - subscription module instance
+   * @param {ConnectivityMonitor} params.connectivityMonitor - connectivityMonitor module instance
    */
   constructor({
     auth,

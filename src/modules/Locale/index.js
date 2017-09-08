@@ -52,7 +52,8 @@ function checkIntl() {
 export default class Locale extends RcModule {
   /**
    * @constructor
-   * @param {String} defaultLocale - default 'en-US'
+   * @param {Object} params - params object
+   * @param {String} params.defaultLocale - default 'en-US'
    */
   constructor({
     defaultLocale = DEFAULT_LOCALE,

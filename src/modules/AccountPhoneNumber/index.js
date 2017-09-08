@@ -14,7 +14,8 @@ function simplifyPhoneNumber(number) {
 export default class AccountPhoneNumber extends DataFetcher {
   /**
    * @constructor
-   * @param {Client} client - client module instance
+   * @param {Object} params - params object
+   * @param {Client} params.client - client module instance
    */
   constructor({
     client,

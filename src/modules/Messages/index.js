@@ -14,12 +14,13 @@ import proxify from '../../lib/proxy/proxify';
 export default class Messages extends RcModule {
   /**
    * @constructor
-   * @param {MessageStore} messageStore - messageStore module instance
-   * @param {ExtensionInfo} extensionInfo - extensionInfo module instance
-   * @param {ContactMatcher} contactMatcher - contactMatcher module instance
-   * @param {ConversationMatcher} conversationMatcher - conversationMatcher module instance
-   * @param {ConversationLogger} conversationLogger - conversationLogger module instance
-   * @param {Number} defaultPerPage - default numbers of perPage, default 20
+   * @param {Object} params - params object
+   * @param {MessageStore} params.messageStore - messageStore module instance
+   * @param {ExtensionInfo} params.extensionInfo - extensionInfo module instance
+   * @param {ContactMatcher} params.contactMatcher - contactMatcher module instance
+   * @param {ConversationMatcher} params.conversationMatcher - conversationMatcher module instance
+   * @param {ConversationLogger} params.conversationLogger - conversationLogger module instance
+   * @param {Number} params.defaultPerPage - default numbers of perPage, default 20
    */
   constructor({
     messageStore,

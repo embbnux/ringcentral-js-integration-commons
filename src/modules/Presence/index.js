@@ -18,11 +18,12 @@ const presenceEndPoint = /.*\/presence(\?.*)?/;
 export default class Presence extends RcModule {
   /**
    * @constructor
-   * @param {Auth} auth - auth module instance
-   * @param {Client} client - client module instance
-   * @param {Storage} storage - storage module instance
-   * @param {Subscription} subscription - subscription module instance
-   * @param {Object} actionTypes - actionTypes enums
+   * @param {Object} params - params object
+   * @param {Auth} params.auth - auth module instance
+   * @param {Client} params.client - client module instance
+   * @param {Storage} params.storage - storage module instance
+   * @param {Subscription} params.subscription - subscription module instance
+   * @param {Object} params.actionTypes - actionTypes enums
    */
   constructor({
     auth,

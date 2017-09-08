@@ -15,11 +15,12 @@ import normalizeNumber from '../../lib/normalizeNumber';
 export default class CallHistory extends RcModule {
   /**
    * @constructor
-   * @param {AccountInfo} accountInfo - accountInfo module instance
-   * @param {CallLog} callLog - callLog module instance
-   * @param {CallMonitor} callMonitor - callMonitor module instance
-   * @param {ActivityMatcher} activityMatcher - activityMatcher module instance
-   * @param {ContactMatcher} contactMatcher - contactMatcher module instance
+   * @param {Object} params - params object
+   * @param {AccountInfo} params.accountInfo - accountInfo module instance
+   * @param {CallLog} params.callLog - callLog module instance
+   * @param {CallMonitor} params.callMonitor - callMonitor module instance
+   * @param {ActivityMatcher} params.activityMatcher - activityMatcher module instance
+   * @param {ContactMatcher} params.contactMatcher - contactMatcher module instance
    */
   constructor({
     accountInfo,

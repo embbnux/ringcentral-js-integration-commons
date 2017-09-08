@@ -12,7 +12,8 @@ import getProxyReducer from './getProxyReducer';
 export default class DateTimeFormat extends RcModule {
   /**
    * @constructor
-   * @param {Locale} locale - locale module instance
+   * @param {Object} params - params object
+   * @param {Locale} params.locale - locale module instance
    */
   constructor({
     locale,

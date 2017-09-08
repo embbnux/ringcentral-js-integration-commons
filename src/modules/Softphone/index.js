@@ -10,8 +10,9 @@ import proxify from '../../lib/proxy/proxify';
 export default class Softphone extends RcModule {
   /**
    * @constructor
-   * @param {Brnad} brand - brand module instance
-   * @param {Bool} extensionMode - default false
+   * @param {Object} params - params object
+   * @param {Brnad} params.brand - brand module instance
+   * @param {Bool} params.extensionMode - default false
    */
   constructor({
     brand,

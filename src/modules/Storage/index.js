@@ -10,7 +10,8 @@ import moduleStatuses from '../../enums/moduleStatuses';
 export default class Storage extends StorageBase {
   /**
    * @constructor
-   * @param {Auth} auth - auth module instance
+   * @param {Object} params - params object
+   * @param {Auth} params.auth - auth module instance
    */
   constructor({
     auth,

@@ -22,17 +22,17 @@ export function conversationLogIdentityFunction(conversation) {
 export default class ConversationLogger extends LoggerBase {
   /**
    * @constructor
-   * @param {Auth} auth - auth module instance
-   * @param {ContactMatcher} contactMatcher - contactMatcher module instance
-   * @param {ConversationMatcher} conversationMatcher - conversationMatcher module instance
-   * @param {DateTimeFormat} dateTimeFormat - dateTimeFormat module instance
-   * @param {MessageStore} messageStore - messageStore module instance
-   * @param {RolesAndPermissions} rolesAndPermissions - rolesAndPermissions module instance
-   * @param {Storage} storage - storage module instance
-   * @param {Storage} storage - storage module instance
-   * @param {TabManager} tabManager - tabManager module instance
-   * @param {Function} isLoggedContact - get if contact is logged
-   * @param {Function} formatDateTime - data time format
+   * @param {Object} params - params object
+   * @param {Auth} params.auth - auth module instance
+   * @param {ContactMatcher} params.contactMatcher - contactMatcher module instance
+   * @param {ConversationMatcher} params.conversationMatcher - conversationMatcher module instance
+   * @param {DateTimeFormat} params.dateTimeFormat - dateTimeFormat module instance
+   * @param {MessageStore} params.messageStore - messageStore module instance
+   * @param {RolesAndPermissions} params.rolesAndPermissions - rolesAndPermissions module instance
+   * @param {Storage} params.storage - storage module instance
+   * @param {TabManager} params.tabManager - tabManager module instance
+   * @param {Function} params.isLoggedContact - get if contact is logged
+   * @param {Function} params.formatDateTime - data time format
    */
   constructor({
     auth,

@@ -18,15 +18,16 @@ import ringoutErrors from '../Ringout/ringoutErrors';
 export default class Call extends RcModule {
   /**
    * @constructor
-   * @param {Alert} alert - alert module instance
-   * @param {Client} client - client module instance
-   * @param {Storage} storage - storage module instance
-   * @param {CallingSettings} callingSettings - callingSettings module instance
-   * @param {Softphone} softphone - softphone module instance
-   * @param {Ringout} ringout - ringout module instance
-   * @param {Webphone} webphone - webphone module instance
-   * @param {NumberValidate} numberValidate - numberValidate module instance
-   * @param {RegionSettings} regionSettings - regionSettings module instance
+   * @param {Object} params - params object
+   * @param {Alert} params.alert - alert module instance
+   * @param {Client} params.client - client module instance
+   * @param {Storage} params.storage - storage module instance
+   * @param {CallingSettings} params.callingSettings - callingSettings module instance
+   * @param {Softphone} params.softphone - softphone module instance
+   * @param {Ringout} params.ringout - ringout module instance
+   * @param {Webphone} params.webphone - webphone module instance
+   * @param {NumberValidate} params.numberValidate - numberValidate module instance
+   * @param {RegionSettings} params.regionSettings - regionSettings module instance
    */
   constructor({
     alert,

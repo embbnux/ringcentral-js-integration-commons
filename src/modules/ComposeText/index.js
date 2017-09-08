@@ -15,12 +15,13 @@ import proxify from '../../lib/proxy/proxify';
 export default class ComposeText extends RcModule {
   /**
    * @constructor
-   * @param {Alert} alert - alert module instance
-   * @param {Auth} auth - auth module instance
-   * @param {Storage} storage - storage module instance
-   * @param {MessageSender} messageSender - messageSender module instance
-   * @param {NumberValidate} numberValidate - numberValidate module instance
-   * @param {ContactSearch} contactSearch - contactSearch module instance
+   * @param {Object} params - params object
+   * @param {Alert} params.alert - alert module instance
+   * @param {Auth} params.auth - auth module instance
+   * @param {Storage} params.storage - storage module instance
+   * @param {MessageSender} params.messageSender - messageSender module instance
+   * @param {NumberValidate} params.numberValidate - numberValidate module instance
+   * @param {ContactSearch} params.contactSearch - contactSearch module instance
    */
   constructor({
     alert,

@@ -17,11 +17,12 @@ import proxify from '../../lib/proxy/proxify';
 export default class RegionSettings extends RcModule {
   /**
    * @constructor
-   * @param {Storage} storage - storage module instance
-   * @param {ExtensionInfo} extensionInfo - extensionInfo module instance
-   * @param {DialingPlan} dialingPlan - dialingPlan module instance
-   * @param {Alert} alert - alert module instance
-   * @param {TabManager} tabManager - tabManager module instance
+   * @param {Object} params - params object
+   * @param {Storage} params.storage - storage module instance
+   * @param {ExtensionInfo} params.extensionInfo - extensionInfo module instance
+   * @param {DialingPlan} params.dialingPlan - dialingPlan module instance
+   * @param {Alert} params.alert - alert module instance
+   * @param {TabManager} params.tabManager - tabManager module instance
    */
   constructor({
     storage,
