@@ -3,7 +3,10 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.isBrowerSupport = isBrowerSupport;
+exports.isSupportWebRTC = isSupportWebRTC;
+exports.isSupportWebSocket = isSupportWebSocket;
+exports.isBrowserSupport = isBrowserSupport;
+exports.isChromeBrowser = isChromeBrowser;
 exports.normalizeSession = normalizeSession;
 exports.isRing = isRing;
 exports.isOnHold = isOnHold;
@@ -22,7 +25,37 @@ var _callDirections2 = _interopRequireDefault(_callDirections);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function isBrowerSupport() {
+function isSupportWebRTC() {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  var isWebRTCSupported = false;
+  ['RTCPeerConnection', 'webkitRTCPeerConnection', 'mozRTCPeerConnection', 'RTCIceGatherer'].forEach(function (item) {
+    if (isWebRTCSupported) {
+      return;
+    }
+    if (item in window) {
+      isWebRTCSupported = true;
+    }
+  });
+  return isWebRTCSupported;
+}
+
+function isSupportWebSocket() {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  return !!window.WebSocket;
+}
+
+function isBrowserSupport() {
+  return isSupportWebRTC() && isSupportWebSocket();
+}
+
+function isChromeBrowser() {
+  if (typeof navigator === 'undefined') {
+    return false;
+  }
   var isChrome = !!navigator.userAgent.match(/Chrom(e|ium)/);
   if (!isChrome) {
     return false;
