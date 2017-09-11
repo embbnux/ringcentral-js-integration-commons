@@ -1,1 +1,0 @@
-{"version":3,"sources":["lib/localeRegExp.js"],"names":[],"mappings":";;;;;kBAAe,wB","file":"localeRegExp.js","sourcesContent":["export default /^[a-z]{2}(-[A-Z]{2})?$/;\n"]}
