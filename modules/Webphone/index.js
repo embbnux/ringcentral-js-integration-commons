@@ -681,7 +681,7 @@ var Webphone = (_class = function (_RcModule) {
                   break;
                 }
 
-                if ((0, _webphoneHelper.isBrowserSupport)()) {
+                if ((0, _webphoneHelper.isBrowerSupport)()) {
                   _context4.next = 5;
                   break;
                 }

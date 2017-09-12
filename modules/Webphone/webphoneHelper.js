@@ -3,9 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.isSupportWebSocket = isSupportWebSocket;
-exports.isBrowserSupport = isBrowserSupport;
-exports.isChromeBrowser = isChromeBrowser;
+exports.isBrowerSupport = isBrowerSupport;
 exports.normalizeSession = normalizeSession;
 exports.isRing = isRing;
 exports.isOnHold = isOnHold;
@@ -22,27 +20,9 @@ var _callDirections = require('../../enums/callDirections');
 
 var _callDirections2 = _interopRequireDefault(_callDirections);
 
-var _sip = require('sip.js');
-
-var _sip2 = _interopRequireDefault(_sip);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function isSupportWebSocket() {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-  return !!window.WebSocket;
-}
-// eslint-disable-next-line
-function isBrowserSupport() {
-  return _sip2.default.WebRTC.isSupported() && isSupportWebSocket();
-}
-
-function isChromeBrowser() {
-  if (typeof navigator === 'undefined') {
-    return false;
-  }
+function isBrowerSupport() {
   var isChrome = !!navigator.userAgent.match(/Chrom(e|ium)/);
   if (!isChrome) {
     return false;
