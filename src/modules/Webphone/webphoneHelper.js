@@ -1,8 +1,24 @@
 import recordStatus from './recordStatus';
 import sessionStatus from './sessionStatus';
 import callDirections from '../../enums/callDirections';
+// eslint-disable-next-line
+import SIP from 'sip.js';
 
-export function isBrowerSupport() {
+export function isSupportWebSocket() {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  return !!window.WebSocket;
+}
+
+export function isBrowserSupport() {
+  return SIP.WebRTC.isSupported() && isSupportWebSocket();
+}
+
+export function isChromeBrowser() {
+  if (typeof navigator === 'undefined') {
+    return false;
+  }
   const isChrome = !!(navigator.userAgent.match(/Chrom(e|ium)/));
   if (!isChrome) {
     return false;
