@@ -45,10 +45,7 @@ export default class ConnectivityMonitor extends RcModule {
         if (typeof checkConnectionFunc === 'function') {
           await checkConnectionFunc();
         } else {
-          // await fetch(DEFAULT_CHECK_URI, {
-          //   method: 'GET',
-          // });
-          // await this._client.service.platform().get(DEFAULT_CHECK_URI, null, { skipAuthCheck: true });
+          await fetch(DEFAULT_CHECK_URI);
         }
         this._requestSuccessHandler();
       } catch (error) {
