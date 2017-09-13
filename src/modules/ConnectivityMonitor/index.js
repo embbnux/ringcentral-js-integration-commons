@@ -1,3 +1,4 @@
+import 'whatwg-fetch';
 import RcModule from '../../lib/RcModule';
 import actionTypes from './actionTypes';
 import moduleStatuses from '../../enums/moduleStatuses';
@@ -9,6 +10,8 @@ import proxify from '../../lib/proxy/proxify';
 export const DEFAULT_TIME_TO_RETRY = 5 * 1000;
 export const DEFAULT_HEART_BEAT_INTERVAL = 60 * 1000;
 
+const DEFAULT_CHECK_URI
+  = 'https://dnyg0s5c46.execute-api.us-west-1.amazonaws.com/Prod/getnetworkstatus';
 export default class ConnectivityMonitor extends RcModule {
   constructor({
     alert,
@@ -37,20 +40,21 @@ export default class ConnectivityMonitor extends RcModule {
     this._requestSuccessHandler = this::this._requestSuccessHandler;
     this._requestErrorHandler = this::this._requestErrorHandler;
 
-    if (typeof checkConnectionFunc === 'function') {
-      this._checkConnectionFunc = async () => {
-        try {
+    this._checkConnectionFunc = async () => {
+      try {
+        if (typeof checkConnectionFunc === 'function') {
           await checkConnectionFunc();
-          this._requestSuccessHandler();
-        } catch (error) {
-          this._requestErrorHandler(error);
+        } else {
+          // await fetch(DEFAULT_CHECK_URI, {
+          //   method: 'GET',
+          // });
+          // await this._client.service.platform().get(DEFAULT_CHECK_URI, null, { skipAuthCheck: true });
         }
-      };
-    } else {
-      this._checkConnectionFunc = async () => {
-        await this._client.service.platform().get('', null, { skipAuthCheck: true });
-      };
-    }
+        this._requestSuccessHandler();
+      } catch (error) {
+        this._requestErrorHandler(error);
+      }
+    };
   }
 
   _shouldInit() {
