@@ -12,7 +12,22 @@ export const DEFAULT_HEART_BEAT_INTERVAL = 60 * 1000;
 
 const DEFAULT_CHECK_URI
   = 'https://dnyg0s5c46.execute-api.us-west-1.amazonaws.com/Prod/getnetworkstatus';
+
+/**
+ * @class
+ * @description Connectivity monitor module
+ */
 export default class ConnectivityMonitor extends RcModule {
+  /**
+   * @constructor
+   * @param {Object} params - params object
+   * @param {Alert} params.alert - alert module instance
+   * @param {Client} params.client - client module instance
+   * @param {Environment} params.environment - environment module instance
+   * @param {Number} params.timeToRetry - time to Retry
+   * @param {Number} params.heartBeatInterval - heart beat interval
+   * @param {Function} params.checkConnectionFunc - function to check network
+   */
   constructor({
     alert,
     client,

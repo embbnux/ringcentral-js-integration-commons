@@ -1,6 +1,10 @@
 import LoggerBase from '../../lib/LoggerBase';
 import ensureExist from '../../lib/ensureExist';
-import { isRinging, isInbound } from '../../lib/callLogHelpers';
+import {
+  isRinging,
+  isInbound,
+  removeDuplicateSelfCalls,
+} from '../../lib/callLogHelpers';
 import actionTypes from './actionTypes';
 import getDataReducer from './getDataReducer';
 import proxify from '../../lib/proxy/proxify';
@@ -15,7 +19,20 @@ export function callIdentityFunction(call) {
   return call.sessionId;
 }
 
+/**
+ * @class
+ * @description call logger module
+ */
 export default class CallLogger extends LoggerBase {
+  /**
+   * @constructor
+   * @param {Object} params - params object
+   * @param {Storage} params.storage - storage module instance
+   * @param {ActivityMatcher} params.activityMatcher - activityMatcher module instance
+   * @param {CallHistory} params.callHistory - callHistory module instance
+   * @param {TabManager} params.tabManager - tabManager module instance
+   * @param {ContactMatcher} params.contactMatcher - contactMatcher module instance
+   */
   constructor({
     storage,
     activityMatcher,
@@ -23,7 +40,7 @@ export default class CallLogger extends LoggerBase {
     callMonitor,
     contactMatcher,
     tabManager,
-    ...options,
+    ...options
   }) {
     super({
       ...options,
@@ -100,7 +117,7 @@ export default class CallLogger extends LoggerBase {
   async logCall({
     call,
     contact,
-    ...options,
+    ...options
   }) {
     const inbound = isInbound(call);
     const fromEntity = (inbound && contact) ||
@@ -158,9 +175,9 @@ export default class CallLogger extends LoggerBase {
           null;
 
         let toEntity = null;
-        if(toMatches && toMatches.length === 1) {
+        if (toMatches && toMatches.length === 1) {
           toEntity = toMatches[0];
-        }else if(toMatches && toMatches.length > 1 && toNumberEntity !== '') {
+        } else if(toMatches && toMatches.length > 1 && toNumberEntity !== '') {
           toEntity = toMatches.find(match =>
             toNumberEntity === match.id
           );
@@ -201,7 +218,7 @@ export default class CallLogger extends LoggerBase {
         ) || [];
         this._lastProcessedCalls = this._callMonitor.calls;
 
-        this._lastProcessedCalls.forEach((call) => {
+        removeDuplicateSelfCalls(this._lastProcessedCalls).forEach((call) => {
           const oldCallIndex = oldCalls.findIndex(item => item.sessionId === call.sessionId);
 
           if (oldCallIndex === -1) {
