@@ -71,6 +71,10 @@ var _url = require('url');
 
 var _url2 = _interopRequireDefault(_url);
 
+var _qs = require('qs');
+
+var _qs2 = _interopRequireDefault(_qs);
+
 var _RcModule2 = require('../../lib/RcModule');
 
 var _RcModule3 = _interopRequireDefault(_RcModule2);
@@ -163,6 +167,16 @@ var Auth = (_class = function (_RcModule) {
 
   /**
    * @constructor
+   * @param {Object} params - params object
+   * @param {Client} params.client - client module instance
+   * @param {Alert} params.alert - alert module instance
+   * @param {Brand} params.brand - brand module instance
+   * @param {Locale} params.locale - locale module instance
+   * @param {TabManager} params.tabManager - tabManager module instance
+   * @param {environment} params.Environment - environment module instance
+   * @param {String} params.redirectUri - redirect uri
+   * @param {String} params.proxyUri - proxyUri module instance
+   * @param {Number} params.defaultProxyRetry - default proxy retry time 5000
    */
   function Auth() {
     var _this2 = this;
@@ -835,11 +849,18 @@ var Auth = (_class = function (_RcModule) {
     key: 'openOAuthPage',
     value: function openOAuthPage() {
       if (this.proxyLoaded) {
+        var extendedQuery = _qs2.default.stringify({
+          force: true,
+          localeId: this._locale.currentLocale,
+          ui_options: 'hide_remember_me hide_tos'
+        });
         this._proxyFrame.contentWindow.postMessage({
           oAuthUri: this.getLoginUrl({
             redirectUri: this.redirectUri,
-            brandId: this._brand.id
-          }) + '&force=true&localeId=' + encodeURIComponent(this._locale.currentLocale)
+            brandId: this._brand.id,
+            state: btoa(Date.now()),
+            display: 'page'
+          }) + '&' + extendedQuery
         }, '*');
       }
     }

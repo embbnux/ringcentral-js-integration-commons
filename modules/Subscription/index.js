@@ -108,9 +108,21 @@ function _applyDecoratedDescriptor(target, property, decorators, descriptor, con
 
 var DEFAULT_TIME_TO_RETRY = 60 * 1000;
 
+/**
+ * @class
+ * @description Subscription module to subscibe notification
+ */
 var Subscription = (_class = function (_RcModule) {
   (0, _inherits3.default)(Subscription, _RcModule);
 
+  /**
+   * @constructor
+   * @param {Object} params - params object
+   * @param {Auth} params.auth - auth module instance
+   * @param {Client} params.client - client module instance
+   * @param {Storage} params.storage - storage module instance
+   * @param {Number} params.timeToRetry - time to retry, default 60 seconds
+   */
   function Subscription(_ref) {
     var auth = _ref.auth,
         client = _ref.client,
@@ -320,8 +332,10 @@ var Subscription = (_class = function (_RcModule) {
         _this4.store.dispatch({
           type: _this4.actionTypes.subscribe
         });
-        _this4._subscription.setEventFilters(_this4.filters);
-        _this4._subscription.register();
+        if (_this4._subscription) {
+          _this4._subscription.setEventFilters(_this4.filters);
+          _this4._subscription.register();
+        }
       }, 2000);
     }
   }, {
@@ -671,6 +685,11 @@ var Subscription = (_class = function (_RcModule) {
     key: 'cachedSubscription',
     get: function get() {
       return this._storage.getItem(this._cacheStorageKey);
+    }
+  }, {
+    key: 'pubnub',
+    get: function get() {
+      return this._subscription && this._subscription._pubnub;
     }
   }]);
   return Subscription;
