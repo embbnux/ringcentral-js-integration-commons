@@ -9,6 +9,10 @@ var _getOwnPropertyDescriptor = require('babel-runtime/core-js/object/get-own-pr
 
 var _getOwnPropertyDescriptor2 = _interopRequireDefault(_getOwnPropertyDescriptor);
 
+var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
+
+var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
+
 var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
@@ -132,8 +136,9 @@ function uniqueContactItems(result) {
   var hash = {};
   var unique = [];
   items.forEach(function (item) {
-    if (!hash[item.id]) {
-      hash[item.id] = 1;
+    var itemId = '' + item.type + item.id;
+    if (!hash[itemId]) {
+      hash[itemId] = 1;
       unique.push(item);
     }
   });
@@ -164,7 +169,7 @@ function groupByFirstLetterOfName(contactItems) {
     var group = void 0;
     contactItems.forEach(function (contact) {
       var name = (contact.name || '').replace(/^\s\s*/, ''); // trim start
-      var letter = name[0] || '';
+      var letter = (name[0] || '').toLocaleUpperCase();
       if (!group || group.caption !== letter) {
         group = {
           contacts: [],
@@ -268,6 +273,8 @@ var ContactSearch = (_class = function (_RcModule) {
 
     _this.addSelector('contactGroups', function () {
       return _this.searching && _this.searching.result;
+    }, function () {
+      return Math.round(Date.now() / _this._ttl);
     }, function (result) {
       var pageSize = _this._contactListPageSize;
       var pageNumber = _this.searchCriteria.pageNumber || 1;
@@ -297,6 +304,8 @@ var ContactSearch = (_class = function (_RcModule) {
         this._initModuleStatus();
       } else if (this._shouldReset()) {
         this._resetModuleStatus();
+        this._clearStateCache();
+        this._restSearchCriteria();
       }
     }
   }, {
@@ -317,10 +326,31 @@ var ContactSearch = (_class = function (_RcModule) {
       });
     }
   }, {
+    key: '_clearStateCache',
+    value: function _clearStateCache() {
+      this.store.dispatch({
+        type: this.actionTypes.cleanUp
+      });
+    }
+  }, {
+    key: '_restSearchCriteria',
+    value: function _restSearchCriteria() {
+      this.store.dispatch({
+        type: this.actionTypes.restSearchCriteria
+      });
+    }
+  }, {
     key: '_resetModuleStatus',
     value: function _resetModuleStatus() {
       this.store.dispatch({
         type: this.actionTypes.resetSuccess
+      });
+    }
+  }, {
+    key: 'resetSearchStatus',
+    value: function resetSearchStatus() {
+      this.store.dispatch({
+        type: this.actionTypes.reset
       });
     }
   }, {
@@ -379,80 +409,72 @@ var ContactSearch = (_class = function (_RcModule) {
                 return _context.abrupt('return');
 
               case 3:
-                if (!(this.searching.searchString === searchString)) {
-                  _context.next = 5;
-                  break;
-                }
-
-                return _context.abrupt('return');
-
-              case 5:
                 searchOnSources = (0, _from2.default)(this._searchSources.keys());
                 _iteratorNormalCompletion2 = true;
                 _didIteratorError2 = false;
                 _iteratorError2 = undefined;
-                _context.prev = 9;
+                _context.prev = 7;
                 _iterator2 = (0, _getIterator3.default)(searchOnSources);
 
-              case 11:
+              case 9:
                 if (_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done) {
-                  _context.next = 18;
+                  _context.next = 16;
                   break;
                 }
 
                 sourceName = _step2.value;
-                _context.next = 15;
+                _context.next = 13;
                 return this._searchSource({
                   searchOnSources: searchOnSources,
                   sourceName: sourceName,
                   searchString: searchString
                 });
 
-              case 15:
+              case 13:
                 _iteratorNormalCompletion2 = true;
-                _context.next = 11;
+                _context.next = 9;
+                break;
+
+              case 16:
+                _context.next = 22;
                 break;
 
               case 18:
-                _context.next = 24;
-                break;
-
-              case 20:
-                _context.prev = 20;
-                _context.t0 = _context['catch'](9);
+                _context.prev = 18;
+                _context.t0 = _context['catch'](7);
                 _didIteratorError2 = true;
                 _iteratorError2 = _context.t0;
 
-              case 24:
-                _context.prev = 24;
-                _context.prev = 25;
+              case 22:
+                _context.prev = 22;
+                _context.prev = 23;
 
                 if (!_iteratorNormalCompletion2 && _iterator2.return) {
                   _iterator2.return();
                 }
 
-              case 27:
-                _context.prev = 27;
+              case 25:
+                _context.prev = 25;
 
                 if (!_didIteratorError2) {
-                  _context.next = 30;
+                  _context.next = 28;
                   break;
                 }
 
                 throw _iteratorError2;
 
+              case 28:
+                return _context.finish(25);
+
+              case 29:
+                return _context.finish(22);
+
               case 30:
-                return _context.finish(27);
-
-              case 31:
-                return _context.finish(24);
-
-              case 32:
               case 'end':
                 return _context.stop();
             }
           }
-        }, _callee, this, [[9, 20, 24, 32], [25,, 27, 31]]);
+        }, _callee, this, [[7, 18, 22, 30], [23,, 25, 29]]);
       }));
 
       function search(_x) {
@@ -464,117 +486,102 @@ var ContactSearch = (_class = function (_RcModule) {
   }, {
     key: 'searchPlus',
     value: function () {
-      var _ref5 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3(_ref6) {
-        var _this3 = this;
-
+      var _ref5 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2(_ref6) {
         var sourceName = _ref6.sourceName,
-            searchText = _ref6.searchText,
+            searchString = _ref6.searchString,
             pageNumber = _ref6.pageNumber;
-        return _regenerator2.default.wrap(function _callee3$(_context3) {
+
+        var searchOnSources, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, source;
+
+        return _regenerator2.default.wrap(function _callee2$(_context2) {
           while (1) {
-            switch (_context3.prev = _context3.next) {
+            switch (_context2.prev = _context2.next) {
               case 0:
                 if (this.ready) {
-                  _context3.next = 3;
+                  _context2.next = 3;
                   break;
                 }
 
                 this.store.dispatch({
                   type: this.actionTypes.prepareSearch
                 });
-                return _context3.abrupt('return');
+                return _context2.abrupt('return');
 
               case 3:
 
                 this.store.dispatch({
                   type: this.actionTypes.updateSearchCriteria,
                   sourceName: sourceName,
-                  searchText: searchText,
+                  searchString: searchString,
                   pageNumber: pageNumber
                 });
 
-                clearTimeout(this._searchTimeoutId);
-                this._searchTimeoutId = setTimeout((0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2() {
-                  var searchOnSources, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, source;
+                searchOnSources = !sourceName || sourceName === AllContactSourceName ? (0, _from2.default)(this._searchSources.keys()) : [sourceName];
+                _iteratorNormalCompletion3 = true;
+                _didIteratorError3 = false;
+                _iteratorError3 = undefined;
+                _context2.prev = 8;
+                _iterator3 = (0, _getIterator3.default)(searchOnSources);
 
-                  return _regenerator2.default.wrap(function _callee2$(_context2) {
-                    while (1) {
-                      switch (_context2.prev = _context2.next) {
-                        case 0:
-                          searchOnSources = !sourceName || sourceName === AllContactSourceName ? (0, _from2.default)(_this3._searchSources.keys()) : [sourceName];
-                          _iteratorNormalCompletion3 = true;
-                          _didIteratorError3 = false;
-                          _iteratorError3 = undefined;
-                          _context2.prev = 4;
-                          _iterator3 = (0, _getIterator3.default)(searchOnSources);
+              case 10:
+                if (_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done) {
+                  _context2.next = 17;
+                  break;
+                }
 
-                        case 6:
-                          if (_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done) {
-                            _context2.next = 13;
-                            break;
-                          }
+                source = _step3.value;
+                _context2.next = 14;
+                return this._searchSource({
+                  searchOnSources: searchOnSources,
+                  sourceName: source,
+                  searchString: searchString
+                });
 
-                          source = _step3.value;
-                          _context2.next = 10;
-                          return _this3._searchSource({
-                            searchOnSources: searchOnSources,
-                            sourceName: source,
-                            searchString: searchText
-                          });
+              case 14:
+                _iteratorNormalCompletion3 = true;
+                _context2.next = 10;
+                break;
 
-                        case 10:
-                          _iteratorNormalCompletion3 = true;
-                          _context2.next = 6;
-                          break;
+              case 17:
+                _context2.next = 23;
+                break;
 
-                        case 13:
-                          _context2.next = 19;
-                          break;
+              case 19:
+                _context2.prev = 19;
+                _context2.t0 = _context2['catch'](8);
+                _didIteratorError3 = true;
+                _iteratorError3 = _context2.t0;
 
-                        case 15:
-                          _context2.prev = 15;
-                          _context2.t0 = _context2['catch'](4);
-                          _didIteratorError3 = true;
-                          _iteratorError3 = _context2.t0;
+              case 23:
+                _context2.prev = 23;
+                _context2.prev = 24;
 
-                        case 19:
-                          _context2.prev = 19;
-                          _context2.prev = 20;
+                if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                  _iterator3.return();
+                }
 
-                          if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                            _iterator3.return();
-                          }
+              case 26:
+                _context2.prev = 26;
 
-                        case 22:
-                          _context2.prev = 22;
+                if (!_didIteratorError3) {
+                  _context2.next = 29;
+                  break;
+                }
 
-                          if (!_didIteratorError3) {
-                            _context2.next = 25;
-                            break;
-                          }
+                throw _iteratorError3;
 
-                          throw _iteratorError3;
+              case 29:
+                return _context2.finish(26);
 
-                        case 25:
-                          return _context2.finish(22);
+              case 30:
+                return _context2.finish(23);
 
-                        case 26:
-                          return _context2.finish(19);
-
-                        case 27:
-                        case 'end':
-                          return _context2.stop();
-                      }
-                    }
-                  }, _callee2, _this3, [[4, 15, 19, 27], [20,, 22, 26]]);
-                })), 100);
-
-              case 6:
+              case 31:
               case 'end':
-                return _context3.stop();
+                return _context2.stop();
             }
           }
-        }, _callee3, this);
+        }, _callee2, this, [[8, 19, 23, 31], [24,, 26, 30]]);
       }));
 
       function searchPlus(_x2) {
@@ -583,69 +590,92 @@ var ContactSearch = (_class = function (_RcModule) {
 
       return searchPlus;
     }()
+    // TODO Need to refactor, remove cache, and update data in real time.
+
   }, {
     key: '_searchSource',
     value: function () {
-      var _ref8 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee4(_ref9) {
-        var searchOnSources = _ref9.searchOnSources,
-            sourceName = _ref9.sourceName,
-            searchString = _ref9.searchString;
+      var _ref7 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3(_ref8) {
+        var searchOnSources = _ref8.searchOnSources,
+            sourceName = _ref8.sourceName,
+            searchString = _ref8.searchString;
         var entities;
-        return _regenerator2.default.wrap(function _callee4$(_context4) {
+        return _regenerator2.default.wrap(function _callee3$(_context3) {
           while (1) {
-            switch (_context4.prev = _context4.next) {
+            switch (_context3.prev = _context3.next) {
               case 0:
                 this.store.dispatch({
                   type: this.actionTypes.search
                 });
-                _context4.prev = 1;
+                _context3.prev = 1;
                 entities = null;
 
                 entities = this._searchFromCache({ sourceName: sourceName, searchString: searchString });
 
                 if (!entities) {
-                  _context4.next = 7;
+                  _context3.next = 7;
                   break;
                 }
 
                 this._loadSearching({ searchOnSources: searchOnSources, searchString: searchString, entities: entities });
-                return _context4.abrupt('return');
+                return _context3.abrupt('return');
 
               case 7:
-                _context4.next = 9;
+                _context3.next = 9;
                 return this._searchSources.get(sourceName)({
                   searchString: searchString
                 });
 
               case 9:
-                entities = _context4.sent;
+                entities = _context3.sent;
 
                 entities = this._searchSourcesFormat.get(sourceName)(entities);
                 this._loadSearching({ searchOnSources: searchOnSources, searchString: searchString, entities: entities });
                 this._saveSearching({ sourceName: sourceName, searchString: searchString, entities: entities });
-                _context4.next = 18;
+                _context3.next = 18;
                 break;
 
               case 15:
-                _context4.prev = 15;
-                _context4.t0 = _context4['catch'](1);
+                _context3.prev = 15;
+                _context3.t0 = _context3['catch'](1);
 
                 this._onSearchError();
 
               case 18:
               case 'end':
-                return _context4.stop();
+                return _context3.stop();
             }
           }
-        }, _callee4, this, [[1, 15]]);
+        }, _callee3, this, [[1, 15]]);
       }));
 
       function _searchSource(_x3) {
-        return _ref8.apply(this, arguments);
+        return _ref7.apply(this, arguments);
       }
 
       return _searchSource;
     }()
+  }, {
+    key: '_quickSort',
+    value: function _quickSort(_ref9) {
+      var _ref9$result = _ref9.result,
+          result = _ref9$result === undefined ? [] : _ref9$result,
+          _ref9$searchString = _ref9.searchString,
+          searchString = _ref9$searchString === undefined ? '' : _ref9$searchString;
+
+      var list = [].concat((0, _toConsumableArray3.default)(result));
+      if (searchString === '') {
+        return list;
+      }
+      return list.sort(function (current, next) {
+        var currentName = current.name || '';
+        var currentPhoneNumber = current.phoneNumber || '';
+        var nextName = next.name || '';
+        var nextPhoneNumber = next.phoneNumber || '';
+        var isSort = currentName.indexOf(searchString) < nextName.indexOf(searchString) || currentPhoneNumber.indexOf(searchString) < nextPhoneNumber.indexOf(searchString);
+        return isSort;
+      });
+    }
   }, {
     key: '_searchFromCache',
     value: function _searchFromCache(_ref10) {
@@ -767,6 +797,11 @@ var ContactSearch = (_class = function (_RcModule) {
     key: 'contactGroups',
     get: function get() {
       return this._selectors.contactGroups();
+    }
+  }, {
+    key: 'sortedResult',
+    get: function get() {
+      return this._quickSort(this.searching);
     }
   }]);
   return ContactSearch;

@@ -104,8 +104,6 @@ var Analytics = function (_RcModule) {
     _this._brandCode = brandCode;
     _this._reducer = (0, _getAnalyticsReducer2.default)(_this.actionTypes);
     _this._segment = (0, _Analytics.Segment)();
-    _this._segment.load(_this._analyticsKey);
-    _this._segment.page();
     return _this;
   }
 
@@ -117,6 +115,7 @@ var Analytics = function (_RcModule) {
       this.store.subscribe(function () {
         return _this2._onStateChange();
       });
+      this._segment.load(this._analyticsKey);
     }
   }, {
     key: 'identify',

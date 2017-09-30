@@ -310,17 +310,26 @@ var Contacts = function (_RcModule) {
       var contactType = _ref3.contactType,
           contactId = _ref3.contactId;
 
-      var contact = this.companyContacts.find(function (x) {
-        return x.id.toString() === contactId && (!contactType || x.type === contactType);
-      }) || this.personalContacts.find(function (x) {
-        return x.id.toString() === contactId && (!contactType || x.type === contactType);
-      });
-      return contact;
+      var id = (contactId || '').toString();
+      switch (contactType) {
+        case 'company':
+          return this.companyContacts.find(function (x) {
+            return x.id.toString() === id;
+          });
+        case 'personal':
+          return this.personalContacts.find(function (x) {
+            return x.id.toString() === id;
+          });
+        default:
+          return null;
+      }
     }
   }, {
     key: 'getImageProfile',
     value: function getImageProfile(contact) {
       var _this4 = this;
+
+      var useCache = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
 
       return new _promise2.default(function (resolve) {
         if (!contact || !contact.id || contact.type !== 'company' || !contact.hasProfileImage) {
@@ -329,7 +338,7 @@ var Contacts = function (_RcModule) {
         }
 
         var imageId = '' + contact.type + contact.id;
-        if (_this4.profileImages[imageId] && Date.now() - _this4.profileImages[imageId].timestamp < _this4._avatarTtl) {
+        if (useCache && _this4.profileImages[imageId] && Date.now() - _this4.profileImages[imageId].timestamp < _this4._avatarTtl) {
           var image = _this4.profileImages[imageId].imageUrl;
           resolve(image);
           return;
@@ -363,7 +372,7 @@ var Contacts = function (_RcModule) {
                 imageUrl = null;
                 _context.prev = 3;
                 _context.next = 6;
-                return this._client.account().extension(ctx.contact.id).profileImage().get();
+                return this._client.account().extension(ctx.contact.id).profileImage('195x195').get();
 
               case 6:
                 response = _context.sent;
@@ -418,7 +427,7 @@ var Contacts = function (_RcModule) {
         }, _callee, this, [[3, 15]]);
       }));
 
-      function _processQueryAvatar(_x) {
+      function _processQueryAvatar(_x2) {
         return _ref4.apply(this, arguments);
       }
 
@@ -517,7 +526,7 @@ var Contacts = function (_RcModule) {
         }, _callee2, this);
       }));
 
-      function _processQueryPresences(_x2) {
+      function _processQueryPresences(_x3) {
         return _ref5.apply(this, arguments);
       }
 
@@ -597,7 +606,7 @@ var Contacts = function (_RcModule) {
         }, _callee3, this, [[1, 19]]);
       }));
 
-      function _batchQueryPresences(_x3) {
+      function _batchQueryPresences(_x4) {
         return _ref6.apply(this, arguments);
       }
 

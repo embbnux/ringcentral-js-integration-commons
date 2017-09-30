@@ -23,6 +23,8 @@ var _contactSearchStatus = require('./contactSearchStatus');
 
 var _contactSearchStatus2 = _interopRequireDefault(_contactSearchStatus);
 
+var _index = require('./index');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function getContactSearchStatusReducer(types) {
@@ -72,6 +74,7 @@ function getSearchingReducer(types) {
           searchString: searchString,
           result: entities
         };
+      case types.resetSuccess:
       case types.prepareSearch:
       case types.reset:
       case types.searchError:
@@ -85,8 +88,8 @@ function getSearchingReducer(types) {
 
 function getSearchCriteriaReducer(types) {
   var initialState = {
-    sourceName: '',
-    searchText: '',
+    sourceName: _index.AllContactSourceName,
+    searchString: '',
     pageNumber: 1
   };
   return function () {
@@ -94,19 +97,21 @@ function getSearchCriteriaReducer(types) {
     var _ref3 = arguments[1];
     var type = _ref3.type,
         sourceName = _ref3.sourceName,
-        searchText = _ref3.searchText,
+        searchString = _ref3.searchString,
         pageNumber = _ref3.pageNumber;
 
     switch (type) {
       case types.updateSearchCriteria:
-        if (state.sourceName !== sourceName || state.searchText !== searchText || state.pageNumber !== pageNumber) {
+        if (state.sourceName !== sourceName || state.searchString !== searchString || state.pageNumber !== pageNumber) {
           return {
             sourceName: sourceName,
-            searchText: searchText,
+            searchString: searchString,
             pageNumber: pageNumber
           };
         }
         return state;
+      case types.restSearchCriteria:
+        return initialState;
       default:
         return state;
     }

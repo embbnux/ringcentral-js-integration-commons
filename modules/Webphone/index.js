@@ -484,7 +484,7 @@ var Webphone = (_class = function (_RcModule) {
         appKey: this._appKey,
         appName: this._appName,
         appVersion: this._appVersion,
-        uuid: this._auth.endpoingId,
+        uuid: this._auth.endpointId,
         logLevel: this._webphoneLogLevel, // error 0, warn 1, log: 2, debug: 3
         audioHelper: {
           enabled: true, // enables audio feedback when web phone is ringing or making a call
