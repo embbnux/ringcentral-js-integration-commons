@@ -253,7 +253,7 @@ export default class ContactSearch extends RcModule {
   }
 
   @proxify
-  async searchPlus({ sourceName, searchString, pageNumber }) {
+  async searchPlus({ sourceName, searchString, pageNumber, useCache = true }) {
     if (!this.ready) {
       this.store.dispatch({
         type: this.actionTypes.prepareSearch,
@@ -277,28 +277,33 @@ export default class ContactSearch extends RcModule {
         searchOnSources,
         sourceName: source,
         searchString,
+        useCache,
       });
     }
   }
   // TODO Need to refactor, remove cache, and update data in real time.
   @proxify
-  async _searchSource({ searchOnSources, sourceName, searchString }) {
+  async _searchSource({ searchOnSources, sourceName, searchString, useCache = true }) {
     this.store.dispatch({
       type: this.actionTypes.search,
     });
     try {
       let entities = null;
-      entities = this._searchFromCache({ sourceName, searchString });
-      if (entities) {
-        this._loadSearching({ searchOnSources, searchString, entities });
-        return;
+      if (useCache) {
+        entities = this._searchFromCache({ sourceName, searchString });
+        if (entities) {
+          this._loadSearching({ searchOnSources, searchString, entities });
+          return;
+        }
       }
       entities = await this._searchSources.get(sourceName)({
         searchString,
       });
       entities = this._searchSourcesFormat.get(sourceName)(entities);
       this._loadSearching({ searchOnSources, searchString, entities });
-      this._saveSearching({ sourceName, searchString, entities });
+      if (useCache) {
+        this._saveSearching({ sourceName, searchString, entities });
+      }
     } catch (error) {
       this._onSearchError();
     }
