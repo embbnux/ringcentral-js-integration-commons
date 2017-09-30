@@ -273,8 +273,6 @@ var ContactSearch = (_class = function (_RcModule) {
 
     _this.addSelector('contactGroups', function () {
       return _this.searching && _this.searching.result;
-    }, function () {
-      return Math.round(Date.now() / _this._ttl);
     }, function (result) {
       var pageSize = _this._contactListPageSize;
       var pageNumber = _this.searchCriteria.pageNumber || 1;
