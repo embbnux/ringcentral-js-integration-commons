@@ -487,7 +487,9 @@ var ContactSearch = (_class = function (_RcModule) {
       var _ref5 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2(_ref6) {
         var sourceName = _ref6.sourceName,
             searchString = _ref6.searchString,
-            pageNumber = _ref6.pageNumber;
+            pageNumber = _ref6.pageNumber,
+            _ref6$useCache = _ref6.useCache,
+            useCache = _ref6$useCache === undefined ? true : _ref6$useCache;
 
         var searchOnSources, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, source;
 
@@ -532,7 +534,8 @@ var ContactSearch = (_class = function (_RcModule) {
                 return this._searchSource({
                   searchOnSources: searchOnSources,
                   sourceName: source,
-                  searchString: searchString
+                  searchString: searchString,
+                  useCache: useCache
                 });
 
               case 14:
@@ -596,7 +599,9 @@ var ContactSearch = (_class = function (_RcModule) {
       var _ref7 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3(_ref8) {
         var searchOnSources = _ref8.searchOnSources,
             sourceName = _ref8.sourceName,
-            searchString = _ref8.searchString;
+            searchString = _ref8.searchString,
+            _ref8$useCache = _ref8.useCache,
+            useCache = _ref8$useCache === undefined ? true : _ref8$useCache;
         var entities;
         return _regenerator2.default.wrap(function _callee3$(_context3) {
           while (1) {
@@ -608,43 +613,50 @@ var ContactSearch = (_class = function (_RcModule) {
                 _context3.prev = 1;
                 entities = null;
 
+                if (!useCache) {
+                  _context3.next = 8;
+                  break;
+                }
+
                 entities = this._searchFromCache({ sourceName: sourceName, searchString: searchString });
 
                 if (!entities) {
-                  _context3.next = 7;
+                  _context3.next = 8;
                   break;
                 }
 
                 this._loadSearching({ searchOnSources: searchOnSources, searchString: searchString, entities: entities });
                 return _context3.abrupt('return');
 
-              case 7:
-                _context3.next = 9;
+              case 8:
+                _context3.next = 10;
                 return this._searchSources.get(sourceName)({
                   searchString: searchString
                 });
 
-              case 9:
+              case 10:
                 entities = _context3.sent;
 
                 entities = this._searchSourcesFormat.get(sourceName)(entities);
                 this._loadSearching({ searchOnSources: searchOnSources, searchString: searchString, entities: entities });
-                this._saveSearching({ sourceName: sourceName, searchString: searchString, entities: entities });
-                _context3.next = 18;
+                if (useCache) {
+                  this._saveSearching({ sourceName: sourceName, searchString: searchString, entities: entities });
+                }
+                _context3.next = 19;
                 break;
 
-              case 15:
-                _context3.prev = 15;
+              case 16:
+                _context3.prev = 16;
                 _context3.t0 = _context3['catch'](1);
 
                 this._onSearchError();
 
-              case 18:
+              case 19:
               case 'end':
                 return _context3.stop();
             }
           }
-        }, _callee3, this, [[1, 15]]);
+        }, _callee3, this, [[1, 16]]);
       }));
 
       function _searchSource(_x3) {
