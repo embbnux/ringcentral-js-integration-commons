@@ -541,6 +541,7 @@ var Webphone = (_class = function (_RcModule) {
       this._webphone.userAgent.once('registrationFailed', onRegistrationFailed);
       this._webphone.userAgent.on('invite', function (session) {
         console.debug('UA invite');
+        (0, _webphoneHelper.sendReceiveConfirm)(session);
         _this4._onInvite(session);
       });
     }
