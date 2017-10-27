@@ -41,6 +41,7 @@ const DEFAULT_AVATARQUERYINTERVAL = 2 * 1000; // 2 seconds
 @Module({
   deps: [
     'Client',
+    'Alert',
     'AddressBook',
     'AccountExtension',
     'AccountPhoneNumber',
