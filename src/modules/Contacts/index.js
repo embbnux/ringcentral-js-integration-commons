@@ -53,6 +53,7 @@ export default class Contacts extends RcModule {
    * @constructor
    * @param {Object} params - params object
    * @param {Client} params.client - client module instance
+   * @param {Alert} params.alert - alert module instance
    * @param {AddressBook} params.addressBook - addressBook module instance
    * @param {AccountExtension} params.accountExtension - accountExtension module instance
    * @param {AccountPhoneNumber} params.accountPhoneNumber - accountPhoneNumber module instance
@@ -156,8 +157,12 @@ export default class Contacts extends RcModule {
 
   _handlerContactsSources() {
     this._addContactsSources.forEach(({ addSelector, sourcesName }) => {
-      this.__defineGetter__(sourcesName, () => this._selectors[sourcesName]());
-      this.addSelector(...addSelector);
+      if (!this[sourcesName]) {
+        Object.defineProperty(this, sourcesName, {
+          get: () => this._selectors[sourcesName]()
+        });
+        this.addSelector(...addSelector);
+      }
     });
   }
 
