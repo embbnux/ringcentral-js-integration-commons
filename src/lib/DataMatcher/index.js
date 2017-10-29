@@ -49,7 +49,7 @@ export default class DataMatcher extends RcModule {
     this._searchProviders = new Map();
     this._matchPromises = new Map();
     this._matchQueues = new Map();
-    if (!this.disableCache) {
+    if (!disableCache) {
       this._storage = storage;
     }
     this._storage = storage;
