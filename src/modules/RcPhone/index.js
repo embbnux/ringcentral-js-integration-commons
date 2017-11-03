@@ -5,6 +5,7 @@ import RingCentralClient from 'ringcentral-client';
 import { ModuleFactory } from '../../lib/di';
 import RcModule from '../../lib/RcModule';
 
+import AccountContacts from '../AccountContacts';
 import AccountExtension from '../AccountExtension';
 import AccountInfo from '../AccountInfo';
 import AccountPhoneNumber from '../AccountPhoneNumber';
@@ -104,6 +105,7 @@ import Analytics from '../Analytics';
     CallLogger,
     AccountPhoneNumber,
     AddressBook,
+    AccountContacts,
     Contacts,
     ConversationLogger,
     Messages,

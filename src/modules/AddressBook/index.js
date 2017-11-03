@@ -4,6 +4,7 @@ import sleep from '../../lib/sleep';
 import syncTypes from '../../enums/syncTypes';
 import actionTypes from './actionTypes';
 import proxify from '../../lib/proxy/proxify';
+import { addPhoneToContact } from '../../lib/contactHelper';
 
 import getAddressBookReducer, {
   getSyncTokenReducer,
@@ -109,6 +110,32 @@ export default class AddressBook extends Pollable {
         syncTimestamp: getSyncTimestampReducer(this.actionTypes),
       });
     }
+
+    this.addSelector(
+      'contacts',
+      () => this.rawContacts,
+      (rawContacts) => {
+        const contacts = [];
+        rawContacts.forEach((rawContact) => {
+          const contact = {
+            type: 'personal',
+            phoneNumbers: [],
+            ...rawContact,
+          };
+          Object.keys(contact).forEach((key) => {
+            if (key.toLowerCase().indexOf('phone') === -1) {
+              return;
+            }
+            if (typeof contact[key] !== 'string') {
+              return;
+            }
+            addPhoneToContact(contact, contact[key], key);
+          });
+          contacts.push(contact);
+        });
+        return contacts;
+      }
+    );
   }
 
   initialize() {
@@ -283,11 +310,15 @@ export default class AddressBook extends Pollable {
     return this.state.syncToken;
   }
 
-  get contacts() {
+  get rawContacts() {
     if (this._storage) {
       return this._storage.getItem(this._addressBookStorageKey);
     }
     return this.state.contactList;
+  }
+
+  get contacts() {
+    return this._selectors.contacts();
   }
 
   get timestamp() {
