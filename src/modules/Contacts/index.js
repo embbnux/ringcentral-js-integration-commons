@@ -1,38 +1,10 @@
 import RcModule from '../../lib/RcModule';
 import { Module } from '../../lib/di';
-import isBlank from '../../lib/isBlank';
 import normalizeNumber from '../../lib/normalizeNumber';
 import ensureExist from '../../lib/ensureExist';
-import { batchGetApi } from '../../lib/batchApiHelper';
-import sleep from '../../lib/sleep';
 import actionTypes from './actionTypes';
 import getContactsReducer from './getContactsReducer';
 import contactsMessages from './contactsMessages';
-
-const MaximumBatchGetPresence = 30;
-
-function addPhoneToContact(contact, phone, type) {
-  const phoneNumber = normalizeNumber({ phoneNumber: phone });
-  if (isBlank(phoneNumber)) {
-    return;
-  }
-  const existedPhone = contact.phoneNumbers.find(
-    number => number && number.phoneNumber === phone
-  );
-  if (existedPhone) {
-    existedPhone.phoneType = type;
-  } else {
-    contact.phoneNumbers.push({
-      phoneNumber: phone,
-      phoneType: type,
-    });
-  }
-}
-
-const DEFAULT_TTL = 30 * 60 * 1000; // 30 mins
-const DEFAULT_PRESENCETTL = 10 * 60 * 1000; // 10 mins
-const DEFAULT_AVATARTTL = 2 * 60 * 60 * 1000; // 2 hour
-const DEFAULT_AVATARQUERYINTERVAL = 2 * 1000; // 2 seconds
 
 /**
  * @class
@@ -45,6 +17,7 @@ const DEFAULT_AVATARQUERYINTERVAL = 2 * 1000; // 2 seconds
     'AddressBook',
     'AccountExtension',
     'AccountPhoneNumber',
+    'AccountContacts',
     { dep: 'ContactsOptions', optional: true }
   ]
 })
@@ -65,13 +38,10 @@ export default class Contacts extends RcModule {
   constructor({
     client,
     addressBook,
+    accountContacts,
     accountExtension,
     accountPhoneNumber,
     alert,
-    ttl = DEFAULT_TTL,
-    avatarTtl = DEFAULT_AVATARTTL,
-    presenceTtl = DEFAULT_PRESENCETTL,
-    avatarQueryInterval = DEFAULT_AVATARQUERYINTERVAL,
     readyCheckFn,
     addContactsSources = [],
     ...options,
@@ -83,51 +53,12 @@ export default class Contacts extends RcModule {
     this._addressBook = this::ensureExist(addressBook, 'addressBook');
     this._accountExtension = this::ensureExist(accountExtension, 'accountExtension');
     this._accountPhoneNumber = this::ensureExist(accountPhoneNumber, 'accountPhoneNumber');
+    this._accountContacts = this::ensureExist(accountContacts, 'accountContacts');
     this._client = this::ensureExist(client, 'client');
     this._alert = this::ensureExist(alert, 'alert');
     this._reducer = getContactsReducer(this.actionTypes);
-    this._ttl = ttl;
-    this._avatarTtl = avatarTtl;
-    this._presenceTtl = presenceTtl;
-    this._avatarQueryInterval = avatarQueryInterval;
     this._addContactsSources = addContactsSources;
     this._readyCheckFn = readyCheckFn;
-    this.addSelector(
-      'companyContacts',
-      () => this._accountExtension.availableExtensions,
-      () => this._accountPhoneNumber.extensionToPhoneNumberMap,
-      (extensions, extensionToPhoneNumberMap) => {
-        const newExtensions = [];
-        extensions.forEach((extension) => {
-          if (!(extension.status === 'Enabled' &&
-            ['DigitalUser', 'User', 'Department'].indexOf(extension.type) >= 0)) {
-            return;
-          }
-          const contact = {
-            type: 'company',
-            id: extension.id,
-            firstName: extension.contact && extension.contact.firstName,
-            lastName: extension.contact && extension.contact.lastName,
-            email: extension.contact && extension.contact.email,
-            extensionNumber: extension.ext,
-            hasProfileImage: extension.hasProfileImage,
-            phoneNumbers: [],
-          };
-          if (isBlank(contact.extensionNumber)) {
-            return;
-          }
-          const phones = extensionToPhoneNumberMap[contact.extensionNumber];
-          if (phones && phones.length > 0) {
-            phones.forEach((phone) => {
-              addPhoneToContact(contact, phone.phoneNumber, 'directPhone');
-            });
-          }
-          newExtensions.push(contact);
-        });
-        return newExtensions;
-      }
-    );
-
     this._handlerContactsSources();
   }
 
@@ -260,155 +191,11 @@ export default class Contacts extends RcModule {
   }
 
   getImageProfile(contact, useCache = true) {
-    return new Promise((resolve) => {
-      if (!contact || !contact.id || contact.type !== 'company' || !contact.hasProfileImage) {
-        resolve(null);
-        return;
-      }
-
-      const imageId = `${contact.type}${contact.id}`;
-      if (
-        useCache &&
-        this.profileImages[imageId] &&
-        (Date.now() - this.profileImages[imageId].timestamp < this._avatarTtl)
-      ) {
-        const image = this.profileImages[imageId].imageUrl;
-        resolve(image);
-        return;
-      }
-
-      if (!this._getAvatarContexts) {
-        this._getAvatarContexts = [];
-      }
-      this._getAvatarContexts.push({
-        contact,
-        resolve,
-      });
-
-      if (!this._queryingAvatar) {
-        this._queryingAvatar = true;
-        this._processQueryAvatar(this._getAvatarContexts);
-      }
-    });
-  }
-
-  async _processQueryAvatar(getAvatarContexts) {
-    const ctx = getAvatarContexts[0];
-    const imageId = `${ctx.contact.type}${ctx.contact.id}`;
-    let imageUrl = null;
-    try {
-      const response = await this._client
-        .account()
-        .extension(ctx.contact.id)
-        .profileImage('195x195')
-        .get();
-      imageUrl = URL.createObjectURL(await response._response.blob());
-      this.store.dispatch({
-        type: this.actionTypes.fetchImageSuccess,
-        imageId,
-        imageUrl,
-        ttl: this._avatarTtl,
-      });
-    } catch (e) {
-      console.error(e);
-    }
-    ctx.resolve(imageUrl);
-    getAvatarContexts.splice(0, 1);
-    if (getAvatarContexts.length) {
-      await sleep(this._avatarQueryInterval);
-      this._processQueryAvatar(getAvatarContexts);
-    } else {
-      this._queryingAvatar = false;
-    }
+    return this._accountContacts.getImageProfile(contact, useCache);
   }
 
   getPresence(contact) {
-    return new Promise((resolve) => {
-      if (!contact || !contact.id || contact.type !== 'company') {
-        resolve(null);
-        return;
-      }
-
-      const presenceId = `${contact.type}${contact.id}`;
-      if (
-        this.contactPresences[presenceId] &&
-        (Date.now() - this.contactPresences[presenceId].timestamp < this._presenceTtl)
-      ) {
-        const presence = this.contactPresences[presenceId].presence;
-        resolve(presence);
-        return;
-      }
-
-      if (!this._getPresenceContexts) {
-        this._getPresenceContexts = [];
-      }
-      this._getPresenceContexts.push({
-        contact,
-        resolve,
-      });
-
-      clearTimeout(this.enqueueTimeoutId);
-      if (this._getPresenceContexts.length === MaximumBatchGetPresence) {
-        this._processQueryPresences(this._getPresenceContexts);
-        this._getPresenceContexts = null;
-      } else {
-        this.enqueueTimeoutId = setTimeout(() => {
-          this._processQueryPresences(this._getPresenceContexts);
-          this._getPresenceContexts = null;
-        }, 1000);
-      }
-    });
-  }
-
-  async _processQueryPresences(getPresenceContexts) {
-    const contacts = getPresenceContexts.map(x => x.contact);
-    const responses = await this._batchQueryPresences(contacts);
-    getPresenceContexts.forEach((ctx) => {
-      const response = responses[ctx.contact.id];
-      if (!response) {
-        ctx.resolve(null);
-        return;
-      }
-      const { dndStatus, presenceStatus, telephonyStatus, userStatus } = response;
-      const presence = {
-        dndStatus,
-        presenceStatus,
-        telephonyStatus,
-        userStatus,
-      };
-      const presenceId = `${ctx.contact.type}${ctx.contact.id}`;
-      this.store.dispatch({
-        type: this.actionTypes.fetchPresenceSuccess,
-        presenceId,
-        presence,
-        ttl: this._presenceTtl,
-      });
-      ctx.resolve(presence);
-    });
-  }
-
-  async _batchQueryPresences(contacts) {
-    const presenceSet = {};
-    try {
-      if (contacts.length === 1) {
-        const id = contacts[0].id;
-        const response = await this._client.account().extension(id).presence().get();
-        presenceSet[id] = response;
-      } else if (contacts.length > 1) {
-        const ids = contacts.map(x => x.id).join(',');
-        const multipartResponse = await batchGetApi({
-          platform: this._client.service.platform(),
-          url: `/account/~/extension/${ids}/presence?detailedTelephonyState=true&sipData=true`,
-        });
-        const responses = multipartResponse.map(x => x.json());
-        responses.forEach((item) => {
-          presenceSet[item.extension.id] = item;
-        });
-      }
-    } catch (e) {
-      console.error(e);
-    }
-    return presenceSet;
+    return this._accountContacts.getPresence(contact);
   }
 
   get status() {
@@ -416,7 +203,7 @@ export default class Contacts extends RcModule {
   }
 
   get companyContacts() {
-    return this._selectors.companyContacts();
+    return this._accountContacts.contacts;
   }
 
   get personalContacts() {
@@ -424,10 +211,10 @@ export default class Contacts extends RcModule {
   }
 
   get profileImages() {
-    return this.state.profileImages;
+    return this._accountContacts.profileImages;
   }
 
   get contactPresences() {
-    return this.state.contactPresences;
+    return this._accountContacts.contactPresences;
   }
 }

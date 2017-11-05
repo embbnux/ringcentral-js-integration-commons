@@ -21,12 +21,13 @@ const DEFAULT_AVATARQUERYINTERVAL = 2 * 1000; // 2 seconds
  */
 @Module({
   deps: [
+    'Client',
     'AccountExtension',
     'AccountPhoneNumber',
     { dep: 'AccoundContactsOptions', optional: true }
   ]
 })
-export default class AccoundContacts extends RcModule {
+export default class AccountContacts extends RcModule {
   /**
    * @constructor
    * @param {Object} params - params object
@@ -292,5 +293,13 @@ export default class AccoundContacts extends RcModule {
 
   get contacts() {
     return this._selectors.contacts();
+  }
+
+  get profileImages() {
+    return this.state.profileImages;
+  }
+
+  get contactPresences() {
+    return this.state.contactPresences;
   }
 }

@@ -9,6 +9,8 @@ export function getProfileImagesReducer(types) {
         Object.keys(state).forEach((key) => {
           if (Date.now() - state[key].timestamp < ttl) {
             data[key] = state[key];
+          } else {
+            URL.revokeObjectURL(state[key].imageUrl);
           }
         });
         data[imageId] = {
@@ -16,6 +18,12 @@ export function getProfileImagesReducer(types) {
           timestamp: Date.now(),
         };
         return data;
+      }
+      case types.resetSuccess: {
+        Object.keys(state).forEach((key) => {
+          URL.revokeObjectURL(state[key].imageUrl);
+        });
+        return {};
       }
       default:
         return state;
@@ -41,6 +49,8 @@ export function getContactPresencesReducer(types) {
         });
         return data;
       }
+      case types.resetSuccess:
+        return {};
       default:
         return state;
     }
