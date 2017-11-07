@@ -2,9 +2,18 @@ import RcModule from '../../lib/RcModule';
 import { Module } from '../../lib/di';
 import normalizeNumber from '../../lib/normalizeNumber';
 import ensureExist from '../../lib/ensureExist';
+import isBlank from '../../lib/isBlank';
+import {
+  uniqueContactItems,
+  sortContactItemsByName,
+  groupByFirstLetterOfName,
+  filterContacts,
+} from '../../lib/contactHelper';
 import actionTypes from './actionTypes';
 import getContactsReducer from './getContactsReducer';
 import contactsMessages from './contactsMessages';
+
+export const AllContactSourceName = 'all';
 
 /**
  * @class
@@ -12,12 +21,8 @@ import contactsMessages from './contactsMessages';
  */
 @Module({
   deps: [
-    'Client',
+    'Auth',
     'Alert',
-    'AddressBook',
-    'AccountExtension',
-    'AccountPhoneNumber',
-    'AccountContacts',
     { dep: 'ContactsOptions', optional: true }
   ]
 })
@@ -36,41 +41,98 @@ export default class Contacts extends RcModule {
    * @param {Number} params.avatarQueryInterval - interval of query avatar, default 2 seconds
    */
   constructor({
+    auth,
     client,
     addressBook,
     accountContacts,
     accountExtension,
     accountPhoneNumber,
     alert,
-    readyCheckFn,
-    addContactsSources = [],
     ...options,
   }) {
     super({
       ...options,
       actionTypes,
     });
-    this._addressBook = this::ensureExist(addressBook, 'addressBook');
-    this._accountExtension = this::ensureExist(accountExtension, 'accountExtension');
-    this._accountPhoneNumber = this::ensureExist(accountPhoneNumber, 'accountPhoneNumber');
-    this._accountContacts = this::ensureExist(accountContacts, 'accountContacts');
-    this._client = this::ensureExist(client, 'client');
+    this._auth = this::ensureExist(auth, 'auth');
     this._alert = this::ensureExist(alert, 'alert');
     this._reducer = getContactsReducer(this.actionTypes);
-    this._addContactsSources = addContactsSources;
-    this._readyCheckFn = readyCheckFn;
-    this._handlerContactsSources();
-  }
+    this._contactSources = new Map();
+    this._contactSourcesCheck = new Map();
+    this._contactSourcesGetPresence = new Map();
+    this._contactSourcesGetProfileImage = new Map();
+    this._sourcesLastStatus = new Map();
+    this._sourcesUpdatedAt = Date.now();
 
-  _handlerContactsSources() {
-    this._addContactsSources.forEach(({ addSelector, sourcesName }) => {
-      if (!this[sourcesName]) {
-        Object.defineProperty(this, sourcesName, {
-          get: () => this._selectors[sourcesName]()
-        });
-        this.addSelector(...addSelector);
+    this.addSelector(
+      'contactSourceNames',
+      () => this._searchSources.size,
+      () => this._checkSourceUpdated(),
+      () => {
+        const names = [AllContactSourceName];
+        for (const sourceName of this._contactSources.keys()) {
+          const readyCheckFn = this._contactSourcesCheck.get(sourceName);
+          if (readyCheckFn()) {
+            names.push(sourceName);
+          }
+        }
+        return names;
       }
-    });
+    );
+
+    this.addSelector(
+      'allContacts',
+      () => this._checkSourceUpdated(),
+      () => {
+        const contacts = [];
+        for (const sourceName of this._contactSources.keys()) {
+          const readyCheckFn = this._contactSourcesCheck.get(sourceName);
+          if (readyCheckFn()) {
+            contacts.concat(this._contactSources.get(sourceName)());
+          }
+        }
+        return contacts;
+      }
+    );
+
+    this.addSelector(
+      'contactGroups',
+      () => this.filteredContacts,
+      (filteredContacts) => {
+        let items = uniqueContactItems(filteredContacts);
+        items = sortContactItemsByName(items);
+        const groups = groupByFirstLetterOfName(items);
+        return groups;
+      }
+    );
+
+    this.addSelector(
+      'filteredContacts',
+      () => this.searchFilter,
+      () => this.sourceFilter,
+      () => this._checkSourceUpdated(),
+      (searchFilter, sourceFilter) => {
+        let contacts;
+        if (isBlank(searchFilter) && sourceFilter === AllContactSourceName) {
+          return this.allContacts;
+        }
+        if (sourceFilter !== AllContactSourceName) {
+          const getSourceData = this._contactSources.get(sourceFilter);
+          const readyCheckFn = this._contactSourcesCheck.get(sourceFilter);
+          if (getSourceData && readyCheckFn && readyCheckFn()) {
+            contacts = getSourceData();
+          } else {
+            contacts = [];
+          }
+        } else {
+          contacts = this.allContacts;
+        }
+        if (!isBlank(searchFilter)) {
+          contacts = filterContacts(contacts, searchFilter);
+        }
+        return contacts;
+      }
+    );
   }
 
   initialize() {
@@ -89,22 +151,14 @@ export default class Contacts extends RcModule {
 
   _shouldInit() {
     return (
-      this._addressBook.ready &&
-      this._accountExtension.ready &&
-      this._accountPhoneNumber.ready &&
-      (!this._readyCheckFn || this._readyCheckFn()) &&
+      this._auth.loggedIn &&
       this.pending
     );
   }
 
   _shouldReset() {
     return (
-      (
-        !this._addressBook.ready ||
-        !this._accountExtension.ready ||
-        (this._readyCheckFn && !this._readyCheckFn()) ||
-        !this._accountPhoneNumber.ready
-      ) &&
+      !this._auth.loggedIn &&
       this.ready
     );
   }
@@ -113,6 +167,59 @@ export default class Contacts extends RcModule {
     this.store.dispatch({
       type: this.actionTypes.resetSuccess,
     });
+  }
+
+  updateFilter({ sourceFilter, searchFilter }) {
+    this.store.dispatch({
+      type: this.actionTypes.updateFilter,
+      sourceFilter,
+      searchFilter,
+    });
+  }
+
+  addSource({ sourceName, getContactsFn, readyCheckFn, getPresenceFn, getProfileImageFn }) {
+    if (!sourceName) {
+      throw new Error('Contacts: "sourceName" is required.');
+    }
+    if (this._contactSources.has(sourceName)) {
+      throw new Error(`Contacts: A contact source named "${sourceName}" already exists`);
+    }
+    if (this._contactSourcesCheck.has(sourceName)) {
+      throw new Error(`Contacts: A contact source check named "${sourceName}" already exists`);
+    }
+    if (typeof getContactsFn !== 'function') {
+      throw new Error('Contacts: getContacts must be a function');
+    }
+    if (typeof readyCheckFn !== 'function') {
+      throw new Error('Contacts: readyCheckFn must be a function');
+    }
+    this._contactSources.set(sourceName, getContactsFn);
+    this._contactSourcesCheck.set(sourceName, readyCheckFn);
+    if (getPresenceFn && typeof getPresenceFn === 'function') {
+      this._contactSourcesGetPresence.set(sourceName, getPresenceFn);
+    }
+    if (getProfileImageFn && typeof getProfileImageFn === 'function') {
+      this._contactSourcesGetProfileImage.set(sourceName, getProfileImageFn);
+    }
+    this._sourcesLastStatus.set(sourceName, {});
+    this._sourcesUpdatedAt = Date.now();
+  }
+
+  _checkSourceUpdated() {
+    let updated = false;
+    for (const sourceName of this._contactSources.keys()) {
+      const lastStatus = this._sourcesLastStatus.get(sourceName);
+      if (lastStatus.ready !== this._contactSourcesCheck.get(sourceName)()) {
+        updated = true;
+      }
+      if (lastStatus.data !== this._contactSources.get(sourceName)()) {
+        updated = true;
+      }
+    }
+    if (updated) {
+      this._sourcesUpdatedAt = Date.now();
+    }
+    return this._sourcesUpdatedAt;
   }
 
   async showAlert() {
@@ -173,29 +280,29 @@ export default class Contacts extends RcModule {
     return result;
   }
 
-  findContactItem({ contactType, contactId }) {
-    const id = (contactId || '').toString();
-    for (const contactsSources of this._addContactsSources) {
-      if (contactsSources.contactType === contactType) {
-        return this[contactsSources.sourcesName].find(x => x.id.toString() === id);
-      }
+  findContactItem({ type, id }) {
+    const contactId = (id || '').toString();
+    const getSourceData = this._contactSources.get(type);
+    if (getSourceData) {
+      return getSourceData().find(x => x.id.toString() === contactId);
     }
-    switch (contactType) {
-      case 'company':
-        return this.companyContacts.find(x => x.id.toString() === id);
-      case 'personal':
-        return this.personalContacts.find(x => x.id.toString() === id);
-      default:
-        return null;
-    }
+    return null;
   }
 
-  getImageProfile(contact, useCache = true) {
-    return this._accountContacts.getImageProfile(contact, useCache);
+  getProfileImage(contact, useCache = true) {
+    const getProfileImageFunc = this._contactSourcesGetProfileImage.get(contact.type);
+    if (getProfileImageFunc) {
+      return getProfileImageFunc(contact, useCache);
+    }
+    return null;
   }
 
   getPresence(contact) {
-    return this._accountContacts.getPresence(contact);
+    const getPresenceFunc = this._contactSourcesGetPresence.get(contact.type);
+    if (getPresenceFunc) {
+      return getPresenceFunc(contact);
+    }
+    return null;
   }
 
   get status() {
@@ -203,18 +310,34 @@ export default class Contacts extends RcModule {
   }
 
   get companyContacts() {
-    return this._accountContacts.contacts;
+    const getSourceData = this._contactSources.get('company');
+    if (getSourceData) {
+      return getSourceData();
+    }
+    return [];
   }
 
   get personalContacts() {
-    return this._addressBook.contacts;
+    const getSourceData = this._contactSources.get('personal');
+    if (getSourceData) {
+      return getSourceData();
+    }
+    return [];
   }
 
-  get profileImages() {
-    return this._accountContacts.profileImages;
+  get searchFilter() {
+    return this.state.searchFilter;
   }
 
-  get contactPresences() {
-    return this._accountContacts.contactPresences;
+  get sourceFilter() {
+    return this.state.sourceFilter;
+  }
+
+  get allContacts() {
+    return this._selectors.allContacts();
+  }
+
+  get filteredContacts() {
+    return this._selectors.filteredContacts();
   }
 }

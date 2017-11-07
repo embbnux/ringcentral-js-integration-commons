@@ -68,7 +68,9 @@ export default class AccountContacts extends RcModule {
       'contacts',
       () => this._accountExtension.availableExtensions,
       () => this._accountPhoneNumber.extensionToPhoneNumberMap,
-      (extensions, extensionToPhoneNumberMap) => {
+      () => this.profileImages,
+      () => this.contactPresences,
+      (extensions, extensionToPhoneNumberMap, profileImages, contactPresences) => {
         const newExtensions = [];
         extensions.forEach((extension) => {
           if (!(extension.status === 'Enabled' &&
@@ -84,6 +86,8 @@ export default class AccountContacts extends RcModule {
             extensionNumber: extension.ext,
             hasProfileImage: extension.hasProfileImage,
             phoneNumbers: [],
+            profileImageUrl: profileImages[extension.id] && profileImages[extension.id].imageUrl,
+            presence: contactPresences[extension.id] && contactPresences[extension.id].presence,
           };
           if (isBlank(contact.extensionNumber)) {
             return;
@@ -142,7 +146,7 @@ export default class AccountContacts extends RcModule {
         return;
       }
 
-      const imageId = `${contact.type}${contact.id}`;
+      const imageId = contact.id;
       if (
         useCache &&
         this.profileImages[imageId] &&
@@ -170,7 +174,7 @@ export default class AccountContacts extends RcModule {
 
   async _processQueryAvatar(getAvatarContexts) {
     const ctx = getAvatarContexts[0];
-    const imageId = `${ctx.contact.type}${ctx.contact.id}`;
+    const imageId = ctx.contact.id;
     let imageUrl = null;
     try {
       const response = await this._client
@@ -205,7 +209,7 @@ export default class AccountContacts extends RcModule {
         return;
       }
 
-      const presenceId = `${contact.type}${contact.id}`;
+      const presenceId = contact.id;
       if (
         this.contactPresences[presenceId] &&
         (Date.now() - this.contactPresences[presenceId].timestamp < this._presenceTtl)
@@ -247,7 +251,7 @@ export default class AccountContacts extends RcModule {
         return;
       }
       const { dndStatus, presenceStatus, telephonyStatus, userStatus } = response;
-      const presenceId = `${ctx.contact.type}${ctx.contact.id}`;
+      const presenceId = ctx.contact.id;
       presenceMap[presenceId] = {
         dndStatus,
         presenceStatus,

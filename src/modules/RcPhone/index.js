@@ -157,7 +157,8 @@ export default class RcPhone extends RcModule {
       contactSearch,
       contacts,
       callMonitor,
-      contactMatcher
+      contactMatcher,
+      accountContacts,
     } = modules;
 
     // Webphone configuration
@@ -189,6 +190,14 @@ export default class RcPhone extends RcModule {
         });
       }
     };
+
+    contacts.addSource({
+      sourceName: 'company',
+      getContactsFn: () => accountContacts.contacts,
+      readyCheckFn: () => accountContacts.ready,
+      getPresenceFn: () => accountContacts.getPresence,
+      getProfileImageFn: () => accountContacts.getProfileImageFn,
+    });
 
     // ContactMatcher configuration
     contactMatcher.addSearchProvider({
