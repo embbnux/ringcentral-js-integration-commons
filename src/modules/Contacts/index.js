@@ -30,23 +30,11 @@ export default class Contacts extends RcModule {
   /**
    * @constructor
    * @param {Object} params - params object
-   * @param {Client} params.client - client module instance
+   * @param {Auth} params.auth - auth module instance
    * @param {Alert} params.alert - alert module instance
-   * @param {AddressBook} params.addressBook - addressBook module instance
-   * @param {AccountExtension} params.accountExtension - accountExtension module instance
-   * @param {AccountPhoneNumber} params.accountPhoneNumber - accountPhoneNumber module instance
-   * @param {Number} params.ttl - timestamp of local cache, default 30 mins
-   * @param {Number} params.avatarTtl - timestamp of avatar local cache, default 2 hour
-   * @param {Number} params.presenceTtl - timestamp of presence local cache, default 10 mins
-   * @param {Number} params.avatarQueryInterval - interval of query avatar, default 2 seconds
    */
   constructor({
     auth,
-    client,
-    addressBook,
-    accountContacts,
-    accountExtension,
-    accountPhoneNumber,
     alert,
     ...options,
   }) {
@@ -66,11 +54,11 @@ export default class Contacts extends RcModule {
 
     this.addSelector(
       'contactSourceNames',
-      () => this._searchSources.size,
+      () => this._contactSources.size,
       () => this._checkSourceUpdated(),
       () => {
         const names = [AllContactSourceName];
-        for (const sourceName of this._contactSources.keys()) {
+        for (const sourceName of Array.from(this._contactSources.keys())) {
           const readyCheckFn = this._contactSourcesCheck.get(sourceName);
           if (readyCheckFn()) {
             names.push(sourceName);
@@ -84,11 +72,11 @@ export default class Contacts extends RcModule {
       'allContacts',
       () => this._checkSourceUpdated(),
       () => {
-        const contacts = [];
-        for (const sourceName of this._contactSources.keys()) {
+        let contacts = [];
+        for (const sourceName of Array.from(this._contactSources.keys())) {
           const readyCheckFn = this._contactSourcesCheck.get(sourceName);
           if (readyCheckFn()) {
-            contacts.concat(this._contactSources.get(sourceName)());
+            contacts = contacts.concat(this._contactSources.get(sourceName)());
           }
         }
         return contacts;
@@ -113,10 +101,13 @@ export default class Contacts extends RcModule {
       () => this._checkSourceUpdated(),
       (searchFilter, sourceFilter) => {
         let contacts;
-        if (isBlank(searchFilter) && sourceFilter === AllContactSourceName) {
+        if (
+          isBlank(searchFilter) &&
+          (sourceFilter === AllContactSourceName || isBlank(sourceFilter))
+        ) {
           return this.allContacts;
         }
-        if (sourceFilter !== AllContactSourceName) {
+        if (sourceFilter !== AllContactSourceName && !isBlank(sourceFilter)) {
           const getSourceData = this._contactSources.get(sourceFilter);
           const readyCheckFn = this._contactSourcesCheck.get(sourceFilter);
           if (getSourceData && readyCheckFn && readyCheckFn()) {
@@ -188,7 +179,7 @@ export default class Contacts extends RcModule {
       throw new Error(`Contacts: A contact source check named "${sourceName}" already exists`);
     }
     if (typeof getContactsFn !== 'function') {
-      throw new Error('Contacts: getContacts must be a function');
+      throw new Error('Contacts: getContactsFn must be a function');
     }
     if (typeof readyCheckFn !== 'function') {
       throw new Error('Contacts: readyCheckFn must be a function');
@@ -207,7 +198,7 @@ export default class Contacts extends RcModule {
 
   _checkSourceUpdated() {
     let updated = false;
-    for (const sourceName of this._contactSources.keys()) {
+    for (const sourceName of Array.from(this._contactSources.keys())) {
       const lastStatus = this._sourcesLastStatus.get(sourceName);
       if (lastStatus.ready !== this._contactSourcesCheck.get(sourceName)()) {
         updated = true;
@@ -339,5 +330,9 @@ export default class Contacts extends RcModule {
 
   get filteredContacts() {
     return this._selectors.filteredContacts();
+  }
+
+  get sourceNames() {
+    return this._selectors.contactSourceNames();
   }
 }

@@ -2,11 +2,11 @@ import { combineReducers } from 'redux';
 import getModuleStatusReducer from '../../lib/getModuleStatusReducer';
 
 export function getSearchFilterReducer(types) {
-  return (state = '', { type, searchfilter }) => {
+  return (state = '', { type, searchFilter }) => {
     switch (type) {
       case types.updateFilter:
-        if (searchfilter) {
-          return searchfilter;
+        if (searchFilter) {
+          return searchFilter;
         }
         return state;
       default:
@@ -16,11 +16,11 @@ export function getSearchFilterReducer(types) {
 }
 
 export function getSourceFilterReducer(types) {
-  return (state = '', { type, sourcefilter }) => {
+  return (state = '', { type, sourceFilter }) => {
     switch (type) {
       case types.updateFilter:
-        if (sourcefilter) {
-          return sourcefilter;
+        if (sourceFilter) {
+          return sourceFilter;
         }
         return state;
       default:

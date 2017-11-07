@@ -159,6 +159,7 @@ export default class RcPhone extends RcModule {
       callMonitor,
       contactMatcher,
       accountContacts,
+      addressBook,
     } = modules;
 
     // Webphone configuration
@@ -197,6 +198,12 @@ export default class RcPhone extends RcModule {
       readyCheckFn: () => accountContacts.ready,
       getPresenceFn: () => accountContacts.getPresence,
       getProfileImageFn: () => accountContacts.getProfileImageFn,
+    });
+
+    contacts.addSource({
+      sourceName: 'personal',
+      getContactsFn: () => addressBook.contacts,
+      readyCheckFn: () => addressBook.ready,
     });
 
     // ContactMatcher configuration
