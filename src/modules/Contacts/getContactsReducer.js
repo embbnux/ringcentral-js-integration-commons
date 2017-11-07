@@ -29,10 +29,25 @@ export function getSourceFilterReducer(types) {
   };
 }
 
+export function getPageNumberReducer(types) {
+  return (state = 1, { type, pageNumber }) => {
+    switch (type) {
+      case types.updateFilter:
+        if (pageNumber) {
+          return pageNumber;
+        }
+        return state;
+      default:
+        return state;
+    }
+  };
+}
+
 export default function getContactsReducer(types) {
   return combineReducers({
     status: getModuleStatusReducer(types),
     searchFilter: getSearchFilterReducer(types),
     sourceFilter: getSourceFilterReducer(types),
+    pageNumber: getPageNumberReducer(types),
   });
 }

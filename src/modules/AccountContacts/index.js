@@ -69,26 +69,28 @@ export default class AccountContacts extends RcModule {
       () => this._accountExtension.availableExtensions,
       () => this._accountPhoneNumber.extensionToPhoneNumberMap,
       () => this.profileImages,
-      () => this.contactPresences,
-      (extensions, extensionToPhoneNumberMap, profileImages, contactPresences) => {
+      () => this.presences,
+      (extensions, extensionToPhoneNumberMap, profileImages, presences) => {
         const newExtensions = [];
         extensions.forEach((extension) => {
           if (!(extension.status === 'Enabled' &&
             ['DigitalUser', 'User', 'Department'].indexOf(extension.type) >= 0)) {
             return;
           }
+          const id = `${extension.id}`;
           const contact = {
             type: 'company',
-            id: extension.id,
+            id,
             firstName: extension.contact && extension.contact.firstName,
             lastName: extension.contact && extension.contact.lastName,
             email: extension.contact && extension.contact.email,
             extensionNumber: extension.ext,
-            hasProfileImage: extension.hasProfileImage,
+            hasProfileImage: !!extension.hasProfileImage,
             phoneNumbers: [],
-            profileImageUrl: profileImages[extension.id] && profileImages[extension.id].imageUrl,
-            presence: contactPresences[extension.id] && contactPresences[extension.id].presence,
+            profileImageUrl: profileImages[id] && profileImages[id].imageUrl,
+            presence: presences[id] && presences[id].presence,
           };
+          contact.name = `${contact.firstName || ''} ${contact.lastName || ''}`;
           if (isBlank(contact.extensionNumber)) {
             return;
           }
@@ -174,7 +176,7 @@ export default class AccountContacts extends RcModule {
 
   async _processQueryAvatar(getAvatarContexts) {
     const ctx = getAvatarContexts[0];
-    const imageId = ctx.contact.id;
+    const imageId = `${ctx.contact.id}`;
     let imageUrl = null;
     try {
       const response = await this._client
@@ -209,12 +211,12 @@ export default class AccountContacts extends RcModule {
         return;
       }
 
-      const presenceId = contact.id;
+      const presenceId = `${contact.id}`;
       if (
-        this.contactPresences[presenceId] &&
-        (Date.now() - this.contactPresences[presenceId].timestamp < this._presenceTtl)
+        this.presences[presenceId] &&
+        (Date.now() - this.presences[presenceId].timestamp < this._presenceTtl)
       ) {
-        const presence = this.contactPresences[presenceId].presence;
+        const presence = this.presences[presenceId].presence;
         resolve(presence);
         return;
       }
@@ -303,7 +305,7 @@ export default class AccountContacts extends RcModule {
     return this.state.profileImages;
   }
 
-  get contactPresences() {
-    return this.state.contactPresences;
+  get presences() {
+    return this.state.presences;
   }
 }

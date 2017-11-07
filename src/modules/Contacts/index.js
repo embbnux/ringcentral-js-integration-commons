@@ -14,6 +14,7 @@ import getContactsReducer from './getContactsReducer';
 import contactsMessages from './contactsMessages';
 
 export const AllContactSourceName = 'all';
+export const DefaultContactListPageSize = 20;
 
 /**
  * @class
@@ -36,6 +37,7 @@ export default class Contacts extends RcModule {
   constructor({
     auth,
     alert,
+    listPageSize = DefaultContactListPageSize,
     ...options,
   }) {
     super({
@@ -51,6 +53,7 @@ export default class Contacts extends RcModule {
     this._contactSourcesGetProfileImage = new Map();
     this._sourcesLastStatus = new Map();
     this._sourcesUpdatedAt = Date.now();
+    this._listPageSize = listPageSize;
 
     this.addSelector(
       'contactSourceNames',
@@ -86,9 +89,13 @@ export default class Contacts extends RcModule {
     this.addSelector(
       'contactGroups',
       () => this.filteredContacts,
-      (filteredContacts) => {
+      () => this.pageNumber,
+      (filteredContacts, pageNumber) => {
+        const pageSize = this._listPageSize;
+        const count = pageNumber * pageSize;
         let items = uniqueContactItems(filteredContacts);
         items = sortContactItemsByName(items);
+        items = items.slice(0, count);
         const groups = groupByFirstLetterOfName(items);
         return groups;
       }
@@ -160,11 +167,12 @@ export default class Contacts extends RcModule {
     });
   }
 
-  updateFilter({ sourceFilter, searchFilter }) {
+  updateFilter({ sourceFilter, searchFilter, pageNumber }) {
     this.store.dispatch({
       type: this.actionTypes.updateFilter,
       sourceFilter,
       searchFilter,
+      pageNumber,
     });
   }
 
@@ -324,6 +332,10 @@ export default class Contacts extends RcModule {
     return this.state.sourceFilter;
   }
 
+  get pageNumber() {
+    return this.state.pageNumber;
+  }
+
   get allContacts() {
     return this._selectors.allContacts();
   }
@@ -334,5 +346,9 @@ export default class Contacts extends RcModule {
 
   get sourceNames() {
     return this._selectors.contactSourceNames();
+  }
+
+  get contactGroups() {
+    return this._selectors.contactGroups();
   }
 }

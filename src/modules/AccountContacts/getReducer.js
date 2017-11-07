@@ -61,6 +61,6 @@ export default function getContactsReducer(types) {
   return combineReducers({
     status: getModuleStatusReducer(types),
     profileImages: getProfileImagesReducer(types),
-    contactPresences: getContactPresencesReducer(types),
+    presences: getContactPresencesReducer(types),
   });
 }

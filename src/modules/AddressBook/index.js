@@ -122,6 +122,8 @@ export default class AddressBook extends Pollable {
             phoneNumbers: [],
             ...rawContact,
           };
+          contact.id = `${contact.id}`;
+          contact.name = `${contact.firstName || ''} ${contact.lastName || ''}`;
           Object.keys(contact).forEach((key) => {
             if (key.toLowerCase().indexOf('phone') === -1) {
               return;
