@@ -25,7 +25,6 @@ const DEFAULT_AVATARQUERYINTERVAL = 2 * 1000; // 2 seconds
     'Client',
     'AccountExtension',
     'AccountPhoneNumber',
-    { dep: 'Contacts', optional: true },
     { dep: 'AccoundContactsOptions', optional: true }
   ]
 })
@@ -45,7 +44,6 @@ export default class AccountContacts extends RcModule {
     client,
     accountExtension,
     accountPhoneNumber,
-    contacts,
     ttl = DEFAULT_TTL,
     avatarTtl = DEFAULT_AVATARTTL,
     presenceTtl = DEFAULT_PRESENCETTL,
@@ -108,16 +106,6 @@ export default class AccountContacts extends RcModule {
         return newExtensions;
       }
     );
-
-    if (contacts) {
-      contacts.addSource({
-        sourceName: 'company',
-        getContactsFn: () => this.contacts,
-        readyCheckFn: () => this.ready,
-        getPresenceFn: (...args) => this.getPresence(...args),
-        getProfileImageFn: (...args) => this.getProfileImageFn(...args),
-      });
-    }
   }
 
   initialize() {
@@ -154,6 +142,7 @@ export default class AccountContacts extends RcModule {
     );
   }
 
+  // interface of contact source
   @proxify
   getImageProfile(contact, useCache = true) {
     return new Promise((resolve) => {
@@ -218,6 +207,7 @@ export default class AccountContacts extends RcModule {
     }
   }
 
+  // interface of contact source
   @proxify
   getPresence(contact) {
     return new Promise((resolve) => {
@@ -312,15 +302,21 @@ export default class AccountContacts extends RcModule {
     return this.state.status;
   }
 
-  get contacts() {
-    return this._selectors.contacts();
-  }
-
   get profileImages() {
     return this.state.profileImages;
   }
 
   get presences() {
     return this.state.presences;
+  }
+
+  // interface of contact source
+  get sourceName() {
+    return 'company';
+  }
+
+  // interface of contact source
+  get contacts() {
+    return this._selectors.contacts();
   }
 }

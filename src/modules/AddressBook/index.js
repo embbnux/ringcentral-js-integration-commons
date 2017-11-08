@@ -47,7 +47,6 @@ function getSyncParams(syncToken, pageId) {
   deps: [
     'Client',
     'Auth',
-    { dep: 'Contacts', optional: true },
     { dep: 'Storage', optional: true },
     { dep: 'AddressBookOptions', optional: true }
   ]
@@ -68,7 +67,6 @@ export default class AddressBook extends Pollable {
     client,
     auth,
     storage,
-    contacts,
     ttl = DEFAULT_TTL,
     timeToRetry = DEFAULT_TIME_TO_RETRY,
     polling = true,
@@ -140,14 +138,6 @@ export default class AddressBook extends Pollable {
         return contactsList;
       }
     );
-
-    if (contacts) {
-      contacts.addSource({
-        sourceName: 'personal',
-        getContactsFn: () => this.contacts,
-        readyCheckFn: () => this.ready,
-      });
-    }
   }
 
   initialize() {
@@ -329,10 +319,6 @@ export default class AddressBook extends Pollable {
     return this.state.contactList;
   }
 
-  get contacts() {
-    return this._selectors.contacts();
-  }
-
   get timestamp() {
     if (this._storage) {
       return this._storage.getItem(this._syncTimestampStorageKey);
@@ -346,5 +332,15 @@ export default class AddressBook extends Pollable {
 
   get timeToRetry() {
     return this._timeToRetry;
+  }
+
+  // interface of contact source
+  get sourceName() {
+    return 'personal';
+  }
+
+  // interface of contact source
+  get contacts() {
+    return this._selectors.contacts();
   }
 }

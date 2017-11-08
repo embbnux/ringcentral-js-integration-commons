@@ -146,6 +146,11 @@ import AudioSettings from '../AudioSettings';
         readyCheckFunction: () => true },
       spread: true },
     { provide: 'SoftphoneOptions', useValue: { extensionMode: null }, spread: true },
+    { provide: 'ContactSources',
+      useFactory: ({ addressBook, accountContacts }) =>
+        [addressBook, accountContacts],
+      deps: ['AccountContacts', 'AddressBook']
+    },
   ]
 })
 export default class RcPhone extends RcModule {
