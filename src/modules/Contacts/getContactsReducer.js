@@ -5,7 +5,7 @@ export function getSearchFilterReducer(types) {
   return (state = '', { type, searchFilter }) => {
     switch (type) {
       case types.updateFilter:
-        if (searchFilter) {
+        if (searchFilter !== null && searchFilter !== undefined) {
           return searchFilter;
         }
         return state;
@@ -19,7 +19,7 @@ export function getSourceFilterReducer(types) {
   return (state = '', { type, sourceFilter }) => {
     switch (type) {
       case types.updateFilter:
-        if (sourceFilter) {
+        if (sourceFilter !== null && sourceFilter !== undefined) {
           return sourceFilter;
         }
         return state;

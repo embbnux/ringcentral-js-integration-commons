@@ -47,6 +47,7 @@ function getSyncParams(syncToken, pageId) {
   deps: [
     'Client',
     'Auth',
+    { dep: 'Contacts', optional: true },
     { dep: 'Storage', optional: true },
     { dep: 'AddressBookOptions', optional: true }
   ]
@@ -67,6 +68,7 @@ export default class AddressBook extends Pollable {
     client,
     auth,
     storage,
+    contacts,
     ttl = DEFAULT_TTL,
     timeToRetry = DEFAULT_TIME_TO_RETRY,
     polling = true,
@@ -115,7 +117,7 @@ export default class AddressBook extends Pollable {
       'contacts',
       () => this.rawContacts,
       (rawContacts) => {
-        const contacts = [];
+        const contactsList = [];
         rawContacts.forEach((rawContact) => {
           const contact = {
             type: 'personal',
@@ -133,11 +135,19 @@ export default class AddressBook extends Pollable {
             }
             addPhoneToContact(contact, contact[key], key);
           });
-          contacts.push(contact);
+          contactsList.push(contact);
         });
-        return contacts;
+        return contactsList;
       }
     );
+
+    if (contacts) {
+      contacts.addSource({
+        sourceName: 'personal',
+        getContactsFn: () => this.contacts,
+        readyCheckFn: () => this.ready,
+      });
+    }
   }
 
   initialize() {

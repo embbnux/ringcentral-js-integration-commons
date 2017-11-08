@@ -24,6 +24,7 @@ const DEFAULT_AVATARQUERYINTERVAL = 2 * 1000; // 2 seconds
     'Client',
     'AccountExtension',
     'AccountPhoneNumber',
+    { dep: 'Contacts', optional: true },
     { dep: 'AccoundContactsOptions', optional: true }
   ]
 })
@@ -43,6 +44,7 @@ export default class AccountContacts extends RcModule {
     client,
     accountExtension,
     accountPhoneNumber,
+    contacts,
     ttl = DEFAULT_TTL,
     avatarTtl = DEFAULT_AVATARTTL,
     presenceTtl = DEFAULT_PRESENCETTL,
@@ -105,6 +107,16 @@ export default class AccountContacts extends RcModule {
         return newExtensions;
       }
     );
+
+    if (contacts) {
+      contacts.addSource({
+        sourceName: 'company',
+        getContactsFn: () => this.contacts,
+        readyCheckFn: () => this.ready,
+        getPresenceFn: (...args) => this.getPresence(...args),
+        getProfileImageFn: (...args) => this.getProfileImageFn(...args),
+      });
+    }
   }
 
   initialize() {

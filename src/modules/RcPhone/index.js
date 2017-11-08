@@ -192,20 +192,6 @@ export default class RcPhone extends RcModule {
       }
     };
 
-    contacts.addSource({
-      sourceName: 'company',
-      getContactsFn: () => accountContacts.contacts,
-      readyCheckFn: () => accountContacts.ready,
-      getPresenceFn: () => accountContacts.getPresence,
-      getProfileImageFn: () => accountContacts.getProfileImageFn,
-    });
-
-    contacts.addSource({
-      sourceName: 'personal',
-      getContactsFn: () => addressBook.contacts,
-      readyCheckFn: () => addressBook.ready,
-    });
-
     // ContactMatcher configuration
     contactMatcher.addSearchProvider({
       name: 'contacts',
