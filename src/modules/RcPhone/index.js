@@ -158,8 +158,6 @@ export default class RcPhone extends RcModule {
       contacts,
       callMonitor,
       contactMatcher,
-      accountContacts,
-      addressBook,
     } = modules;
 
     // Webphone configuration
