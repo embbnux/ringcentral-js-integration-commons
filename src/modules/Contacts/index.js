@@ -11,7 +11,6 @@ import {
 } from '../../lib/contactHelper';
 import actionTypes from './actionTypes';
 import getContactsReducer from './getContactsReducer';
-import contactsMessages from './contactsMessages';
 
 export const AllContactSourceName = 'all';
 export const DefaultContactListPageSize = 20;
@@ -23,7 +22,6 @@ export const DefaultContactListPageSize = 20;
 @Module({
   deps: [
     'Auth',
-    'Alert',
     { dep: 'ContactsOptions', optional: true }
   ]
 })
@@ -32,11 +30,9 @@ export default class Contacts extends RcModule {
    * @constructor
    * @param {Object} params - params object
    * @param {Auth} params.auth - auth module instance
-   * @param {Alert} params.alert - alert module instance
    */
   constructor({
     auth,
-    alert,
     listPageSize = DefaultContactListPageSize,
     ...options,
   }) {
@@ -45,7 +41,6 @@ export default class Contacts extends RcModule {
       actionTypes,
     });
     this._auth = this::ensureExist(auth, 'auth');
-    this._alert = this::ensureExist(alert, 'alert');
     this._reducer = getContactsReducer(this.actionTypes);
     this._contactSources = new Map();
     this._contactSourcesCheck = new Map();
@@ -219,14 +214,6 @@ export default class Contacts extends RcModule {
       this._sourcesUpdatedAt = Date.now();
     }
     return this._sourcesUpdatedAt;
-  }
-
-  async showAlert() {
-    if (this._alert) {
-      this._alert.warning({
-        message: contactsMessages.inexistence,
-      });
-    }
   }
 
   matchPhoneNumber(phone) {
