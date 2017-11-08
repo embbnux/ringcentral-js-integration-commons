@@ -4,6 +4,7 @@ import isBlank from '../../lib/isBlank';
 import ensureExist from '../../lib/ensureExist';
 import { addPhoneToContact } from '../../lib/contactHelper';
 import { batchGetApi } from '../../lib/batchApiHelper';
+import proxify from '../../lib/proxy/proxify';
 import sleep from '../../lib/sleep';
 
 import actionTypes from './actionTypes';
@@ -153,6 +154,7 @@ export default class AccountContacts extends RcModule {
     );
   }
 
+  @proxify
   getImageProfile(contact, useCache = true) {
     return new Promise((resolve) => {
       if (!contact || !contact.id || contact.type !== 'company' || !contact.hasProfileImage) {
@@ -216,6 +218,7 @@ export default class AccountContacts extends RcModule {
     }
   }
 
+  @proxify
   getPresence(contact) {
     return new Promise((resolve) => {
       if (!contact || !contact.id || contact.type !== 'company') {

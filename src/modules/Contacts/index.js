@@ -9,6 +9,7 @@ import {
   groupByFirstLetterOfName,
   filterContacts,
 } from '../../lib/contactHelper';
+import proxify from '../../lib/proxy/proxify';
 import actionTypes from './actionTypes';
 import getContactsReducer from './getContactsReducer';
 
@@ -266,7 +267,7 @@ export default class Contacts extends RcModule {
     return result;
   }
 
-  findContactItem({ type, id }) {
+  find({ type, id }) {
     const contactId = (id || '').toString();
     const getSourceData = this._contactSources.get(type);
     if (getSourceData) {
@@ -275,6 +276,7 @@ export default class Contacts extends RcModule {
     return null;
   }
 
+  @proxify
   getProfileImage(contact, useCache = true) {
     const getProfileImageFunc = this._contactSourcesGetProfileImage.get(contact.type);
     if (getProfileImageFunc) {
@@ -283,6 +285,7 @@ export default class Contacts extends RcModule {
     return null;
   }
 
+  @proxify
   getPresence(contact) {
     const getPresenceFunc = this._contactSourcesGetPresence.get(contact.type);
     if (getPresenceFunc) {
