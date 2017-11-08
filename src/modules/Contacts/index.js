@@ -180,8 +180,8 @@ export default class Contacts extends RcModule {
    * @param {String} params.sourceName - source name
    * @param {Bool} params.ready - source ready status
    * @param {Array} params.contacts - source contacts data
-   * @param {Function} params.getPresenceFn - get source presence function, optional
-   * @param {Function} params.getProfileImageFn - get source profile image function, optional
+   * @param {Function} params.getPresence - get source presence function, optional
+   * @param {Function} params.getProfileImage - get source profile image function, optional
    */
   addSource(source) {
     if (!source.sourceName) {
