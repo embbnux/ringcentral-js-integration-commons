@@ -165,6 +165,7 @@ export default class Contacts extends RcModule {
     });
   }
 
+  @proxify
   updateFilter({ sourceFilter, searchFilter, pageNumber }) {
     this.store.dispatch({
       type: this.actionTypes.updateFilter,
@@ -238,19 +239,12 @@ export default class Contacts extends RcModule {
       if (!found) {
         return;
       }
-      const name =
-        `${
-        contact.firstName ? contact.firstName : ''
-        } ${
-        contact.lastName ? contact.lastName : ''
-        }`;
       const matchedContact = {
         ...contact,
         phoneNumbers: [
           ...contact.phoneNumbers
         ],
         entityType: 'rcContact',
-        name,
       };
       if (contact.extensionNumber) {
         matchedContact.phoneNumbers.push({
@@ -283,19 +277,21 @@ export default class Contacts extends RcModule {
   }
 
   @proxify
-  getProfileImage(contact, useCache = true) {
+  async getProfileImage(contact, useCache = true) {
     const source = this._contactSources.get(contact.type);
     if (source && source.getProfileImage) {
-      return source.getProfileImage(contact, useCache);
+      const result = await source.getProfileImage(contact, useCache);
+      return result;
     }
     return null;
   }
 
   @proxify
-  getPresence(contact) {
+  async getPresence(contact) {
     const source = this._contactSources.get(contact.type);
     if (source && source.getPresence) {
-      return source.getPresence(contact);
+      const result = await source.getPresence(contact);
+      return result;
     }
     return null;
   }

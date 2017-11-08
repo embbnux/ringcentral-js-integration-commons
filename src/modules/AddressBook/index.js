@@ -118,7 +118,7 @@ export default class AddressBook extends Pollable {
         const contactsList = [];
         rawContacts.forEach((rawContact) => {
           const contact = {
-            type: 'personal',
+            type: this.sourceName,
             phoneNumbers: [],
             ...rawContact,
           };

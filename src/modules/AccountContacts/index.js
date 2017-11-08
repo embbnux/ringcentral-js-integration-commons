@@ -80,7 +80,7 @@ export default class AccountContacts extends RcModule {
           }
           const id = `${extension.id}`;
           const contact = {
-            type: 'company',
+            type: this.sourceName,
             id,
             firstName: extension.contact && extension.contact.firstName,
             lastName: extension.contact && extension.contact.lastName,
@@ -144,7 +144,7 @@ export default class AccountContacts extends RcModule {
 
   // interface of contact source
   @proxify
-  getImageProfile(contact, useCache = true) {
+  getProfileImage(contact, useCache = true) {
     return new Promise((resolve) => {
       if (!contact || !contact.id || contact.type !== 'company' || !contact.hasProfileImage) {
         resolve(null);
