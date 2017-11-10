@@ -8,12 +8,12 @@ import {
   sortContactItemsByName,
   groupByFirstLetterOfName,
   filterContacts,
+  AllContactSourceName,
 } from '../../lib/contactHelper';
 import proxify from '../../lib/proxy/proxify';
 import actionTypes from './actionTypes';
 import getContactsReducer from './getContactsReducer';
 
-export const AllContactSourceName = 'all';
 export const DefaultContactListPageSize = 20;
 
 /**
@@ -278,7 +278,7 @@ export default class Contacts extends RcModule {
 
   @proxify
   async getProfileImage(contact, useCache = true) {
-    const source = this._contactSources.get(contact.type);
+    const source = this._contactSources.get(contact && contact.type);
     if (source && source.getProfileImage) {
       const result = await source.getProfileImage(contact, useCache);
       return result;
@@ -288,7 +288,7 @@ export default class Contacts extends RcModule {
 
   @proxify
   async getPresence(contact) {
-    const source = this._contactSources.get(contact.type);
+    const source = this._contactSources.get(contact && contact.type);
     if (source && source.getPresence) {
       const result = await source.getPresence(contact);
       return result;
