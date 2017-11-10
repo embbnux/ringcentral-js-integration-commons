@@ -289,4 +289,8 @@ export default class AccountContacts extends RcModule {
   get contacts() {
     return this._selectors.contacts();
   }
+
+  get sourceReady() {
+    return this.ready;
+  }
 }
