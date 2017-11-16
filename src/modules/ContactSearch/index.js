@@ -148,7 +148,7 @@ export default class ContactSearch extends RcModule {
 
   @proxify
   async search({ searchString }) {
-    if (!this.ready || (searchString.length < this._minimalSearchLength)) {
+    if (!this.ready || !searchString || (searchString.length < this._minimalSearchLength)) {
       this.store.dispatch({
         type: this.actionTypes.prepareSearch,
       });
