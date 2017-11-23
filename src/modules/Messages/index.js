@@ -4,11 +4,15 @@ import moduleStatuses from '../../enums/moduleStatuses';
 import ensureExist from '../../lib/ensureExist';
 import actionTypes from './actionTypes';
 import getMessagesReducer from './getMessagesReducer';
-import { getNumbersFromMessage, sortSearchResults } from '../../lib/messageHelper';
+import {
+  getNumbersFromMessage,
+  sortSearchResults,
+  messageIsTextMessage,
+  messageIsVoicemail,
+} from '../../lib/messageHelper';
 import cleanNumber from '../../lib/cleanNumber';
 import proxify from '../../lib/proxy/proxify';
 import messageTypes from '../../enums/messageTypes';
-import * as messageHelper from '../../lib/messageHelper';
 
 /**
  * @class
@@ -147,11 +151,11 @@ export default class Messages extends RcModule {
             return allConversations;
           case messageTypes.text:
             return allConversations.filter(
-              conversation => messageHelper.messageIsTextMessage(conversation)
+              conversation => messageIsTextMessage(conversation)
             );
           case messageTypes.voiceMail:
             return allConversations.filter(
-              conversation => messageHelper.messageIsVoicemail(conversation)
+              conversation => messageIsVoicemail(conversation)
             );
           default:
             return allConversations;
@@ -224,7 +228,7 @@ export default class Messages extends RcModule {
           });
           return searchResults.sort(sortSearchResults);
         }
-        return allConversations;
+        return allConversations.sort(sortSearchResults);
       },
     );
 
