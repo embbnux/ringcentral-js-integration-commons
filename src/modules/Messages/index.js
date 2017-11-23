@@ -7,6 +7,8 @@ import getMessagesReducer from './getMessagesReducer';
 import { getNumbersFromMessage, sortSearchResults } from '../../lib/messageHelper';
 import cleanNumber from '../../lib/cleanNumber';
 import proxify from '../../lib/proxy/proxify';
+import messageTypes from '../../enums/messageTypes';
+import * as messageHelper from '../../lib/messageHelper';
 
 /**
  * @class
@@ -86,6 +88,7 @@ export default class Messages extends RcModule {
         return '';
       }
     );
+
     this.addSelector('allConversations',
       () => this._messageStore.conversations,
       () => this._extensionInfo.extensionNumber,
@@ -134,8 +137,30 @@ export default class Messages extends RcModule {
           })
         ),
     );
+
+    this.addSelector('typeFilteredConversations',
+      () => this.allConversations,
+      () => this.typeFilter,
+      (allConversations, typeFilter) => {
+        switch (typeFilter) {
+          case messageTypes.all:
+            return allConversations;
+          case messageTypes.text:
+            return allConversations.filter(
+              conversation => messageHelper.messageIsTextMessage(conversation)
+            );
+          case messageTypes.voiceMail:
+            return allConversations.filter(
+              conversation => messageHelper.messageIsVoicemail(conversation)
+            );
+          default:
+            return allConversations;
+        }
+      }
+    );
+
     this.addSelector('filteredConversations',
-      this._selectors.allConversations,
+      this._selectors.typeFilteredConversations,
       () => this._selectors.effectiveSearchString(),
       (allConversations, effectiveSearchString) => {
         if (effectiveSearchString !== '') {
@@ -193,13 +218,13 @@ export default class Messages extends RcModule {
               searchResults.push({
                 ...message,
                 matchedMessage,
-                matchOrders: 1,
+                matchOrder: 1,
               });
             }
           });
           return searchResults.sort(sortSearchResults);
         }
-        return allConversations.sort(sortSearchResults);
+        return allConversations;
       },
     );
 
@@ -297,6 +322,14 @@ export default class Messages extends RcModule {
     });
   }
 
+  @proxify
+  async updateTypeFilter(type) {
+    this.store.dispatch({
+      type: this.actionTypes.updateTypeFilter,
+      typeFilter: type,
+    });
+  }
+
   get status() {
     return this.state.status;
   }
@@ -311,6 +344,10 @@ export default class Messages extends RcModule {
 
   get searchInput() {
     return this.state.searchInput;
+  }
+
+  get typeFilter() {
+    return this.state.typeFilter;
   }
 
   get allConversations() {
