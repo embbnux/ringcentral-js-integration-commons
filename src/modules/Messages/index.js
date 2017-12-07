@@ -124,6 +124,10 @@ export default class Messages extends RcModule {
             null;
           const isLogging = !!(conversationLogId && loggingMap[conversationLogId]);
           const conversationMatches = conversationLogMapping[conversationLogId] || [];
+          let voicemailAttachment = null;
+          if (messageIsVoicemail(message)) {
+            voicemailAttachment = this._messageStore.getVoicemailAttachment(message);
+          }
           return {
             ...message,
             self,
@@ -133,6 +137,7 @@ export default class Messages extends RcModule {
             conversationLogId,
             isLogging,
             conversationMatches,
+            voicemailAttachment,
             lastMatchedCorrespondentEntity: (
               this._conversationLogger &&
                 this._conversationLogger.getLastMatchedCorrespondentEntity(message)

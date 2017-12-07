@@ -574,6 +574,20 @@ export default class MessageStore extends Pollable {
     this.pushMessages([record]);
   }
 
+  getVoicemailAttachment(message) {
+    const attachment = message.attachments && message.attachments[0];
+    if (!attachment) {
+      return { duration: 0 };
+    }
+    const duration = attachment.vmDuration;
+    const token = this._client.service.platform().auth().accessToken();
+    const uri = `${attachment.uri}?access_token=${decodeURIComponent(token)}`;
+    return {
+      duration,
+      uri,
+    };
+  }
+
   get cache() {
     if (this._storage) {
       return this._storage.getItem(this._storageKey);
