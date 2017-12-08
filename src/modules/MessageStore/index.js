@@ -520,8 +520,27 @@ export default class MessageStore extends Pollable {
       });
     } catch (error) {
       console.error(error);
+      this._alert.warning({
+        message: messageStoreErrors.readFailed,
+      });
     }
     return null;
+  }
+
+  @proxify
+  async unreadMessage(messageId) {
+    try {
+      const message = await this._updateMessageApi(messageId, 'Unread');
+      this.store.dispatch({
+        type: this.actionTypes.updateMessages,
+        records: [message],
+      });
+    } catch (error) {
+      console.error(error);
+      this._alert.warning({
+        message: messageStoreErrors.unreadFailed,
+      });
+    }
   }
 
   @proxify
@@ -535,7 +554,7 @@ export default class MessageStore extends Pollable {
       });
     } catch (error) {
       console.error(error);
-      this._alert.info({
+      this._alert.warning({
         message: messageStoreErrors.deleteFailed,
       });
     }
@@ -572,20 +591,6 @@ export default class MessageStore extends Pollable {
 
   pushMessage(record) {
     this.pushMessages([record]);
-  }
-
-  getVoicemailAttachment(message) {
-    const attachment = message.attachments && message.attachments[0];
-    if (!attachment) {
-      return { duration: 0 };
-    }
-    const duration = attachment.vmDuration;
-    const token = this._client.service.platform().auth().accessToken();
-    const uri = `${attachment.uri}?access_token=${decodeURIComponent(token)}`;
-    return {
-      duration,
-      uri,
-    };
   }
 
   get cache() {

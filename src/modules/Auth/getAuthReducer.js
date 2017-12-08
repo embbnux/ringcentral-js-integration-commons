@@ -87,6 +87,46 @@ export function getEndpointIdReducer(types) {
   };
 }
 
+export function getTokenReducer(types) {
+  return (state = {}, { type, token, refreshTokenValid }) => {
+    switch (type) {
+      case types.loginSuccess:
+      case types.refreshSuccess:
+        return {
+          ownerId: token.owner_id,
+          endpointId: token.endpoint_id,
+          accessToken: token.access_token,
+          expireTime: token.expire_time,
+          expiresIn: token.expires_in,
+        };
+      case types.loginError:
+      case types.logoutSuccess:
+      case types.logoutError:
+        return null;
+
+      case types.refreshError:
+        if (refreshTokenValid) {
+          return state;
+        }
+        return {};
+      case types.initSuccess:
+      case types.tabSync:
+        if (token) {
+          return {
+            ownerId: token.owner_id,
+            endpointId: token.endpoint_id,
+            accessToken: token.access_token,
+            expireTime: token.expire_time,
+            expiresIn: token.expires_in,
+          };
+        }
+        return {};
+      default:
+        return state;
+    }
+  };
+}
+
 export function getFreshLoginReducer(types) {
   return (state = null, { type, loggedIn }) => {
     switch (type) {
@@ -142,8 +182,7 @@ export default function getAuthReducer(types) {
     status: getModuleStatusReducer(types),
     loginStatus: getLoginStatusReducer(types),
     freshLogin: getFreshLoginReducer(types),
-    ownerId: getOwnerIdReducer(types),
-    endpointId: getEndpointIdReducer(types),
+    token: getTokenReducer(types),
     proxyLoaded: getProxyLoadedReducer(types),
     proxyRetryCount: getProxyRetryCountReducer(types),
   });
