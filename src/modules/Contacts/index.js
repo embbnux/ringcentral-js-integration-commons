@@ -1,6 +1,5 @@
 import RcModule from '../../lib/RcModule';
 import { Module } from '../../lib/di';
-import normalizeNumber from '../../lib/normalizeNumber';
 import ensureExist from '../../lib/ensureExist';
 import isBlank from '../../lib/isBlank';
 import {
