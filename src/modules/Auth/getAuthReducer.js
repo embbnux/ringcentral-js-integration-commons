@@ -37,56 +37,6 @@ export function getLoginStatusReducer(types) {
   };
 }
 
-export function getOwnerIdReducer(types) {
-  return (state = null, { type, token, refreshTokenValid }) => {
-    switch (type) {
-      case types.loginSuccess:
-      case types.refreshSuccess:
-        return token.owner_id;
-
-      case types.loginError:
-      case types.logoutSuccess:
-      case types.logoutError:
-        return null;
-
-      case types.refreshError:
-        return refreshTokenValid ? state : null;
-
-      case types.initSuccess:
-      case types.tabSync:
-        return (token && token.owner_id) || null;
-
-      default:
-        return state;
-    }
-  };
-}
-
-export function getEndpointIdReducer(types) {
-  return (state = null, { type, token, refreshTokenValid }) => {
-    switch (type) {
-      case types.loginSuccess:
-      case types.refreshSuccess:
-        return token.endpoint_id;
-
-      case types.loginError:
-      case types.logoutSuccess:
-      case types.logoutError:
-        return null;
-
-      case types.refreshError:
-        return refreshTokenValid ? state : null;
-
-      case types.initSuccess:
-      case types.tabSync:
-        return (token && token.endpoint_id) || null;
-
-      default:
-        return state;
-    }
-  };
-}
-
 export function getTokenReducer(types) {
   return (state = {}, { type, token, refreshTokenValid }) => {
     switch (type) {
@@ -102,7 +52,7 @@ export function getTokenReducer(types) {
       case types.loginError:
       case types.logoutSuccess:
       case types.logoutError:
-        return null;
+        return {};
 
       case types.refreshError:
         if (refreshTokenValid) {
