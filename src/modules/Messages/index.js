@@ -181,19 +181,7 @@ export default class Messages extends RcModule {
         if (effectiveSearchString !== '') {
           const searchResults = [];
           allConversations.forEach((message) => {
-            const searchNumber = cleanNumber(effectiveSearchString, false);
             const searchRegExp = new RegExp(effectiveSearchString, 'i');
-            if (searchNumber !== '' && message.correspondents.find(contact => (
-              cleanNumber(contact.phoneNumber || contact.extensionNumber || '')
-                .indexOf(searchNumber) > -1
-            ))) {
-              // match by phoneNumber or extensionNumber
-              searchResults.push({
-                ...message,
-                matchOrder: 0,
-              });
-              return;
-            }
             if (message.correspondentMatches.length) {
               if (
                 message.correspondentMatches.find(entity => (
