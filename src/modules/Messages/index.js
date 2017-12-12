@@ -11,7 +11,6 @@ import {
   messageIsVoicemail,
   getVoicemailAttachment,
 } from '../../lib/messageHelper';
-import cleanNumber from '../../lib/cleanNumber';
 import proxify from '../../lib/proxy/proxify';
 import messageTypes from '../../enums/messageTypes';
 

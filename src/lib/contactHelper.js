@@ -1,11 +1,9 @@
 import isBlank from './isBlank';
-import cleanNumber from './cleanNumber';
 
 export const AllContactSourceName = 'all';
 
 export function addPhoneToContact(contact, phone, type) {
-  const phoneNumber = cleanNumber(phone);
-  if (isBlank(phoneNumber)) {
+  if (isBlank(phone)) {
     return;
   }
   const existedPhone = contact.phoneNumbers.find(
@@ -118,10 +116,9 @@ export function filterContacts(contacts, searchFilter) {
 
 export function getMatchContacts({ contacts, phoneNumber, entityType }) {
   const result = [];
-  const cleanedNumber = cleanNumber(phoneNumber);
   contacts.forEach((contact) => {
     const found = contact.phoneNumbers && contact.phoneNumbers.find(
-      number => (cleanNumber(number.phoneNumber) === cleanedNumber)
+      number => (number.phoneNumber === phoneNumber)
     );
     if (!found) {
       return;
