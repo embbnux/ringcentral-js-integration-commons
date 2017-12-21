@@ -536,6 +536,14 @@ export default class Webphone extends RcModule {
   _onAccepted(session) {
     session.on('accepted', () => {
       console.log('accepted');
+      if (session.callStatus === sessionStatus.finished) {
+        try {
+          session.terminate();
+        } catch (e) {
+          console.error(e);
+        }
+        return;
+      }
       session.callStatus = sessionStatus.connected;
       this._onCallStart(session);
     });
