@@ -251,7 +251,7 @@ export default class CallingSettings extends RcModule {
       this._alert.warning({
         message: this._brand.id === '1210' ?
           callingSettingsMessages.firstLogin :
-          callingSettingsMessages.firstLoginOther
+          callingSettingsMessages.firstLoginOther,
       });
       this._warningEmergencyCallingNotAvailable();
       if (typeof this._onFirstLogin === 'function') {
@@ -350,7 +350,7 @@ export default class CallingSettings extends RcModule {
   async _warningEmergencyCallingNotAvailable() {
     if (this.callWith === callingOptions.browser) {
       this._alert.info({
-        message: callingSettingsMessages.emergencyCallingNotAvailable
+        message: callingSettingsMessages.emergencyCallingNotAvailable,
       });
     }
   }
