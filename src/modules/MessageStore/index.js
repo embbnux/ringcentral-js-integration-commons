@@ -7,6 +7,7 @@ import { batchPutApi } from '../../lib/batchApiHelper';
 import * as messageHelper from '../../lib/messageHelper';
 import * as messageStoreHelper from './messageStoreHelper';
 
+import ensureExist from '../../lib/ensureExist';
 import actionTypes from './actionTypes';
 import getMessageStoreReducer from './getMessageStoreReducer';
 import getDataReducer from './getDataReducer';
@@ -32,7 +33,13 @@ const DEFAULT_DAY_SPAN = 7;
  */
 @Module({
   deps: [
-    'Alert', 'Client', 'Auth', 'Subscription', 'ConnectivityMonitor', 'RolesAndPermissions',
+    'Alert',
+    'Client',
+    'Auth',
+    'Subscription',
+    'ConnectivityMonitor',
+    'RolesAndPermissions',
+    { dep: 'TabManager', optional: true },
     { dep: 'Storage', optional: true },
     { dep: 'MessageStoreOptions', optional: true }
   ]
@@ -45,6 +52,7 @@ export default class MessageStore extends Pollable {
    * @param {Auth} params.auth - auth module instance
    * @param {Client} params.client - client module instance
    * @param {Storage} params.storage - storage module instance
+   * @param {TabManager} params.tabManage - TabManager module instance
    * @param {subscription} params.subscription - subscription module instance
    * @param {connectivityMonitor} params.connectivityMonitor - connectivityMonitor module instance
    * @param {RolesAndPermissions} params.rolesAndPermissions - rolesAndPermissions module instance
@@ -64,6 +72,7 @@ export default class MessageStore extends Pollable {
     subscription,
     connectivityMonitor,
     rolesAndPermissions,
+    tabManager,
     polling = false,
     disableCache = false,
     ...options
@@ -72,18 +81,19 @@ export default class MessageStore extends Pollable {
       ...options,
       actionTypes,
     });
-    this._alert = alert;
+    this._alert = this::ensureExist(alert, 'alert');
     this._client = client;
     if (!disableCache) {
       this._storage = storage;
     }
-    this._subscription = subscription;
-    this._connectivityMonitor = connectivityMonitor;
-    this._rolesAndPermissions = rolesAndPermissions;
+    this._subscription = this::ensureExist(subscription, 'subscription');
+    this._connectivityMonitor = this::ensureExist(connectivityMonitor, 'connectivityMonitor');
+    this._rolesAndPermissions = this::ensureExist(rolesAndPermissions, 'rolesAndPermissions');
+    this._tabManager = tabManager;
     this._ttl = ttl;
     this._timeToRetry = timeToRetry;
     this._daySpan = daySpan;
-    this._auth = auth;
+    this._auth = this::ensureExist(auth, 'auth');
     this._promise = null;
     this._lastSubscriptionMessage = null;
     this._storageKey = 'messageStore';
@@ -202,6 +212,10 @@ export default class MessageStore extends Pollable {
         this._connectivity = this._connectivityMonitor.connectivity;
       }
       this._initMessageStore();
+    } else if (this._isDataReady()) {
+      this.store.dispatch({
+        type: this.actionTypes.initSuccess,
+      });
     } else if (this._shouldReset()) {
       this._resetModuleStatus();
     } else if (
@@ -214,9 +228,11 @@ export default class MessageStore extends Pollable {
 
   _shouldInit() {
     return (
+      this._auth.loggedIn &&
       (!this._storage || this._storage.ready) &&
       this._subscription.ready &&
       (!this._connectivityMonitor || this._connectivityMonitor.ready) &&
+      (!this._tabManager || this._tabManager.ready) &&
       this._rolesAndPermissions.ready &&
       this.pending
     );
@@ -225,8 +241,10 @@ export default class MessageStore extends Pollable {
   _shouldReset() {
     return (
       (
+        !this._auth.loggedIn ||
         (!!this._storage && !this._storage.ready) ||
         !this._subscription.ready ||
+        (!!this._tabManager && !this._tabManager.ready) ||
         (!!this._connectivityMonitor && !this._connectivityMonitor.ready) ||
         !this._rolesAndPermissions.ready
       ) &&
@@ -237,8 +255,23 @@ export default class MessageStore extends Pollable {
   _shouleCleanCache() {
     return (
       this._auth.isFreshLogin ||
+      !this.updatedTimestamp ||
       (Date.now() - this.updatedTimestamp) > this.ttl
     );
+  }
+
+  _shouldFetch() {
+    return (
+      (!this._tabManager || this._tabManager.active) &&
+      this._shouleCleanCache()
+    );
+  }
+
+  _isDataReady() {
+    // only turns ready when data has been fetched
+    // (could be from other tabs)
+    return this.status === moduleStatuses.initializing &&
+      this.syncToken !== null;
   }
 
   _resetModuleStatus() {
@@ -258,15 +291,18 @@ export default class MessageStore extends Pollable {
   }
 
   async _initMessageStore() {
-    try {
-      await this._syncMessages();
-      this._subscription.subscribe('/account/~/extension/~/message-store');
-    } catch (e) {
-      console.error(e);
+    if (this._shouldFetch()) {
+      try {
+        await this._syncMessages();
+      } catch (e) {
+        console.error(e);
+      }
+    } else if (this._polling) {
+      this._startPolling();
+    } else {
+      this._retry();
     }
-    this.store.dispatch({
-      type: this.actionTypes.initSuccess,
-    });
+    this._subscription.subscribe('/account/~/extension/~/message-store');
   }
 
   _subscriptionHandler() {
@@ -421,6 +457,9 @@ export default class MessageStore extends Pollable {
   }
 
   async _syncMessages() {
+    if (this._tabManager && !this._tabManager.active) {
+      return;
+    }
     await this._sync(async () => {
       await this._updateMessagesFromSync();
     });
