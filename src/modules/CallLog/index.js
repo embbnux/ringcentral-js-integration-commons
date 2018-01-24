@@ -189,10 +189,7 @@ export default class CallLog extends Pollable {
           type: this.actionTypes.clearToken,
         });
       }
-      await this.sync();
-      if (this._subscription) {
-        this._subscription.subscribe(subscriptionFilters.detailedPresence);
-      }
+      await this._init();
       this.store.dispatch({
         type: this.actionTypes.initSuccess,
       });
@@ -215,6 +212,7 @@ export default class CallLog extends Pollable {
       });
     } else if (
       this.ready &&
+      (!this._tabManager || this._tabManager.active) &&
       this._subscription &&
       this._subscription.ready &&
       this._subscription.message &&
@@ -222,6 +220,21 @@ export default class CallLog extends Pollable {
     ) {
       this._lastMessage = this._subscription.message;
       this._subscriptionHandler(this._lastMessage);
+    }
+  }
+
+  async _init() {
+    if (!this._tabManager || this._tabManager.active) {
+      try {
+        await this.sync();
+      } catch (e) {
+        console.log(e);
+      }
+    } else if (this._polling) {
+      this._startPolling();
+    }
+    if (this._subscription) {
+      this._subscription.subscribe(subscriptionFilters.detailedPresence);
     }
   }
 

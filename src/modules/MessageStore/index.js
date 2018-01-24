@@ -200,7 +200,7 @@ export default class MessageStore extends Pollable {
     this.store.subscribe(() => this._onStateChange());
   }
 
-  _onStateChange() {
+  async _onStateChange() {
     if (this._shouldInit()) {
       this.store.dispatch({
         type: this.actionTypes.init,
@@ -211,8 +211,7 @@ export default class MessageStore extends Pollable {
       if (this._connectivityMonitor) {
         this._connectivity = this._connectivityMonitor.connectivity;
       }
-      this._initMessageStore();
-    } else if (this._isDataReady()) {
+      await this._initMessageStore();
       this.store.dispatch({
         type: this.actionTypes.initSuccess,
       });
@@ -260,20 +259,6 @@ export default class MessageStore extends Pollable {
     );
   }
 
-  _shouldFetch() {
-    return (
-      (!this._tabManager || this._tabManager.active) &&
-      this._shouleCleanCache()
-    );
-  }
-
-  _isDataReady() {
-    // only turns ready when data has been fetched
-    // (could be from other tabs)
-    return this.status === moduleStatuses.initializing &&
-      this.syncToken !== null;
-  }
-
   _resetModuleStatus() {
     this.store.dispatch({
       type: this.actionTypes.resetSuccess,
@@ -291,7 +276,7 @@ export default class MessageStore extends Pollable {
   }
 
   async _initMessageStore() {
-    if (this._shouldFetch()) {
+    if (!this._tabManager || this._tabManager.active) {
       try {
         await this._syncMessages();
       } catch (e) {
@@ -299,13 +284,14 @@ export default class MessageStore extends Pollable {
       }
     } else if (this._polling) {
       this._startPolling();
-    } else {
-      this._retry();
     }
     this._subscription.subscribe('/account/~/extension/~/message-store');
   }
 
   _subscriptionHandler() {
+    if (this._tabManager && !this._tabManager.active) {
+      return;
+    }
     const accountExtesionEndPoint = /\/message-store$/;
     const { message } = this._subscription;
     if (
@@ -457,9 +443,6 @@ export default class MessageStore extends Pollable {
   }
 
   async _syncMessages() {
-    if (this._tabManager && !this._tabManager.active) {
-      return;
-    }
     await this._sync(async () => {
       await this._updateMessagesFromSync();
     });
