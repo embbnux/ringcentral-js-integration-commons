@@ -200,7 +200,7 @@ export default class AddressBook extends Pollable {
 
   _shouldFetch() {
     return (
-      (!this._tabManager || this._tabManager.active) &&
+      (!this._storage || !this._tabManager || this._tabManager.active) &&
       this._shouleCleanCache()
     );
   }

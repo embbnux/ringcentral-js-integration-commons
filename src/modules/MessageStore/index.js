@@ -276,7 +276,7 @@ export default class MessageStore extends Pollable {
   }
 
   async _initMessageStore() {
-    if (!this._tabManager || this._tabManager.active) {
+    if (!this._storage || !this._tabManager || this._tabManager.active) {
       try {
         await this._syncMessages();
       } catch (e) {
@@ -289,7 +289,7 @@ export default class MessageStore extends Pollable {
   }
 
   _subscriptionHandler() {
-    if (this._tabManager && !this._tabManager.active) {
+    if (this._storage && this._tabManager && !this._tabManager.active) {
       return;
     }
     const accountExtesionEndPoint = /\/message-store$/;

@@ -166,7 +166,7 @@ export default class CallLog extends Pollable {
       await sleep(SYNC_DELAY);
       if (
         ownerId === this._auth.ownerId &&
-        (!this._tabManager || this._tabManager.active)
+        (!this._storage || !this._tabManager || this._tabManager.active)
       ) {
         this.sync();
       }
@@ -231,7 +231,7 @@ export default class CallLog extends Pollable {
   }
 
   async _init() {
-    if (!this._tabManager || this._tabManager.active) {
+    if (!this._storage || !this._tabManager || this._tabManager.active) {
       try {
         await this.sync();
       } catch (e) {
