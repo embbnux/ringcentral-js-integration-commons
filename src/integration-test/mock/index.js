@@ -143,7 +143,7 @@ export function presence(id) {
 
 export function dialingPlan() {
   mockApi({
-    path: '/restapi/v1.0/account/~/dialing-plan?perPage=MAX&page=1',
+    url: `begin:${mockServer}/restapi/v1.0/account/~/dialing-plan`,
     body: dialingPlanBody,
   });
 }
