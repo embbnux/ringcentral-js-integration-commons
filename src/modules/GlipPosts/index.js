@@ -204,10 +204,11 @@ export default class GlipPosts extends RcModule {
           }
         }
       );
-      console.log(response.json());
+      return response.json();
     } catch (e) {
       console.error(e);
     }
+    return null;
   }
 
   updatePostInput({ text, groupId }) {
