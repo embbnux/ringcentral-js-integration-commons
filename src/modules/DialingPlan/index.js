@@ -26,7 +26,7 @@ export default class DialingPlan extends DataFetcher {
       polling: true,
       fetchFunction: async () => (await fetchList(async (params) => {
         const platform = client.service.platform();
-        const response = await platform.get('/account/~/dialing-plan', undefined, params);
+        const response = await platform.get('/account/~/dialing-plan', params);
         return response.json();
       })).map(p => ({
         id: p.id,
