@@ -87,7 +87,7 @@ describe('GlipGroups :: getTimestampReducer', () => {
   });
 });
 
-describe('getReducer', () => {
+describe('GlipGroups :: getReducer', () => {
   it('should be a function', () => {
     expect(getReducer).to.be.a('function');
   });

@@ -31,7 +31,9 @@ export function getGlipPostsCreateStatusReducer(types) {
 }
 
 export function getGlipPostsStoreReducer(types) {
-  return (state = {}, { type, groupId, records, record, oldRecordId, isSendByMe }) => {
+  return (state = {}, {
+    type, groupId, records, record, oldRecordId, isSendByMe
+  }) => {
     let newState;
     let newPosts;
     let oldPostIndex;
