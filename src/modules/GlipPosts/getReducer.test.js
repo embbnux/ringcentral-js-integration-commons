@@ -99,6 +99,60 @@ describe('GlipPosts :: getGlipPostsStoreReducer', () => {
     it('should have initial state of empty object', () => {
       expect(reducer(undefined, {})).to.deep.equal({});
     });
+
+    it('should return object with new records when fetch successfully', () => {
+      expect(reducer({}, {
+        type: actionTypes.fetchSuccess,
+        groupId: '1234',
+        records: [{ id: '1' }]
+      })).to.deep.equal({
+        1234: [{ id: '1' }]
+      });
+    });
+
+    it('should return record on create or createSuccess or createError', () => {
+      [
+        actionTypes.create,
+        actionTypes.createSuccess,
+        actionTypes.createError,
+      ].forEach((type) => {
+        expect(reducer({
+          1234: [{ id: '1' }]
+        }, {
+          type,
+          record: { id: '2' },
+          groupId: '1234'
+        })).to.deep.equal({
+          1234: [{ id: '2' }, { id: '1' }]
+        });
+      });
+    });
+
+    it(`should do nothing when is created by me and existing
+        when create or createSuccess or createError`, () => {
+        [
+          actionTypes.create,
+          actionTypes.createSuccess,
+          actionTypes.createError,
+        ].forEach((type) => {
+          expect(reducer({
+            1234: [{
+              id: '2', creatorId: '123', text: '111', sendStatus: status.creating
+            }]
+          }, {
+            type,
+            record: {
+              id: '2', creatorId: '123', text: '111', sendStatus: status.creating
+            },
+            groupId: '1234',
+            isSendByMe: true,
+          })).to.deep.equal({
+            1234: [{
+              id: '2', creatorId: '123', text: '111', sendStatus: status.creating
+            }]
+          });
+        });
+      });
   });
 });
 
@@ -113,6 +167,25 @@ describe('GlipPosts :: getGlipPostsInputsReducer', () => {
     const reducer = getGlipPostsInputsReducer(actionTypes);
     it('should have initial state of empty object', () => {
       expect(reducer(undefined, {})).to.deep.equal({});
+    });
+
+    it('should return new input map on updatePostInput', () => {
+      expect(reducer({
+        1234: {
+          text: 'aaa'
+        }
+      }, {
+        type: actionTypes.updatePostInput,
+        groupId: '2222',
+        textValue: 'xxx'
+      })).to.deep.equal({
+        1234: {
+          text: 'aaa'
+        },
+        2222: {
+          text: 'xxx'
+        }
+      });
     });
   });
 });
