@@ -100,6 +100,12 @@ describe('GlipPosts :: getGlipPostsStoreReducer', () => {
       expect(reducer(undefined, {})).to.deep.equal({});
     });
 
+    it('should have empty object of resetSuccess', () => {
+      expect(reducer({ test: 'aaa' }, {
+        type: actionTypes.resetSuccess
+      })).to.deep.equal({});
+    });
+
     it('should return object with new records when fetch successfully', () => {
       expect(reducer({}, {
         type: actionTypes.fetchSuccess,

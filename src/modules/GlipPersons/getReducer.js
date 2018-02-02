@@ -19,7 +19,7 @@ export function getGlipPersonsStatusReducer(types) {
 
 export function getGlipPersonStoreReducer(types) {
   return (state = {}, {
-    type, personId, person, persons
+    type, person, persons
   }) => {
     let newState;
     switch (type) {
@@ -27,7 +27,7 @@ export function getGlipPersonStoreReducer(types) {
         newState = {
           ...state,
         };
-        newState[personId] = person;
+        newState[person.id] = person;
         return newState;
       case types.batchFetchSuccess:
         newState = {

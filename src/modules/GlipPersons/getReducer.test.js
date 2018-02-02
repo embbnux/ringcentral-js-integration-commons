@@ -64,7 +64,6 @@ describe('GlipPersons :: getGlipPersonStoreReducer', () => {
     it('should return new person in map on fetchSuccess', () => {
       expect(reducer({}, {
         type: actionTypes.fetchSuccess,
-        personId: '1234',
         person: {
           id: '1234'
         }

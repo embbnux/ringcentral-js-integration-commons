@@ -70,6 +70,8 @@ export function getGlipPostsStoreReducer(types) {
           newState[groupId] = [record].concat(newPosts);
         }
         return newState;
+      case types.resetSuccess:
+        return {};
       default:
         return state;
     }

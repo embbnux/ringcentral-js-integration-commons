@@ -9,6 +9,7 @@ import actionTypes from './actionTypes';
 import getReducer, { getGlipPersonStoreReducer } from './getReducer';
 
 const MaximumBatchGetPersons = 30;
+const DEFAULT_BATCH_FETCH_DELAY = 500;
 
 @Module({
   deps: [
@@ -33,6 +34,7 @@ export default class GlipPersons extends RcModule {
     auth,
     storage,
     tabManager,
+    batchFetchDelay = DEFAULT_BATCH_FETCH_DELAY,
     ...options
   }) {
     super({
@@ -46,6 +48,7 @@ export default class GlipPersons extends RcModule {
     this._storage = storage;
 
     this._fetchingIds = {};
+    this._batchFetchDelay = batchFetchDelay;
 
     this._dataStorageKey = 'glipPersonsData';
     if (this._storage) {
@@ -108,7 +111,7 @@ export default class GlipPersons extends RcModule {
 
   @proxify
   async loadMe() {
-    await this.loadPerson('me');
+    await this.loadPerson(this._auth.ownerId);
   }
 
   @proxify
@@ -117,10 +120,9 @@ export default class GlipPersons extends RcModule {
       this.store.dispatch({
         type: this.actionTypes.fetch,
       });
-      const person = await this._client.glip().persons(id === 'me' ? '~' : id).get();
+      const person = await this._client.glip().persons(id).get();
       this.store.dispatch({
         type: this.actionTypes.fetchSuccess,
-        personId: id,
         person,
       });
     } catch (e) {
@@ -177,7 +179,7 @@ export default class GlipPersons extends RcModule {
     }
     const lastIds = newPersonIds.slice(MaximumBatchGetPersons);
     if (lastIds.length > 0) {
-      await sleep(100);
+      await sleep(this._batchFetchDelay);
       await this.loadPersons(lastIds);
     }
   }
@@ -219,6 +221,6 @@ export default class GlipPersons extends RcModule {
   }
 
   get me() {
-    return this.personsMap.me;
+    return this.personsMap[this._auth.ownerId];
   }
 }

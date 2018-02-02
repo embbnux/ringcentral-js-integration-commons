@@ -23,7 +23,7 @@ const DEFAULT_PER_PAGE = 20;
 const DEFAULT_TTL = 30 * 60 * 1000;
 const DEFAULT_RETRY = 62 * 1000;
 
-function formatGroup(group, personsMap, postsMap = {}) {
+function formatGroup(group, personsMap, postsMap = {}, ownerId) {
   if (!group || !group.id) {
     return {};
   }
@@ -33,7 +33,7 @@ function formatGroup(group, personsMap, postsMap = {}) {
       if (personsMap[memberId]) {
         detailMembers.push({
           ...personsMap[memberId],
-          isMe: personsMap.me && personsMap.me.id === memberId,
+          isMe: ownerId === memberId,
         });
       }
     });
@@ -425,7 +425,7 @@ export default class GlipGroups extends Pollable {
     (filteredGroups, pageNumber, personsMap, postsMap) => {
       const count = pageNumber * this._perPage;
       const sortedGroups =
-        filteredGroups.map(group => formatGroup(group, personsMap, postsMap))
+        filteredGroups.map(group => formatGroup(group, personsMap, postsMap, this._auth.ownerId))
           .sort((a, b) => {
             if (a.updatedTime === b.updatedTime) return 0;
             return a.updatedTime > b.updatedTime ?
@@ -462,7 +462,7 @@ export default class GlipGroups extends Pollable {
     () => (this._glipPersons && this._glipPersons.personsMap) || {},
     (allGroups, currentGroupId, personsMap) => {
       const group = allGroups.find(g => g.id === currentGroupId) || {};
-      return formatGroup(group, personsMap);
+      return formatGroup(group, personsMap, undefined, this._auth.ownerId);
     },
   )
 
