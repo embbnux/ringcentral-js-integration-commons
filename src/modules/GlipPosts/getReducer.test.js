@@ -100,6 +100,12 @@ describe('GlipPosts :: getGlipPostsStoreReducer', () => {
       expect(reducer(undefined, {})).to.deep.equal({});
     });
 
+    it('should return original state of actionTypes is not recognized', () => {
+      const originalState = {};
+      expect(reducer(originalState, { type: 'foo' }))
+        .to.equal(originalState);
+    });
+
     it('should have empty object of resetSuccess', () => {
       expect(reducer({ test: 'aaa' }, {
         type: actionTypes.resetSuccess
@@ -192,6 +198,12 @@ describe('GlipPosts :: getGlipPostsInputsReducer', () => {
           text: 'xxx'
         }
       });
+    });
+
+    it('should return original state of actionTypes is not recognized', () => {
+      const originalState = {};
+      expect(reducer(originalState, { type: 'foo' }))
+        .to.equal(originalState);
     });
   });
 });
