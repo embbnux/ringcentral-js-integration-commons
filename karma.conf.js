@@ -112,7 +112,7 @@ module.exports = function(config) {
     browsers: ['ChromeNoSandbox'],
     customLaunchers: {
       ChromeNoSandbox: {
-        base: 'Chrome',
+        base: 'ChromeHeadless', // update to Chrome if you want to run it with Chrome UI
         flags: ['--no-sandbox']
       }
     },
