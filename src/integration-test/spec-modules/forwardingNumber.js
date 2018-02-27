@@ -13,22 +13,22 @@ export default (auth, client, forwardingNumber, account) => {
     let isLoginSuccess;
     const clientHistoryRequest = new ClientHistoryRequest(new Map(), client);
 
-    afterEach(async function () {
-      await auth.logout();
-      await waitInSeconds(1);
-      if (typeof localStorage !== 'undefined') {
-        localStorage.clear();
-      }
-    });
-
     describe('When has ReadUserForwardingFlipNumbers permission', function () {
-      beforeEach(async function () {
+      before(async function () {
         mock.restore();
         mock.mockForLogin();
         isLoginSuccess = await ensureLogin(auth, account);
         if (!isLoginSuccess) {
           console.error('Skip test case as failed to login with credential ', account);
           this.skip();
+        }
+      });
+
+      after(async function () {
+        await auth.logout();
+        await waitInSeconds(1);
+        if (typeof localStorage !== 'undefined') {
+          localStorage.clear();
         }
       });
 
@@ -52,7 +52,7 @@ export default (auth, client, forwardingNumber, account) => {
     });
 
     describe("When doesn't have ReadUserForwardingFlipNumbers permission", function () {
-      beforeEach(async function () {
+      before(async function () {
         mock.restore();
         mock.mockForLogin({ mockAuthzProfile: false });
         mock.authzProfile({
@@ -62,6 +62,14 @@ export default (auth, client, forwardingNumber, account) => {
         if (!isLoginSuccess) {
           console.error('Skip test case as failed to login with credential ', account);
           this.skip();
+        }
+      });
+
+      after(async function () {
+        await auth.logout();
+        await waitInSeconds(1);
+        if (typeof localStorage !== 'undefined') {
+          localStorage.clear();
         }
       });
 
