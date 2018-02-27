@@ -19,7 +19,6 @@ export default (auth, client, blockedNumber, account) => {
       if (typeof localStorage !== 'undefined') {
         localStorage.clear();
       }
-      console.log(blockedNumber.ready);
     });
 
     it('Should load numbers when there is ReadBlockedNumbers permission', async () => {
@@ -48,7 +47,6 @@ export default (auth, client, blockedNumber, account) => {
       }
       this.retries(2);
       await waitInSeconds(1);
-      console.log(blockedNumber.numbers);
       expect(blockedNumber.numbers.length).equal(0);
     });
   });
