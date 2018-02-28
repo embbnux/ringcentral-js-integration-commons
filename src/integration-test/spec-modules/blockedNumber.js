@@ -16,9 +16,6 @@ export default (auth, client, blockedNumber, account) => {
     afterEach(async function () {
       await auth.logout();
       await waitInSeconds(1);
-      if (typeof localStorage !== 'undefined') {
-        localStorage.clear();
-      }
     });
 
     it('Should load numbers when there is ReadBlockedNumbers permission', async () => {

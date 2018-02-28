@@ -50,6 +50,7 @@ export default class ForwardingNumber extends DataFetcher {
         }
       },
       readyCheckFn: () => this._rolesAndPermissions.ready,
+      cleanOnReset: true,
       ...options,
     });
     this._rolesAndPermissions = this::ensureExist(rolesAndPermissions, 'rolesAndPermissions');
@@ -76,6 +77,6 @@ export default class ForwardingNumber extends DataFetcher {
   )
 
   get _hasPermission() {
-    return this._rolesAndPermissions.permissions.ReadUserForwardingFlipNumbers;
+    return !!this._rolesAndPermissions.permissions.ReadUserForwardingFlipNumbers;
   }
 }

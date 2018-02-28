@@ -11,7 +11,7 @@ export default (auth, client, forwardingNumber, account) => {
     mock.mockClient(client);
 
     let isLoginSuccess;
-    const clientHistoryRequest = new ClientHistoryRequest(new Map(), client);
+    // const clientHistoryRequest = new ClientHistoryRequest(new Map(), client);
 
     describe('When has ReadUserForwardingFlipNumbers permission', function () {
       before(async function () {
@@ -27,9 +27,6 @@ export default (auth, client, forwardingNumber, account) => {
       after(async function () {
         await auth.logout();
         await waitInSeconds(1);
-        if (typeof localStorage !== 'undefined') {
-          localStorage.clear();
-        }
       });
 
       it('Should load numbers', async () => {
@@ -68,24 +65,21 @@ export default (auth, client, forwardingNumber, account) => {
       after(async function () {
         await auth.logout();
         await waitInSeconds(1);
-        if (typeof localStorage !== 'undefined') {
-          localStorage.clear();
-        }
       });
 
-      it("Should not load numbers", async () => {
+      it('Should not load numbers', async () => {
         this.retries(2);
         await waitInSeconds(1);
         expect(forwardingNumber.numbers.length).equal(0);
       });
 
-      it("Should not load flip numbers", async () => {
+      it('Should not load flip numbers', async () => {
         this.retries(2);
         await waitInSeconds(1);
         expect(forwardingNumber.flipNumbers.length).equal(0);
       });
 
-      it("Should not load forwarding numbers", async () => {
+      it('Should not load forwarding numbers', async () => {
         this.retries(2);
         await waitInSeconds(1);
         expect(forwardingNumber.forwardingNumbers.length).equal(0);

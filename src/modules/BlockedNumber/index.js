@@ -36,6 +36,7 @@ export default class BlockedNumber extends DataFetcher {
         this._client.account().extension().blockedNumber().list(params)
       )),
       readyCheckFn: () => this._rolesAndPermissions.ready,
+      cleanOnReset: true,
     });
 
     this._rolesAndPermissions = this::ensureExist(rolesAndPermissions, 'rolesAndPermissions');
@@ -48,6 +49,6 @@ export default class BlockedNumber extends DataFetcher {
   )
 
   get _hasPermission() {
-    return this._rolesAndPermissions.permissions.ReadBlockedNumbers;
+    return !!this._rolesAndPermissions.permissions.ReadBlockedNumbers;
   }
 }
