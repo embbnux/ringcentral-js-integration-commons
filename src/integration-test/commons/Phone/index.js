@@ -7,6 +7,7 @@ import AccountExtension from '../../../modules/AccountExtension';
 import AccountInfo from '../../../modules/AccountInfo';
 import Alert from '../../../modules/Alert';
 import Auth from '../../../modules/Auth';
+import AccountPhoneNumber from '../../../modules/AccountPhoneNumber';
 import Brand from '../../../modules/Brand';
 import BlockedNumber from '../../../modules/BlockedNumber';
 import Call from '../../../modules/Call';
@@ -196,6 +197,15 @@ export default class Phone extends RcModule {
       subscription: this.subscription,
       rolesAndPermissions: this.rolesAndPermissions,
       getState: () => this.state.accountExtension,
+    }));
+    this.addModule('accountPhoneNumber', new AccountPhoneNumber({
+      ...options,
+      auth: this.auth,
+      client: this.client,
+      storage: this.storage,
+      subscription: this.subscription,
+      rolesAndPermissions: this.rolesAndPermissions,
+      getState: () => this.state.accountPhoneNumber,
     }));
     this.addModule('dialingPlan', new DialingPlan({
       ...options,
@@ -444,6 +454,7 @@ export default class Phone extends RcModule {
       subscription: this.subscription.reducer,
       // router: this.router.reducer,
       accountExtension: this.accountExtension.reducer,
+      accountPhoneNumber: this.accountPhoneNumber.reducer,
       accountInfo: this.accountInfo.reducer,
       rolesAndPermissions: this.rolesAndPermissions.reducer,
       extensionInfo: this.extensionInfo.reducer,

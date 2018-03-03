@@ -14,6 +14,7 @@ const authzProfileBody = require('./data/authzProfile');
 const blockedNumberBody = require('./data/blockedNumber');
 const forwardingNumberBody = require('./data/forwardingNumber');
 const phoneNumberBody = require('./data/phoneNumber');
+const accountPhoneNumberBody = require('./data/accountPhoneNumber');
 const presenceBody = require('./data/presence.json');
 const numberParserBody = require('./data/numberParser.json');
 const smsBody = require('./data/sms.json');
@@ -258,6 +259,17 @@ export function phoneNumber(mockResponse = {}) {
   });
 }
 
+export function accountPhoneNumber(mockResponse = {}) {
+  mockApi({
+    url: `begin:${mockServer}/restapi/v1.0/account/~/phone-number`,
+    body: {
+      ...accountPhoneNumberBody,
+      ...mockResponse,
+    },
+    isOnce: false
+  });
+}
+
 export function subscription(mockResponse = {}) {
   mockApi({
     method: 'POST',
@@ -273,7 +285,8 @@ export function subscription(mockResponse = {}) {
     body: {
       ...subscriptionBody,
       ...mockResponse,
-    }
+    },
+    isOnce: false
   });
 }
 
@@ -316,6 +329,7 @@ export function mockForLogin({ mockAuthzProfile = true } = {}) {
     authzProfile();
   }
   extensionList();
+  accountPhoneNumber();
   blockedNumber();
   forwardingNumber();
   messageSync();
