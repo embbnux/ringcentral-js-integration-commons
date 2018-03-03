@@ -124,6 +124,7 @@ export default class Phone extends RcModule {
       alert: this.alert,
       client: this.client,
       environment: this.environment,
+      checkConnectionFunc: () => true,
       getState: () => this.state.connectivityMonitor,
     }));
     this.addModule('auth', new Auth({
@@ -170,14 +171,6 @@ export default class Phone extends RcModule {
       tabManager: this.tabManager,
       getState: () => this.state.accountInfo,
     }));
-    this.addModule('accountExtension', new AccountExtension({
-      ...options,
-      auth: this.auth,
-      client: this.client,
-      storage: this.storage,
-      subscription: this.subscription,
-      getState: () => this.state.accountExtension,
-    }));
     this.addModule('extensionInfo', new ExtensionInfo({
       ...options,
       auth: this.auth,
@@ -194,6 +187,15 @@ export default class Phone extends RcModule {
       extensionInfo: this.extensionInfo,
       tabManager: this.tabManager,
       getState: () => this.state.rolesAndPermissions,
+    }));
+    this.addModule('accountExtension', new AccountExtension({
+      ...options,
+      auth: this.auth,
+      client: this.client,
+      storage: this.storage,
+      subscription: this.subscription,
+      rolesAndPermissions: this.rolesAndPermissions,
+      getState: () => this.state.accountExtension,
     }));
     this.addModule('dialingPlan', new DialingPlan({
       ...options,

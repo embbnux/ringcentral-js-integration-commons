@@ -17,6 +17,7 @@ import runComposeTextTests from '../../spec-modules/composeText';
 import runRateLimiterTests from '../../spec-modules/rateLimiter';
 import runBlockedNumberTests from '../../spec-modules/blockedNumber';
 import runForwardingNumberTests from '../../spec-modules/forwardingNumber';
+import runAccountExtensionTests from '../../spec-modules/accountExtension';
 
 let phone = getTestPhone();
 runNumValidInCallTests(phone.auth, phone.alert, phone.client, phone.regionSettings, phone.call,
@@ -73,5 +74,13 @@ runForwardingNumberTests(
   phone.auth,
   phone.client,
   phone.forwardingNumber,
+  defaultAccount,
+);
+
+phone = getTestPhone();
+runAccountExtensionTests(
+  phone.auth,
+  phone.client,
+  phone.accountExtension,
   defaultAccount,
 );
