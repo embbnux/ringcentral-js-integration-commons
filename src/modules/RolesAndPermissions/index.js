@@ -53,6 +53,14 @@ export default class RolesAndPermissions extends DataFetcher {
         await this._client.account().extension().authzProfile().get()
       ),
       readyCheckFn: () => this._extensionInfo.ready,
+      forbiddenHandler: async () => {
+        await this._auth.logout();
+        this._alert.danger({
+          message: permissionsMessages.insufficientPrivilege,
+          ttl: 0,
+        });
+        return {};
+      },
       cleanOnReset: true,
     });
     this._isCRM = !!isCRM;
@@ -77,6 +85,17 @@ export default class RolesAndPermissions extends DataFetcher {
       await this._auth.logout();
       this._alert.danger({
         message: permissionsMessages.invalidTier,
+        ttl: 0,
+      });
+    }
+    if (
+      this.ready &&
+      this._auth.loginStatus === loginStatus.loggedIn &&
+      !this.permissions.ReadUserInfo
+    ) {
+      await this._auth.logout();
+      this._alert.danger({
+        message: permissionsMessages.insufficientPrivilege,
         ttl: 0,
       });
     }
