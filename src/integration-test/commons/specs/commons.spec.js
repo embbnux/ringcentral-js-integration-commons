@@ -19,6 +19,9 @@ import runBlockedNumberTests from '../../spec-modules/blockedNumber';
 import runForwardingNumberTests from '../../spec-modules/forwardingNumber';
 import runAccountExtensionTests from '../../spec-modules/accountExtension';
 import runAccountPhoneNumberTests from '../../spec-modules/accountPhoneNumber';
+import runExtensionInfoTests from '../../spec-modules/extensionInfo';
+import runAccountInfoTests from '../../spec-modules/accountInfo';
+import runDialingPlanTests from '../../spec-modules/dialingPlan';
 
 let phone = getTestPhone();
 runNumValidInCallTests(phone.auth, phone.alert, phone.client, phone.regionSettings, phone.call,
@@ -91,5 +94,31 @@ runAccountPhoneNumberTests(
   phone.auth,
   phone.client,
   phone.accountPhoneNumber,
+  defaultAccount,
+);
+
+phone = getTestPhone();
+runExtensionInfoTests(
+  phone.auth,
+  phone.client,
+  phone.extensionInfo,
+  defaultAccount,
+  phone.alert
+);
+
+phone = getTestPhone();
+runAccountInfoTests(
+  phone.auth,
+  phone.client,
+  phone.accountInfo,
+  defaultAccount,
+  phone.alert
+);
+
+phone = getTestPhone();
+runDialingPlanTests(
+  phone.auth,
+  phone.client,
+  phone.dialingPlan,
   defaultAccount,
 );

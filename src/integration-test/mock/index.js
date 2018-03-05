@@ -96,7 +96,8 @@ export function authentication() {
 export function logout() {
   mockApi({
     method: 'POST',
-    path: '/restapi/oauth/revoke'
+    path: '/restapi/oauth/revoke',
+    isOnce: false,
   });
 }
 
@@ -316,13 +317,18 @@ export function restore() {
   fetchMock.restore();
 }
 
-export function mockForLogin({ mockAuthzProfile = true } = {}) {
+export function mockForLogin({
+  mockAuthzProfile = true,
+  mockExtensionInfo = true
+} = {}) {
   authentication();
   logout();
   tokenRefresh();
   presence('~');
   dialingPlan();
-  extensionInfo();
+  if (mockExtensionInfo) {
+    extensionInfo();
+  }
   accountInfo();
   apiInfo();
   if (mockAuthzProfile) {
@@ -335,6 +341,19 @@ export function mockForLogin({ mockAuthzProfile = true } = {}) {
   messageSync();
   phoneNumber();
   subscription();
+}
+
+export function mockForbidden({
+  method = 'GET',
+  path,
+  body = ''
+}) {
+  mockApi({
+    method,
+    path,
+    body,
+    status: 403,
+  });
 }
 
 export function mockClient(client) {

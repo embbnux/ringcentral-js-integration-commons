@@ -164,20 +164,13 @@ export default class Phone extends RcModule {
     //   history,
     //   getState: () => this.state.router,
     // }));
-    this.addModule('accountInfo', new AccountInfo({
-      ...options,
-      auth: this.auth,
-      storage: this.storage,
-      client: this.client,
-      tabManager: this.tabManager,
-      getState: () => this.state.accountInfo,
-    }));
     this.addModule('extensionInfo', new ExtensionInfo({
       ...options,
       auth: this.auth,
       client: this.client,
       storage: this.storage,
       tabManager: this.tabManager,
+      alert: this.alert,
       getState: () => this.state.extensionInfo,
     }));
     this.addModule('rolesAndPermissions', new RolesAndPermissions({
@@ -188,6 +181,16 @@ export default class Phone extends RcModule {
       extensionInfo: this.extensionInfo,
       tabManager: this.tabManager,
       getState: () => this.state.rolesAndPermissions,
+    }));
+    this.addModule('accountInfo', new AccountInfo({
+      ...options,
+      auth: this.auth,
+      storage: this.storage,
+      client: this.client,
+      tabManager: this.tabManager,
+      rolesAndPermissions: this.rolesAndPermissions,
+      alert: this.alert,
+      getState: () => this.state.accountInfo,
     }));
     this.addModule('accountExtension', new AccountExtension({
       ...options,
@@ -213,6 +216,7 @@ export default class Phone extends RcModule {
       storage: this.storage,
       client: this.client,
       tabManager: this.tabManager,
+      rolesAndPermissions: this.rolesAndPermissions,
       getState: () => this.state.dialingPlan,
     }));
     this.addModule('extensionPhoneNumber', new ExtensionPhoneNumber({
