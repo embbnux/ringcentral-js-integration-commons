@@ -86,7 +86,7 @@ export default class ExtensionInfo extends DataFetcher {
       },
       cleanOnReset: true,
       fetchFunction: async () => extractData(await this._client.account().extension().get()),
-      forbiddenHandler: async (e) => {
+      forbiddenHandler: async () => {
         await this._auth.logout();
         if (this._alert) {
           this._alert.danger({
