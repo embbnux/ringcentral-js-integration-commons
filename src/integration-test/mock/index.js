@@ -319,7 +319,8 @@ export function restore() {
 
 export function mockForLogin({
   mockAuthzProfile = true,
-  mockExtensionInfo = true
+  mockExtensionInfo = true,
+  mockForwardingNumber = true,
 } = {}) {
   authentication();
   logout();
@@ -337,7 +338,9 @@ export function mockForLogin({
   extensionList();
   accountPhoneNumber();
   blockedNumber();
-  forwardingNumber();
+  if (mockForwardingNumber) {
+    forwardingNumber();
+  }
   messageSync();
   phoneNumber();
   subscription();
@@ -346,12 +349,14 @@ export function mockForLogin({
 export function mockForbidden({
   method = 'GET',
   path,
+  url,
   body = ''
 }) {
   mockApi({
     method,
     path,
     body,
+    url,
     status: 403,
   });
 }

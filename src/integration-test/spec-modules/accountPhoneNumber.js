@@ -32,7 +32,6 @@ export default (auth, client, accountPhoneNumber, account) => {
       it('Should load numbers', async () => {
         this.retries(2);
         await waitInSeconds(1);
-        console.log('ready': accountPhoneNumber);
         expect(accountPhoneNumber.numbers.length).equal(2);
       });
 
