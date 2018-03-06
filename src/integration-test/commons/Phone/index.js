@@ -180,6 +180,7 @@ export default class Phone extends RcModule {
       client: this.client,
       extensionInfo: this.extensionInfo,
       tabManager: this.tabManager,
+      alert: this.alert,
       getState: () => this.state.rolesAndPermissions,
     }));
     this.addModule('accountInfo', new AccountInfo({

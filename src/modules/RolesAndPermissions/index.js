@@ -65,7 +65,7 @@ export default class RolesAndPermissions extends DataFetcher {
     });
     this._isCRM = !!isCRM;
     this._flag = flag || 'SalesForce';
-    this._alert = alert;
+    this._alert = ensureExist(alert, 'alert');
     this._extensionInfo = ensureExist(extensionInfo, 'extensionInfo');
     this.addSelector(
       'permissions',

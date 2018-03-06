@@ -22,6 +22,7 @@ import runAccountPhoneNumberTests from '../../spec-modules/accountPhoneNumber';
 import runExtensionInfoTests from '../../spec-modules/extensionInfo';
 import runAccountInfoTests from '../../spec-modules/accountInfo';
 import runDialingPlanTests from '../../spec-modules/dialingPlan';
+import runRolesAndPermissions from '../../spec-modules/rolesAndPermissions';
 
 let phone = getTestPhone();
 runNumValidInCallTests(phone.auth, phone.alert, phone.client, phone.regionSettings, phone.call,
@@ -121,4 +122,13 @@ runDialingPlanTests(
   phone.client,
   phone.dialingPlan,
   defaultAccount,
+);
+
+phone = getTestPhone();
+runRolesAndPermissions(
+  phone.auth,
+  phone.client,
+  phone.rolesAndPermissions,
+  defaultAccount,
+  phone.alert
 );
