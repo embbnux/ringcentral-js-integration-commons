@@ -288,7 +288,7 @@ export default class Call extends RcModule {
     ) {
       const error = {
         phoneNumber: parsedToNumber.originalString,
-        type: callErrors.noInternational
+        type: 'noInternational',
       };
       throw error;
     }
