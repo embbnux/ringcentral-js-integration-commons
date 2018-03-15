@@ -9,5 +9,5 @@ export default new Enum([
   'notAnExtension',
   'networkError',
   'noRingoutEnable',
-  'notInternational',
+  'noInternational',
 ], 'callErrors');

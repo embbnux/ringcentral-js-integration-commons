@@ -286,7 +286,10 @@ export default class Call extends RcModule {
       parsedToNumber.international &&
       !this._rolesAndPermissions.permissions.InternationalCalls
     ) {
-      const error = { phoneNumber: parsedToNumber.originalString, type: 'notInternational' };
+      const error = {
+        phoneNumber: parsedToNumber.originalString,
+        type: callErrors.noInternational
+      };
       throw error;
     }
     // using e164 in response to call

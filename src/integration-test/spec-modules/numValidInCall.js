@@ -284,7 +284,7 @@ export default (Auth, Alert, Client, RegionSettings, Call, accountWithMultiDP) =
         expect(containsErrorMessage(Alert.state.messages, callErrors.specialNumber)).to.equal(undefined);
         expect(containsErrorMessage(Alert.state.messages, callErrors.notAnExtension)).to.equal(undefined);
       });
-      it('Should Alert notInternational - Call CA number with US Dialing Plan and Area Code', async function () {
+      it('Should Alert noInternational - Call CA number with US Dialing Plan and Area Code', async function () {
         RegionSettings.setData({ countryCode: 'US', areaCode: '650' });
         try {
           await Call.call({ phoneNumber: '2501234567' });
@@ -295,7 +295,7 @@ export default (Auth, Alert, Client, RegionSettings, Call, accountWithMultiDP) =
         expect(containsErrorMessage(Alert.state.messages, callErrors.noAreaCode)).to.equal(undefined);
         expect(containsErrorMessage(Alert.state.messages, callErrors.specialNumber)).to.equal(undefined);
         expect(containsErrorMessage(Alert.state.messages, callErrors.notAnExtension)).to.equal(undefined);
-        expect(containsErrorMessage(Alert.state.messages, callErrors.notInternational)).to.not.equal(undefined);
+        expect(containsErrorMessage(Alert.state.messages, callErrors.noInternational)).to.not.equal(undefined);
       });
       it('Should Not Alert Anything - Call greater than 7 Digital Number with CA Dialing Plan and Area Code', async function () {
         RegionSettings.setData({ countryCode: 'CA', areaCode: '250' });
@@ -310,7 +310,7 @@ export default (Auth, Alert, Client, RegionSettings, Call, accountWithMultiDP) =
         expect(containsErrorMessage(Alert.state.messages, callErrors.specialNumber)).to.equal(undefined);
         expect(containsErrorMessage(Alert.state.messages, callErrors.notAnExtension)).to.equal(undefined);
       });
-      it('Should Alert notInternational - Call US number with CA Dialing Plan and Area Code', async function () {
+      it('Should Alert noInternational - Call US number with CA Dialing Plan and Area Code', async function () {
         RegionSettings.setData({ countryCode: 'CA', areaCode: '250' });
         try {
           await Call.call({ phoneNumber: '6501234567' });
@@ -321,7 +321,7 @@ export default (Auth, Alert, Client, RegionSettings, Call, accountWithMultiDP) =
         expect(containsErrorMessage(Alert.state.messages, callErrors.noAreaCode)).to.equal(undefined);
         expect(containsErrorMessage(Alert.state.messages, callErrors.specialNumber)).to.equal(undefined);
         expect(containsErrorMessage(Alert.state.messages, callErrors.notAnExtension)).to.equal(undefined);
-        expect(containsErrorMessage(Alert.state.messages, callErrors.notInternational)).to.not.equal(undefined);
+        expect(containsErrorMessage(Alert.state.messages, callErrors.noInternational)).to.not.equal(undefined);
       });
       it('Should Not Alert Anything - Call greater than 7 Digital Number with non US/CA Dialing Plan', async function () {
         RegionSettings.setData({ countryCode: 'GB', areaCode: '' });
