@@ -178,6 +178,14 @@ export default class RolesAndPermissions extends DataFetcher {
       )
     );
   }
+  get onlyPagerPermission() {
+    return !!(
+      this.serviceFeatures && (
+        (this.serviceFeatures.Pager && this.serviceFeatures.Pager.enabled) &&
+        (this.serviceFeatures.SMS && !this.serviceFeatures.SMS.enabled)
+      )
+    );
+  }
 
   get hasReadMessagesPermission() {
     return this.ready && (

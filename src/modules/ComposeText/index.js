@@ -21,6 +21,7 @@ import proxify from '../../lib/proxy/proxify';
     'MessageSender',
     'NumberValidate',
     'ContactSearch',
+    'RolesAndPermissions',
     { dep: 'ComposeTextOptions', optional: true }
   ]
 })
@@ -42,6 +43,7 @@ export default class ComposeText extends RcModule {
     messageSender,
     numberValidate,
     contactSearch,
+    rolesAndPermissions,
     ...options
   }) {
     super({
@@ -52,6 +54,7 @@ export default class ComposeText extends RcModule {
     this._alert = alert;
     this._auth = auth;
     this._storage = storage;
+    this._rolesAndPermissions = rolesAndPermissions;
     this._storageKey = 'composeText';
     this._reducer = getComposeTextReducer(this.actionTypes);
     this._cacheReducer = getCacheReducer(this.actionTypes);
@@ -168,6 +171,9 @@ export default class ComposeText extends RcModule {
   }
 
   _validatePhoneNumber(phoneNumber) {
+    if (this._validateIsOnlyPager(phoneNumber)) {
+      return null;
+    }
     const validateResult = this._numberValidate.validateFormat([phoneNumber]);
     if (!validateResult.result) {
       const error = validateResult.errors[0];
@@ -178,6 +184,16 @@ export default class ComposeText extends RcModule {
       return false;
     }
     return true;
+  }
+  _validateIsOnlyPager(toNumbers) {
+    if (
+      toNumbers.length >= 7 &&
+      this._rolesAndPermissions.onlyPagerPermission
+    ) {
+      this._alertWarning(messageSenderMessages.noSMSPermission);
+      return true;
+    }
+    return false;
   }
 
   @proxify
