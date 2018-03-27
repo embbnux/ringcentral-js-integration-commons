@@ -403,6 +403,7 @@ export default class Phone extends RcModule {
       getState: () => this.state.composeText,
       messageSender: this.messageSender,
       numberValidate: this.numberValidate,
+      rolesAndPermissions: this.rolesAndPermissions,
     }));
 
     this.addModule('messageStore', new MessageStore({
