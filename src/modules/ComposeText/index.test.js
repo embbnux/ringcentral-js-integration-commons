@@ -40,6 +40,11 @@ describe('ComposeText Unit Test', () => {
 
   describe('_onStateChange', () => {
     it('_initSenderNumber and clean should be called once', () => {
+      composeText._messageSender = {
+        senderNumbersList: [{ phoneNumber: '+1234567890'}]
+      };
+      composeText.senderNumbersList = [{ phoneNumber: '+1234567890'}];
+      sinon.stub(composeText, 'ready', { get: () => false });
       sinon.stub(composeText, '_shouldInit').callsFake(() => true);
       sinon.stub(composeText, '_shouldHandleRecipient').callsFake(() => false);
       sinon.stub(composeText, '_shouldReset').callsFake(() => false);
@@ -57,6 +62,12 @@ describe('ComposeText Unit Test', () => {
       sinon.assert.calledOnce(composeText.clean);
     });
     it('_initSenderNumber should be called once', () => {
+      composeText._messageSender = {
+        senderNumbersList: [{ phoneNumber: '+1234567890'}]
+      };
+      composeText.senderNumbersList = [{ phoneNumber: '+1234567890'}];
+      sinon.stub(composeText, 'ready', { get: () => false });
+
       sinon.stub(composeText, '_shouldInit').callsFake(() => true);
       sinon.stub(composeText, '_shouldHandleRecipient').callsFake(() => false);
       sinon.stub(composeText, '_shouldReset').callsFake(() => false);
@@ -74,6 +85,12 @@ describe('ComposeText Unit Test', () => {
       sinon.assert.notCalled(composeText.clean);
     });
     it('_handleRecipient should be called once', () => {
+      composeText._messageSender = {
+        senderNumbersList: [{ phoneNumber: '+1234567890'}]
+      };
+      composeText.senderNumbersList = [{ phoneNumber: '+1234567890'}];
+      sinon.stub(composeText, 'ready', { get: () => false });
+
       sinon.stub(composeText, '_shouldInit').callsFake(() => false);
       sinon.stub(composeText, '_shouldHandleRecipient').callsFake(() => true);
       sinon.stub(composeText, '_shouldReset').callsFake(() => false);
@@ -91,6 +108,12 @@ describe('ComposeText Unit Test', () => {
       sinon.assert.notCalled(composeText.clean);
     });
     it('_handleRecipient should be called once when _shouldHandleRecipient is true', () => {
+      composeText._messageSender = {
+        senderNumbersList: [{ phoneNumber: '+1234567890'}]
+      };
+      composeText.senderNumbersList = [{ phoneNumber: '+1234567890'}];
+      sinon.stub(composeText, 'ready', { get: () => false });
+
       sinon.stub(composeText, '_shouldInit').callsFake(() => false);
       sinon.stub(composeText, '_shouldHandleRecipient').callsFake(() => true);
       sinon.stub(composeText, '_shouldReset').callsFake(() => false);
@@ -108,6 +131,12 @@ describe('ComposeText Unit Test', () => {
       sinon.assert.notCalled(composeText.clean);
     });
     it('_resetModuleStatus should be called once', () => {
+      composeText._messageSender = {
+        senderNumbersList: [{ phoneNumber: '+1234567890'}]
+      };
+      composeText.senderNumbersList = [{ phoneNumber: '+1234567890'}];
+      sinon.stub(composeText, 'ready', { get: () => false });
+
       sinon.stub(composeText, '_shouldInit').callsFake(() => false);
       sinon.stub(composeText, '_shouldHandleRecipient').callsFake(() => false);
       sinon.stub(composeText, '_shouldReset').callsFake(() => true);
@@ -125,6 +154,12 @@ describe('ComposeText Unit Test', () => {
       sinon.assert.notCalled(composeText.clean);
     });
     it('_resetModuleStatus should be called once when _shouldReset is true', () => {
+      composeText._messageSender = {
+        senderNumbersList: [{ phoneNumber: '+1234567890'}]
+      };
+      composeText.senderNumbersList = [{ phoneNumber: '+1234567890'}];
+      sinon.stub(composeText, 'ready', { get: () => false });
+
       sinon.stub(composeText, '_shouldInit').callsFake(() => false);
       sinon.stub(composeText, '_shouldHandleRecipient').callsFake(() => false);
       sinon.stub(composeText, '_shouldReset').callsFake(() => true);
@@ -142,6 +177,12 @@ describe('ComposeText Unit Test', () => {
       sinon.assert.notCalled(composeText.clean);
     });
     it('_initSenderNumber and _resetModuleStatus and _handleRecipient and clean should Not be called', () => {
+      composeText._messageSender = {
+        senderNumbersList: [{ phoneNumber: '+1234567890'}]
+      };
+      composeText.senderNumbersList = [{ phoneNumber: '+1234567890'}];
+      sinon.stub(composeText, 'ready', { get: () => false });
+
       sinon.stub(composeText, '_shouldInit').callsFake(() => false);
       sinon.stub(composeText, '_shouldReset').callsFake(() => false);
       sinon.stub(composeText, '_shouldHandleRecipient').callsFake(() => false);
@@ -159,6 +200,12 @@ describe('ComposeText Unit Test', () => {
       sinon.assert.notCalled(composeText.clean);
     });
     it('_initSenderNumber and _resetModuleStatus and _shouldHandleRecipient and clean should Not be called', () => {
+      composeText._messageSender = {
+        senderNumbersList: [{ phoneNumber: '+1234567890'}]
+      };
+      composeText.senderNumbersList = [{ phoneNumber: '+1234567890'}];
+      sinon.stub(composeText, 'ready', { get: () => false });
+
       sinon.stub(composeText, '_shouldInit').callsFake(() => false);
       sinon.stub(composeText, '_shouldReset').callsFake(() => false);
       sinon.stub(composeText, '_shouldHandleRecipient').callsFake(() => false);
