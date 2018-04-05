@@ -18,28 +18,30 @@ export default function chunkMessage(text, maxLength) {
   }
 
   const chunks = [];
-  let currentIndex = 0;
+  let fromIndex = 0;
   const total = text.length;
 
-  while (currentIndex < total) {
-    let newIndex = currentIndex + maxLength;
+  while (fromIndex < total) {
+    let toIndex = fromIndex + maxLength;
     let offset = 0;
     for (; offset < maxLength; offset += 1) {
-      const char = text.charAt(newIndex - offset);
+      const char = text.charAt(toIndex - offset);
       if (!char) {
         break;
       }
       const isWhiteSpace = /\s/.test(char);
       if (isWhiteSpace) {
-        offset -= 1;
+        if (offset > 0) {
+          offset -= 1;
+        }
         break;
       }
     }
     if (offset !== maxLength) {
-      newIndex -= offset;
+      toIndex -= offset;
     }
-    const snippet = text.substring(currentIndex, newIndex);
-    currentIndex = newIndex;
+    const snippet = text.substring(fromIndex, toIndex);
+    fromIndex = toIndex;
     chunks.push(snippet);
   }
 

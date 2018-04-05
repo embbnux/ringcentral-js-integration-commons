@@ -57,4 +57,10 @@ describe('chunkMessage', () => {
     const chunks = chunkMessage(text, 1);
     expect(chunks).to.deep.equal(['a', 'a']);
   });
+
+  it('should split into 3 chunks', () => {
+    const text = 'a a';
+    const chunks = chunkMessage(text, 1);
+    expect(chunks).to.deep.equal(['a', ' ', 'a']);
+  });
 });
