@@ -55,6 +55,7 @@ export default class Softphone extends RcModule {
   async makeCall(phoneNumber) {
     this.store.dispatch({
       type: this.actionTypes.startToConnect,
+      phoneNumber,
     });
     // TODO use window.open in extension background, this method will crash chrome when
     // executed in background page.
@@ -79,6 +80,10 @@ export default class Softphone extends RcModule {
   // eslint-disable-next-line class-methods-use-this
   get status() {
     return moduleStatuses.ready;
+  }
+
+  get connectingPhoneNumber() {
+    return this.state.connectingPhoneNumber;
   }
 
   get softphoneStatus() {

@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import getSoftphoneReducer, {
   getSoftphoneStatusReducer,
+  getConnectingPhoneNumberReducer,
 } from './getSoftphoneReducer';
 import softphoneStatus from './softphoneStatus';
 import softphoneActionTypes from './actionTypes';
@@ -28,6 +29,32 @@ describe('Softphone', () => {
       expect(reducer('foo', {
         type: softphoneActionTypes.startToConnect,
       })).to.equal(softphoneStatus.connecting);
+    });
+  });
+  describe('getConnectingPhoneNumberReducer', () => {
+    const reducer = getConnectingPhoneNumberReducer(softphoneActionTypes);
+    it('should be a function', () => {
+      expect(getConnectingPhoneNumberReducer).to.be.a('function');
+    });
+    it('should have initial state of null', () => {
+      expect(reducer(undefined, {})).to.equal(null);
+    });
+    it('should return original state if actionType is not recognized', () => {
+      const originalState = {};
+      expect(reducer(originalState, { type: 'foo' }))
+        .to.equal(originalState);
+    });
+    it('should return null if actionType is connectComplete', () => {
+      expect(reducer('foo', {
+        type: softphoneActionTypes.connectComplete,
+      })).to.equal(null);
+    });
+    it('should return connecting phone number if actionType is startToConnect', () => {
+      const phoneNumber = '123';
+      expect(reducer('foo', {
+        type: softphoneActionTypes.startToConnect,
+        phoneNumber,
+      })).to.equal(phoneNumber);
     });
   });
   describe('getSoftphoneReducer', () => {
